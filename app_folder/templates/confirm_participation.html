@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Product participation
+{% endblock %}
+
+
+{% block content %}
+<div>
+    <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
+    <a href="{{ url_for('views.menu_1') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+</div>
+
+
+    <p class="text-center">Merci pour votre participation de {{participation_amount}}€</p>
+
+    <div class="all_btn">
+        <button type="button" class="pronostics_btn btn_not_selected" onclick="window.location.href='/menu_1'">Retourner à la liste de naissance</button>
+        <button type="button" class="pronostics_btn btn_not_selected" onclick="window.location.href='/home_page'">Comment faire parvenir sa participation ?</button>
+    </div>
+
+
+
+<script>
+
+// Fonction pour mettre à jour la valeur du montant restent
+function updateleft_to_payValue(value) {
+    document.getElementById("left_to_payValue").textContent = value;
+}
+
+// Mettre à jour la valeur de départ du curseur pour le montant restant à payer
+window.onload = function() {
+    var Initialleft_to_pay = "0";
+    document.getElementById("left_to_pay").value = Initialleft_to_pay;
+    updateleft_to_payValue(Initialleft_to_pay);
+};
+
+    window.addEventListener('load', function() {
+    var progressBar = document.getElementById('progressBar');
+    var percentagePaid = parseInt("{{ percentage_paid_int }}");
+    progressBar.style.width = percentagePaid + "%";
+    progressBar.textContent = percentagePaid + "%";
+});
+</script>
+
+{% endblock %}

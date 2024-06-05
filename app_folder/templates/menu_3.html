@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Photos
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    .container {
+        text-align: center;
+    }
+    h1 {
+        color: #ffffff;
+        font-size: 3rem;
+        margin-bottom: 20px;
+        margin-top: 50px;
+    }
+    p {
+        color: #ffffff;
+        font-size: 1.5rem;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Coming Soon</h1>
+    <p>Il faudra attendre la naissance avant l'ouverture de cet environnement !</p>
+
+</div>
+
+<!--Night mode-->
+<style>
+    body{
+        background-color: #000000;
+        color: white;
+    }
+</style>
+
+
+<!-- {% if user_is_admin %}
+<p>Possible d'ajouter des photos</p>
+
+{%else%}
+<p>Possible de consulter les photos</p>
+
+{%endif%} -->
+
+
+
+{% endblock %}

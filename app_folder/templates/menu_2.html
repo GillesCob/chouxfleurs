@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Pronostics
+{% endblock %}
+
+
+{% block content %}
+
+{% if session.selected_project.id %}
+    {% if pronostic_done %}
+    <div class="container">
+        <div class="two_btn">
+            <button type="button" class="my_btn btn_selected {% if prono_sex == 'Fille' %}pink{% elif prono_sex == 'Garçon' %}blue{% endif %}" onclick="window.location.href='/menu_2'">Mes réponses</button>
+            <button type="button" class="my_btn" onclick="window.location.href='/all_pronostics'">La tendance</button>
+        </div>
+
+        <!-- Le sexe ----------------------------------------- -->
+        <div class = "guess_title">
+            <label for="name" >Le sexe</label>
+        </div>
+        <p class="text-center">{{ prono_sex }}</p>
+
+
+        <!-- Le nom ----------------------------------------- -->
+        <div class = "guess_title">
+            <label for="name" >Le prénom</label>
+        </div>
+        <p class="text-center">{{ prono_name }}</p>
+
+        
+        <!-- Le poids ----------------------------------------- -->
+        <div class = "guess_title">
+            <label for="weight" >Le poids</label>
+        </div>
+        <p class="text-center">{{ prono_weight }} kilogrammes</p>
+
+
+        <!-- La taille ----------------------------------------- -->
+        <div class = "guess_title">
+            <label for="height" >La taille</label>
+        </div>
+        <p class="text-center">{{ prono_height }} centimètres</p>
+
+
+        <!-- La date ----------------------------------------- -->
+        <div class = "guess_title">
+            <label for="date" >La date</label>
+        </div>
+        <p class="text-center">{{ prono_date }}</p>
+
+        <!-- Changer de pronostic ----------------------------------------- -->
+        <div class="text-center">
+            {%if prono_sex == "Fille"%}
+                <button onclick="window.location.href='/update_pronostic'" class="my_btn validate-btn gender_girl">Changer de pronostic</button>
+            {%else%}
+                <button onclick="window.location.href='/update_pronostic'" class="my_btn validate-btn gender_boy">Changer de pronostic</button>
+            {%endif%}
+        </div>
+    </div>
+        
+    {% else %}
+    <div>
+        <div class="container">
+            <h1 class="page_title">A vos pronostics !</h1>
+            <form method="post">
+                <input type="hidden" name="project_id" value="{{ session.selected_project.id }}">
+    
+                <!-- Le sexe ----------------------------------------- -->
+                <div class = "guess_title">
+                    <label for="name" >Le sexe</label>
+                </div>
+                
+                <input type="hidden" id="selectedGender" name="sex">
+                    <div class="buttons all_btn">
+                        <button type="button" class="my_btn gender_girl " onclick="selectGender('Fille')">Fille</button>
+                        <button type="button" class="my_btn gender_boy" onclick="selectGender('Garçon')">Garçon</button>
+                    </div>
+                    
+    
+                <!-- Le nom ----------------------------------------- -->
+                <div class="form-group">
+                    <div class = "guess_title">
+                    <label for="name" >Le prénom</label>
+                </div>
+    
+                <input type="text" class="form-control text-center" name="name" required>
+    
+    
+                <!-- Le poids ----------------------------------------- -->
+                <div class="form-group">
+                    <div class = "guess_title">
+                    <label for="weight" >Le poids</label>
+                </div>
+    
+                <div class="text-center">
+                    <input type="range" class="form-range" id="weight" name="weight" min="2.5" max="4.5" step="0.1" oninput="updateWeightValue(this.value)">
+                    <span id="weightValue">3,5</span> kilos
+                </div>
+    
+    
+                <!-- La taille ----------------------------------------- -->
+                <div class="form-group">
+                    <div class = "guess_title">
+                    <label for="height" >La taille</label>
+                </div>
+    
+                <div class="text-center">
+                    <input type="range" class="form-range" id="height" name="height" min="30" max="60" step="0.1" oninput="updateHeightValue(this.value)">
+                    <span id="heightValue">45</span> Centimètres
+                </div>
+    
+    
+                <!-- La date ----------------------------------------- -->
+                <div class="form-group">
+                    <div class = "guess_title">
+                    <label for="date" >La date</label>
+                </div>
+                <p class="text-center">Date du terme : 10 novembre</p>
+                
+                <div class = "date_birth">
+                    <input type="date" class="form-control text-center narrow-input" name="date" required>
+                </div>
+    
+    
+                <!-- Validation du pronostic ----------------------------------------- -->
+                <div class="text-center">
+                    <button type="submit" class="my_btn validate-btn {% if sex_selected == 'Fille' %}pink{% elif sex_selected == 'Garçon' %}blue{% else %}gray{% endif %}">Valider info</button>
+                </div>
+    
+            </form>
+        </div>
+    </div>
+    
+    {% endif %}
+
+{% else %}
+Aucun projet sélectionné.
+{% endif %}
+
+<script>
+    function updateWeightValue(value) {
+        document.getElementById("weightValue").textContent = value;
+    }
+    function updateHeightValue(value) {
+        document.getElementById("heightValue").textContent = value;
+    }
+
+
+
+    function selectGender(gender) {
+    // Mettre à jour la valeur du champ de formulaire caché
+    document.getElementById('selectedGender').value = gender;
+
+    // Supprimer la classe "selected" de tous les boutons
+    let buttons = document.querySelectorAll('.my_btn');
+    buttons.forEach(button => {
+        button.classList.remove('btn_gender_choose');
+    });
+
+    // Ajouter la classe "selected" au bouton cliqué
+    event.target.classList.add('btn_gender_choose');
+
+    // Mettre à jour la classe du bouton de validation en fonction du sexe sélectionné
+    let validateBtn = document.querySelector('.validate-btn');
+    validateBtn.classList.remove('gender_girl', 'gender_boy', 'no_gender'); // Supprimer toutes les classes de couleur
+
+    if (gender === 'Fille') {
+        validateBtn.classList.add('gender_girl');
+    } else if (gender === 'Garçon') {
+        validateBtn.classList.add('gender_boy');
+    } else {
+        validateBtn.classList.add('no_gender');
+    }
+}
+
+</script>
+
+
+
+
+{% endblock %}

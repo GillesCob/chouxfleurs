@@ -1,0 +1,302 @@
+/* styles.css */
+
+/* Center the container vertically and horizontally */
+/* .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+} */
+
+/* Add padding and background color to the card */
+.card {
+    padding: 20px;
+    background-color: #eff1f4;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    margin-top: 100px;
+    min-width: 400px;
+}
+
+.card_button {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Add space between form elements */
+/* .form-group {
+    margin-bottom: 20px;
+} */
+
+/* Add margin to the top of the "Already have an account?" message */
+/* .mt-3 {
+    margin-top: 15px;
+} */
+
+
+/* Styles pour le textes / titres / ... ------------------------------------------------------ */
+.page_title{
+    color: #000000;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 15px;
+}
+
+h6{
+    color: #000000;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.guess_title{
+    color: #000000;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+.all_btn {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    padding: 10px;
+}
+
+
+input[type="date"]:before {
+    content: attr(placeholder) !important;
+    color: #aaa;
+    margin-right: 0.5em;
+  }
+  input[type="date"]:focus:before,
+  input[type="date"]:valid:before {
+    content: "";
+  }
+
+
+
+input[type="date"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  font-size: 1em;
+}
+
+
+::placeholder {
+    text-align: center;
+  }
+
+.text-center {
+    text-align: center;
+}
+
+.narrow-input{
+    max-width: 150px;
+}
+
+.date_birth{
+    display: flex;
+    justify-content: center;
+}
+
+
+ul{
+    list-style-type: none;
+    }
+
+/* Boutons présents dans le projet ------------------------------------------------------ */
+
+.my_btn{
+    width: 220px;
+    font-size: 1em;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    color: rgb(0, 0, 0);
+    background-color: white;
+    border: 1px solid #000000;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.my_btn:hover {
+    filter: brightness(1.2); /* Légèrement plus lumineux au survol */
+}
+
+.btn_selected {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    color: white;
+}
+
+
+
+.pronostics_btn{
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    text-transform: uppercase;
+    border-radius: 5px;
+    border: 1px solid #000000;
+    color: rgb(101, 99, 99);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+
+
+.pink {
+    background-color: #FF69B4;
+    color: white;
+}
+
+.blue {
+    background-color: #6495ED;
+    color: white;
+}
+
+.gray {
+    background-color: #D3D3D3;
+    color: #808080;
+}
+
+.validate-btn:hover {
+    filter: brightness(1.2); /* Légèrement plus lumineux au survol */
+}
+
+/* Bouton pour valider le pronostic */
+.validate_btn_position {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+
+/* Pronostic, choix fille.garçon */
+.btn_gender_choose {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    border: 2px solid #000000;
+    color: rgb(255, 255, 255);
+}
+
+.gender_girl {
+    background-color: #FF69B4;
+    color: white;
+}
+
+.gender_boy {
+    background-color: #6495ED;
+    color: white;
+}
+
+.no_gender {
+    background-color: gray;
+}
+
+/* Validation du pronostic */
+.validate-btn {
+    color: white;
+    margin-top: 0.9em;
+    font-size: 0.9em;
+}
+
+.two_btn {
+    display: flex;
+    gap: 20px; /* Espace constant entre les boutons */
+    justify-content: center;
+}
+
+.change_prono_btn {
+    font-size: 0.9em;
+}
+
+
+/* Barre de progression pour la moyenne gars/fille ------------------------------------------------------ */
+.progress-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    border: 1px solid #000000;
+    border-radius: 8px;
+}
+
+.progress {
+    background-color: #6495ED; /* Couleur de fond du reste à faire */
+    height: 30px;
+    }
+
+.bar-container {
+    width: 100%;
+    height: 30px;
+    background-color: #f2f2f2;
+    position: relative;
+    border-radius: 5px;
+}
+
+.fill {
+    height: 100%;
+    background-color: #FF69B4;
+    border-radius: 5px;
+    animation: fillAnimation 2s ease forwards;
+}
+
+@keyframes fillAnimation {
+    from {
+        width: 0%;
+    }
+    to {
+        width: {{percentage_girl}}%;
+    }
+}
+
+.progress-label {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: white;
+}
+
+.label-left {
+    left: 10px;
+}
+
+.label-right {
+    right: 10px;
+}
+
+/* Elements pour les fenêtres modales ------------------------------------------------------ */
+.modal {
+    display: none; /* Masquer la fenêtre modale par défaut */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    color: white;
+}
+
+.modal-content {
+    background-color: #886ed0;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}

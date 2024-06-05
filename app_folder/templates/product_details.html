@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Product details
+{% endblock %}
+
+
+{% block content %}
+<div>
+    <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
+    <a href="{{ url_for('views.menu_1') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+</div>
+
+<div class="container">
+    <div class="card text-center" style="max-width: 400px; margin: 0 auto;">
+        <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text">{{ product.description }}</p>
+            <p class="card-text">Prix initial : {{ product.price }}€</p>
+            <p class="card-text">Montant restant : {{ left_to_pay }}€</p>
+            <a href="{{ product.url_source }}" class="btn btn-secondary mb-2" target="_blank">Voir le produit</a>
+
+
+        </div>
+        <a href="{{ url_for('views.product_participation', product_id=product.id) }}" class="btn btn-primary mt-2">Participer</a>
+
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    window.addEventListener('load', function() {
+    var progressBar = document.getElementById('progressBar');
+    var percentagePaid = parseInt("{{ percentage_paid_int }}");
+    progressBar.style.width = percentagePaid + "%";
+    progressBar.textContent = percentagePaid + "%";
+});
+</script>
+
+{% endblock %}

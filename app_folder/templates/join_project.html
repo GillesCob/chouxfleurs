@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Join project
+{% endblock %}
+
+
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="card p-4">
+            <h1 class="text-center mb-1">Rejoindre un projet</h1>
+            <form method="post">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="project_to_join" placeholder="Lien d'affiliation" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block mt-3">Rejoindre</button>
+            </form>
+            {% if error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

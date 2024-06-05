@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block content %}
+
+{%for product in products%}
+<div class="container d-flex justify-content-center align-items-center">
+    <div class="card p-4">
+        <h1 class="text-center mb-1">Modifier le produit</h1>
+        <form method="post">
+            <div class="form-group">
+                <label for="text">Titre du produit</label>
+                <input type="text" class="form-control" name="product_name" placeholder="{{product.name}}" >
+            </div>
+            <div class="form-group">
+                <label for="text">Description</label>
+                <input type="text" class="form-control" name="product_description" placeholder="{{product.description}}" >
+            </div>
+            <div class="form-group">
+                <label for="text">Prix</label>
+                <input type="text" class="form-control" name="product_price" placeholder="{{product.price}}" >
+            </div>
+            <!-- <div class="form-group">
+                <label for="text">Photo</label>
+                <input type="text" class="form-control" name="product_photo" placeholder="{{product.photo}}" >
+            </div> -->
+            <div class="form-group">
+                <label for="text">url du produit</label>
+                <input type="text" class="form-control" name="product_url_source" placeholder="{{url_source}}" >
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block mt-3">Modifier</button>
+        </form>
+        {% if error %}
+        <div class="alert alert-danger mt-3">{{ error }}</div>
+        {% endif %}
+    </div>
+</div>
+{%endfor%}
+
+
+{% endblock %}

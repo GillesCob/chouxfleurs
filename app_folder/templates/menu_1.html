@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Liste de naissance
+{% endblock %}
+
+
+{% block content %}
+
+{% if session.selected_project.id %}
+    <div class="container">
+        <h1 class="text-center">Liste de naissance</h1>
+        {% if products %}
+            <div class="custom-card">
+                {% for product in products %}
+                    <div>
+                        <div class="card">
+                            <!-- <img class="card-img-left" src="{{ product.image }}" alt="Image du produit {{ product.name }}"> -->
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                
+                                {% if product.left_to_pay == 0 %}
+                                    <p>Produit financé, merci !</p>
+                                {% else %}
+                                    <p class="card-text"><strong>Montant restant :</strong> {{ product.left_to_pay }}€</p>
+                                    <a href="{{ url_for('views.product_details', product_id=product.id) }}" class="btn btn-success mt-2">Plus d'informations</a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if user_is_admin %}
+                            <div class="card_button gap-2">
+
+                                    <!-- Bouton "Modifier" aligné à gauche -->
+                                    <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-info">Modifier</a>
+
+                                    <!-- Bouton "Supprimer" aligné à droite -->
+                                    <form action="{{ url_for('views.delete_product', product_id=product.id) }}" method="post">
+                                        <input type="hidden" name="product_id" value="product.id">
+                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                    </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center">Aucun produit trouvé pour ce projet.</p>
+        {% endif %}
+    </div> 
+    
+
+    {% if user_is_admin %}
+        <div class="col offset-md-3 col-md-6 col-sm-12 text-center mt-5">
+            <a href="/add_product" class="btn btn-primary">Ajouter un produit</a>
+        </div>
+    {% endif %}
+
+
+
+ 
+
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+{% else %}
+Aucun projet sélectionné.
+{% endif %}
+
+<style>
+.card {
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+.custom-card {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.modal {
+    display: none; /* Masquer la fenêtre modale par défaut */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+    
+.modal-content {
+    background-color: #991111;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close-icon {
+    cursor: pointer;
+}
+
+.progress {
+    background-color: #6495ED; /* Couleur de fond du reste à faire */
+  }
+.progress-bar-custom {
+    background-color: #FF69B4; /* Couleur de la barre de progression */
+  }
+</style>
+
+
+<!-- Structure de la fenêtre modale pour supprimer son profil -->
+<div id="myModal_delete_product" class="modal">
+    <div class="modal-content">
+        <span class="close-icon" onclick="closeModal_delete_product()" style="float:right;">&times;</span>
+        <div class="col offset-md-3 col-md-6 col-sm-12">
+            <form method="POST" action="{{ url_for('views.menu_1') }}" class="p-5 text-center">
+                <p>ATTENTION cette action est irréversible !</p>
+                <div class="d-grid gap-2 col-12 mx-auto">
+                    <button type="submit" class="btn btn-danger">Supprimer le produit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    function openModal_delete_product() {
+        document.getElementById('myModal_delete_product').style.display = 'block';
+    }
+
+    function closeModal_delete_product() {
+        document.getElementById('myModal_delete_product').style.display = 'none';
+    }
+
+
+    // Fonction pour mettre à jour la valeur du poids
+    function updatePercentagetValue(value) {
+        document.getElementById("percentageValue").textContent = value;
+    }
+
+    // Mettre à jour la valeur de départ du curseur pour le poids
+    window.onload = function() {
+        var Initialpercentage = "{{percentage_paid}}";
+        document.getElementById("percentage").value = Initialpercentage;
+        updatePercentagetValue(Initialpercentage);
+    }
+
+
+
+</script>
+
+{% endblock %}

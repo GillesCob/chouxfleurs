@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Create project
+{% endblock %}
+
+
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="card p-4">
+            <h1 class="text-center mb-1">Renommer votre projet</h1>
+            <form method="post">
+                <div class="form-group">
+                    <label for="project_name">Nom du projet</label>
+                    <input type="text" class="form-control" name="new_project_name" placeholder="{{actual_name}}" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block mt-3">Renommer</button>
+            </form>
+            {% if error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
