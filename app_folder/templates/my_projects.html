@@ -8,11 +8,13 @@
 {% block content %}
 
 <div class="container">
+
+
     {% if user_is_admin %}
 
         <h1 class="page_title">Mon projet {{project_name}}</h1>
-</br>
-        <h3 class="text-center">Participations à la liste de naissance</h3>
+        </br>
+        <h3 class="text-center">Participations à ma liste de naissance</h3>
         {% if user_participations %}
 
             <table>
@@ -76,9 +78,44 @@
         <div class="text-center">
             <p>Aucun projet rejoint pour le moment.</p>
         </div>
-        
     {%endif%}
 
+    {% if user_participations_side_project %}
+    
+        <hr>
+
+        <h1 class="page_title mt-4">Ma participation aux listes de naissance</h1>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Projet</th>
+                        <th>Produit</th>
+                        <th>Participation</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project_name, participations in user_participations_side_project.items() %}
+                        {% for participation in participations %}
+                            <tr>
+                                <td>{{ project_name }}</td>
+                                <td>{{ participation[0] }}</td>
+                                <td>{{ participation[1] }}€</td>
+                                <td>{{ participation[2] }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+    {%else%}
+
+    <p class="text-center"></p>
+
+    {%endif%}
+
+        <hr>
 
     <div class="col offset-md-3 col-md-6 col-sm-12 text-center mt-4">
         <div class="d-grid gap-2 col-12 mx-auto">

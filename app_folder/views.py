@@ -99,21 +99,89 @@ def project_name_in_session():
         current_project_name = session['selected_project']['name']
         return current_project_name
 
-#Fonction afin de récupérer l'image du produit via les meta tags
-# def get_amazon_product_image(url):
-#     headers = {
-#         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-#     }
-#     response = requests.get(url, headers=headers)
-#     soup = BeautifulSoup(response.content, 'html.parser')
+
+#Fonction pour récupérer SA participation aux projets autres que le siens
+def user_participations_side_project_func():
+    print("COUCOU1")
     
-#     # Chercher le meta tag 'og:image'
-#     og_image_tag = soup.find('meta', property='og:image')
+    user_participations_side_project = {}
     
-#     if og_image_tag and 'content' in og_image_tag.attrs:
-#         return og_image_tag['content']
-#     else:
-#         return None
+    #J'ai dans ma class user la liste des participations
+    user_participations_list = current_user.participation #Je récupère les objets Participation pour le user actuel
+    
+    if user_participations_list:
+        for participation in user_participations_list:
+            participation_id = ObjectId(participation) #Je récupère l'id de la participation
+            participation_obj = Participation.objects(id=participation_id).first() #Je récupère l'objet Participation
+            print("COUCOU2")
+            #Je récupère l'id du produit pour lequel la participation a été faite
+            
+            product_id = participation_obj.product.id
+            print("COUCOU3")
+            #Je récupère l'id du projet pour lequel la participation a été faite
+            project_id = participation_obj.project.id
+            
+            project_name = Project.objects(id=project_id).first().name #Je récupère le nom du projet
+            product_name = Product.objects(id=product_id).first().name #Je récupère le nom du produit
+            participation_amount = participation_obj.amount #Je récupère le montant de la participation
+            participation_date = participation_obj.participation_date #Je récupère la date de la participation
+            participation_date = participation_date.strftime('%d-%m-%Y')
+            
+            
+            # Ajoutez la participation au dictionnaire user_participations
+            if project_name not in user_participations_side_project:
+                user_participations_side_project[project_name] = []  # Créez une liste vide pour chaque nouvel utilisateur
+            
+            user_participations_side_project[project_name].append((product_name, participation_amount, participation_date))
+    else:
+        user_participations_side_project = None
+            
+    return user_participations_side_project
+
+#Fonction pour récupérer LES participations à SON projet
+def my_project_participations():
+
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+    admin_project = Project.objects(admin=user_id).first()
+    user_email = User.objects(id=user_id).first().email
+    
+    user_participations = {}
+    
+    try:
+        project_products= admin_project.product #Je récupère les produits du projet pour lequel mon user est l'admin
+    except (KeyError, AttributeError):
+        flash("Pas de produit, je suis bloqué", category='error')
+        return redirect(url_for('views.home_page', user=current_user, **elements_for_base))
+    
+    
+    for project_product in project_products: #Pour chaque produit de ce projet
+        product_id = ObjectId(project_product) #Je récupère son id
+        #J'ai l'id de mon produit, je vais aller chercher les id des participations pour ce produit
+        product_participations = Participation.objects(product=product_id)
+        
+        for product_participation in product_participations:
+            user = product_participation.user
+            user_id = ObjectId(user.id)
+            
+            
+            product_name = Product.objects(id=product_id).first().name
+            participant_id = product_participation.user.id
+            participant_mail = User.objects(id=participant_id).first().email
+            amount = product_participation.amount
+            date = product_participation.participation_date
+            date = date.strftime('%d-%m-%Y')
+
+            # Ajoutez la participation au dictionnaire user_participations
+            if participant_mail not in user_participations:
+                user_participations[participant_mail] = []  # Créez une liste vide pour chaque nouvel utilisateur
+            
+            user_participations[participant_mail].append((participant_mail, product_name, amount, date))
+            
+        return user_participations
+    
+    else:
+        user_participations = None
 
 #ROUTES -------------------------------------------------------------------------------------------------------------
 @views.route('/')
@@ -323,6 +391,8 @@ def confirm_participation(product_id):
     # Récupérer les détails du produit à partir de l'ID
     product = Product.objects(id=product_id).first()
     
+    user = User.objects(id=user_id).first()
+    
     if request.method == 'POST':
         participation = request.form.get('participation_range')
         
@@ -333,8 +403,10 @@ def confirm_participation(product_id):
         product.participation.append(new_participation.id)
         product.save()
         
+        user.participation.append(new_participation.id)
+        user.save()
+        
         participation_amount = new_participation.amount
-        print(participation_amount)
         
         return render_template('confirm_participation.html', product=product, **elements_for_base, participation_amount=participation_amount)
     
@@ -620,8 +692,12 @@ def my_projects():
     base_elements = elements_for_base_template(user_id)
     projects_dict_special = base_elements['projects_dict']
     
+    user_email = User.objects(id=user_id).first().email
     
-    if admin_project : #Si le user actuel est l'admin d'un projet
+    user_participations_side_project = user_participations_side_project_func()
+    
+    if admin_project: #Si le user actuel est l'admin d'un projet
+        
         user_is_admin = True
         project_id = admin_project.id
         project_name = admin_project.name
@@ -629,37 +705,17 @@ def my_projects():
         
         
         #Je vais récupérer ici les infos concernant les participants à la liste de naissance
-        user_participations = {}
-        
-        project_products= admin_project.product #Je récupère les produits du projet pour lequel mon user est l'admin
-        
-        for project_product in project_products: #Pour chaque produit de ce projet
-            product_id = ObjectId(project_product) #Je récupère son id
-            #J'ai l'id de mon produit, je vais aller chercher les id des participations pour ce produit
-            product_participations = Participation.objects(product=product_id)
-            
-            for product_participation in product_participations:
-                user = product_participation.user
-                user_id = ObjectId(user.id)
+        user_participations = my_project_participations()
                 
-                user_email = User.objects(id=user_id).first().email
-                product_name = Product.objects(id=product_id).first().name
-                amount = product_participation.amount
-                date = product_participation.participation_date
-                date = date.strftime('%d-%m-%Y')
 
-                # Ajoutez la participation au dictionnaire user_participations
-                if user_email not in user_participations:
-                    user_participations[user_email] = []  # Créez une liste vide pour chaque nouvel utilisateur
-                
-                user_participations[user_email].append((user_email, product_name, amount, date))
-
-        return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **base_elements, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations)
+        return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **base_elements, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
         projects_dict_special = base_elements['projects_dict']
-        return render_template('my_projects.html', user=current_user, user_is_admin=user_is_admin, **base_elements, user_email=user_email, projects_dict_special=projects_dict_special)
+        
+        
+        return render_template('my_projects.html', user=current_user, user_is_admin=user_is_admin, **base_elements, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project)
 
 @views.route('/my_account')
 @login_required

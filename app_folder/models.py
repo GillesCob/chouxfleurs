@@ -10,6 +10,7 @@ class User(Document, UserMixin):
     password = StringField(max_length=150, required=True)
     roles = StringField(max_length=50, default='guest')
     pronostic = ListField()
+    participation = ListField()
 
 
 class Project(Document):

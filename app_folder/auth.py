@@ -15,7 +15,7 @@ def login():
     count_projects = 0
     
     if current_user.is_authenticated:
-        return render_template('home.html', user=current_user)
+        return render_template('home.html', user=current_user, count_projects=count_projects)
     else:
         if request.method == 'POST':
             email = request.form.get('email')
