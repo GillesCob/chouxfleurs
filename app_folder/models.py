@@ -11,6 +11,7 @@ class User(Document, UserMixin):
     roles = StringField(max_length=50, default='guest')
     pronostic = ListField()
     participation = ListField()
+    rib = StringField(max_length=150)
 
 
 class Project(Document):

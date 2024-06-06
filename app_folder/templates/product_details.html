@@ -20,7 +20,7 @@
             <p class="card-text">{{ product.description }}</p>
             <p class="card-text">Prix initial : {{ product.price }}€</p>
             <p class="card-text">Montant restant : {{ left_to_pay }}€</p>
-            <a href="{{ product.url_source }}" class="btn btn-secondary mb-2" target="_blank">Voir le produit</a>
+            <a href="#" class="btn btn-secondary mb-2" data-url="{{ product.url_source }}" onclick="checkURLAndRedirect(this)">Voir le produit</a>
 
 
         </div>
@@ -39,6 +39,24 @@
     progressBar.style.width = percentagePaid + "%";
     progressBar.textContent = percentagePaid + "%";
 });
+
+
+    // Vérification de l'url pour la réorientation vers le produit
+    async function checkURLAndRedirect(button) {
+            const url = button.getAttribute('data-url');
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                if (response.ok) {
+                    window.open(url, '_blank');
+                } else {
+                    throw new Error('URL inaccessible');
+                }
+            } catch (error) {
+                alert("Le lien est temporairement inaccessible.");
+                // Rediriger vers une page alternative
+                // window.location.href = "{{ url_for('views.menu_1') }}";
+            }
+        }
 </script>
 
 {% endblock %}

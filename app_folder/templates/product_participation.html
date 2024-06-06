@@ -20,7 +20,7 @@
             <p class="card-text">{{ product.description }}</p>
             <p class="card-text">Prix initial : {{ product.price }}€</p>
             <p class="card-text">Montant restant : {{ left_to_pay }}€</p>
-            <a href="{{ product.url_source }}" class="btn btn-secondary mb-2" target="_blank">Voir le produit</a>
+            <a href="#" class="btn btn-secondary mb-2" data-url="{{ product.url_source }}" onclick="checkURLAndRedirect(this)">Voir le produit</a>
         </br>
         </br>
         <p>La confirmation de votre participation est à titre indicatif, nous nous chargerons d'acheter les produits une fois ceux-ci financés.</p>
@@ -28,8 +28,9 @@
 
         <form action="{{ url_for('views.confirm_participation', product_id=product.id) }}" method="post">
             <div class="text-center">
-                <input type="range" class="form-range" id="participation_range" name="participation_range" min="0" max="{{left_to_pay}}" step="5" oninput="updateparticipation(this.value)">
-                <span id="participation">0</span> €
+                <input type="range" class="form-range" id="participation_range" name="participation_range" min="0" max="{{left_to_pay}}" step="1" value="0" oninput="updatePriceFromRange(this.value)">
+                <input type="number" id="price_input" min="0" max="1000" step="1" value="0" class="text-center" oninput="updateRangeFromInput(this.value)">
+                <span>€</span>
             </div>
             <div>
                 <button type="submit" class="btn btn-primary btn-block mt-3">Participer</button>
@@ -40,21 +41,51 @@
 </div>
 
 
+
 <script>
+    const range = document.getElementById('participation_range');
+    const input = document.getElementById('price_input');
 
+    // Initial sync
+    input.value = range.value;
 
-    // Fonction pour mettre à jour la valeur du reste à payer
-    function updateparticipation(value) {
-        document.getElementById("participation").textContent = value;
+    function updatePriceFromRange(value) {
+        input.value = value;
     }
 
-    // Mettre à jour la valeur de départ du curseur pour le reste à payer
-    window.onload = function() {
-        var Initialparticipation = "0";
-        document.getElementById("participation_range").value = Initialparticipation;
-        updateparticipation(Initialparticipation);
-    };
+    function updateRangeFromInput(value) {
+        range.value = value;
+    }
+
+
+    // Vérification de l'url pour la réorientation vers le produit
+    async function checkURLAndRedirect(button) {
+            const url = button.getAttribute('data-url');
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                if (response.ok) {
+                    window.open(url, '_blank');
+                } else {
+                    throw new Error('URL inaccessible');
+                }
+            } catch (error) {
+                alert("Le lien est temporairement inaccessible.");
+                // Rediriger vers une page alternative
+                // window.location.href = "{{ url_for('views.menu_1') }}";
+            }
+        }
 
 </script>
+
+<style>
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0; /* Chrome, Safari, Edge, Opera */
+    }
+    input[type="number"]::-moz-spin-buttons {
+        display: none; /* Firefox */
+    }
+</style>
 
 {% endblock %}

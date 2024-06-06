@@ -102,7 +102,6 @@ def project_name_in_session():
 
 #Fonction pour récupérer SA participation aux projets autres que le siens
 def user_participations_side_project_func():
-    print("COUCOU1")
     
     user_participations_side_project = {}
     
@@ -113,11 +112,9 @@ def user_participations_side_project_func():
         for participation in user_participations_list:
             participation_id = ObjectId(participation) #Je récupère l'id de la participation
             participation_obj = Participation.objects(id=participation_id).first() #Je récupère l'objet Participation
-            print("COUCOU2")
             #Je récupère l'id du produit pour lequel la participation a été faite
             
             product_id = participation_obj.product.id
-            print("COUCOU3")
             #Je récupère l'id du projet pour lequel la participation a été faite
             project_id = participation_obj.project.id
             
@@ -679,7 +676,6 @@ def my_profil():
 
     user_email = current_user.email
 
-    
     return render_template('my_profil.html', user=current_user, **elements_for_base, user_email=user_email)
 
 @views.route('/my_projects', methods=['GET', 'POST'])
@@ -689,8 +685,9 @@ def my_projects():
     user_email = current_user.email
     admin_project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
     
-    base_elements = elements_for_base_template(user_id)
-    projects_dict_special = base_elements['projects_dict']
+    elements_for_base = elements_for_base_template(user_id)
+    projects_dict_special = elements_for_base['projects_dict'].copy()
+    print(type(projects_dict_special))
     
     user_email = User.objects(id=user_id).first().email
     
@@ -708,38 +705,37 @@ def my_projects():
         user_participations = my_project_participations()
                 
 
-        return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **base_elements, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project)
+        return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
-        projects_dict_special = base_elements['projects_dict']
+        projects_dict_special = elements_for_base['projects_dict']
         
         
-        return render_template('my_projects.html', user=current_user, user_is_admin=user_is_admin, **base_elements, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project)
+        return render_template('my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project)
 
-@views.route('/my_account')
+@views.route('/rib', methods=['GET', 'POST'])
 @login_required
-def my_account():
-
+def rib():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
-
-    user_email = current_user.email
-    project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
     
+    user = User.objects(id=user_id).first()
     
+    admin_project = Project.objects(admin=user_id).first()
+    project_name = admin_project.name
     
-    if project : #Si le user actuel est l'admin d'un projet
-        project_id = project.id
-        project_name = project.name
+    if request.method == 'POST':
+        rib = request.form.get('rib')
         
-        user_is_admin = True
-        return render_template('my_account.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email)
-
-    else: #Si le user actuel n'est pas l'admin d'un projet
-        user_is_admin = False
+        user.rib = rib
+        user.save()
         
-        return render_template('my_account.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email)
+        flash('RIB enregistré avec succès !')
+        return redirect(url_for('views.my_projects', **elements_for_base))
+    
+    
+    return render_template('rib.html', user=current_user, **elements_for_base, project_name=project_name)
    
 @views.route('/create_project', methods=['GET', 'POST'])
 @login_required

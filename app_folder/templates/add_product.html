@@ -25,19 +25,12 @@
                     <label for="text">Description</label>
                     <input type="text" class="form-control" name="product_description" placeholder="Description du produit" required>
                 </div>
-                <!-- <div class="form-group">
-                    <label for="text">Prix</label>
-                    <input type="text" class="form-control" name="product_price" placeholder="Prix du produit" required>
-                </div> -->
                 <p>Prix</p>
                 <div class="text-center">
-                    <input type="range" class="form-range" id="product_price" name="product_price" min="0" max="1000" step="1" oninput="updateprice(this.value)">
-                    <span id="price">0</span> €
+                    <input type="range" class="form-range" id="product_price" name="product_price" min="0" max="1000" step="1" value="0" oninput="updatePriceFromRange(this.value)">
+                    <input type="number" id="price_input" min="0" max="1000" step="1" value="0" class="text-center" oninput="updateRangeFromInput(this.value)">
+                    <span>€</span>
                 </div>
-                <!-- <div class="form-group">
-                    <label for="text">Photo</label>
-                    <input type="text" class="form-control" name="product_photo" placeholder="Photo du produit" required>
-                </div> -->
                 <div class="form-group">
                     <label for="text">url du produit</label>
                     <input type="text" class="form-control" name="product_url_source" placeholder="url du produit" required>
@@ -52,17 +45,34 @@
     </div>
 
 
+
 <script>
-    // Fonction pour mettre à jour la valeur du prix
-    function updateprice(value) {
-        document.getElementById("price").textContent = value;
+    const range = document.getElementById('product_price');
+    const input = document.getElementById('price_input');
+
+    // Initial sync
+    input.value = range.value;
+
+    function updatePriceFromRange(value) {
+        input.value = value;
     }
 
-    // Mettre à jour la valeur de départ du curseur pour le prix
-    window.onload = function() {
-        var Initialprice = "0";
-        document.getElementById("product_price").value = Initialprice;
-        updateprice(Initialprice);
-    };
+    function updateRangeFromInput(value) {
+        range.value = value;
+    }
 </script>
+
+<style>
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0; /* Chrome, Safari, Edge, Opera */
+        }
+        input[type="number"]::-moz-spin-buttons {
+            display: none; /* Firefox */
+        }
+</style>
+
+
+
 {% endblock %}

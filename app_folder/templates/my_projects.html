@@ -9,11 +9,15 @@
 
 <div class="container">
 
-
     {% if user_is_admin %}
 
         <h1 class="page_title">Mon projet {{project_name}}</h1>
-        </br>
+
+        <div class="col offset-md-3 col-md-6 col-sm-12 text-center mt-4">
+            <a href="/rib" class="btn btn-primary">Renseigner mon RIB</a>
+        </div>
+
+    </br>
         <h3 class="text-center">Participations à ma liste de naissance</h3>
         {% if user_participations %}
 
