@@ -6,42 +6,40 @@
 
 
 {% block content %}
-    <div>
+    <div class="back-button-container">
         <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
         <a href="{{ url_for('views.menu_1') }}">
             <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
         </a>
     </div>
 
-    <div class="container d-flex justify-content-center align-items-center">
-        <div class="card p-4">
-            <h1 class="text-center mb-1">Ajouter un produit à la liste</h1>
+    <div class="my_container">
+            <h1>Ajouter un produit</h1>
             <form method="post">
-                <div class="form-group">
-                    <label for="text">Titre du produit</label>
-                    <input type="text" class="form-control" name="product_name" placeholder="Nom du produit" required>
+                <div class="inert_card">
+                    <!-- Titre du produit -->
+                    <label for="text" class="product_title">Titre du produit</label>
+                    <input type="text" class="form-control text-center" name="product_name" placeholder="Nom du produit" required>
+                    <!-- Description du produit -->
+                    <label for="text" class="product_title">Description</label>
+                    <input type="text" class="form-control text-center" name="product_description" placeholder="Description du produit" required>
+                    <!-- Prix initial -->
+                    <div>
+                        <label for="text" class="product_title">Prix</label>
+                        <input type="range" class="form-range" id="product_price" name="product_price" min="0" max="1000" step="1" value="0" oninput="updatePriceFromRange(this.value)">
+                        <input type="number" id="price_input" min="0" max="1000" step="1" value="0" class="text-center" oninput="updateRangeFromInput(this.value)">
+                        <span>€</span>
+                    </div>
+                    <!-- url produit -->
+                    <label for="text" class="product_title">url du produit</label>
+                    <input type="text" class="form-control text-center" name="product_url_source" placeholder="url du produit" required>
                 </div>
-                <div class="form-group">
-                    <label for="text">Description</label>
-                    <input type="text" class="form-control" name="product_description" placeholder="Description du produit" required>
-                </div>
-                <p>Prix</p>
-                <div class="text-center">
-                    <input type="range" class="form-range" id="product_price" name="product_price" min="0" max="1000" step="1" value="0" oninput="updatePriceFromRange(this.value)">
-                    <input type="number" id="price_input" min="0" max="1000" step="1" value="0" class="text-center" oninput="updateRangeFromInput(this.value)">
-                    <span>€</span>
-                </div>
-                <div class="form-group">
-                    <label for="text">url du produit</label>
-                    <input type="text" class="form-control" name="product_url_source" placeholder="url du produit" required>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-block mt-3">Ajouter</button>
+                <button type="submit" id="my_button" class="my_btn validate-btn">Ajouter</button>
+
             </form>
             {% if error %}
             <div class="alert alert-danger mt-3">{{ error }}</div>
             {% endif %}
-        </div>
     </div>
 
 
@@ -60,18 +58,26 @@
     function updateRangeFromInput(value) {
         range.value = value;
     }
-</script>
 
-<style>
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0; /* Chrome, Safari, Edge, Opera */
-        }
-        input[type="number"]::-moz-spin-buttons {
-            display: none; /* Firefox */
-        }
-</style>
+        // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
+        // Voir à terme comment mettre ce code dans le fichier script.js afin d'éviter de le dupliquer partout
+            // Récupérer le bouton par son ID
+            var button = document.getElementById('my_button');
+
+        // Récupérer la valeur de gender_choice
+        var gender_choice = "{{gender_choice}}" ;
+
+
+        // Définir la classe en fonction de la valeur de gender_choice
+        if (gender_choice === "Fille") {
+            button.classList.add("gender_girl");
+        } else if (gender_choice === "Garçon") {
+            button.classList.add("gender_boy");
+        } else {
+            button.classList.add("no_gender");
+}
+
+</script>
 
 
 

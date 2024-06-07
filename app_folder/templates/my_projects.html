@@ -7,20 +7,16 @@
 
 {% block content %}
 
-<div class="container">
+
+<div class="my_container">
 
     {% if user_is_admin %}
 
-        <h1 class="page_title">Mon projet {{project_name}}</h1>
-
-        <div class="col offset-md-3 col-md-6 col-sm-12 text-center mt-4">
-            <a href="/rib" class="btn btn-primary">Renseigner mon RIB</a>
-        </div>
-
-    </br>
-        <h3 class="text-center">Participations à ma liste de naissance</h3>
+        <h1>Mon projet {{project_name}}</h1>
+        
+        
         {% if user_participations %}
-
+        <h2>Participations à ma liste de naissance</h2>
             <table>
                 <thead>
                     <tr>
@@ -30,6 +26,7 @@
                         <th>Date</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {% for email, participations in user_participations.items() %}
                         {% for participation in participations %}
@@ -42,54 +39,72 @@
                         {% endfor %}
                     {% endfor %}
                 </tbody>
+
             </table>
+
         {%else%}
-        <p class="text-center">Pas encore de participation</p>
+        <!-- Je ne mets rien -->
         {%endif%}
-        </br>
-        <div class="col offset-md-3 col-md-6 col-sm-12 text-center">
-            <button class="btn btn-primary" onclick="copyTextToClipboard()">Copier votre lien d'affiliation</button>
+
+        <button class="my_btn" onclick="copyTextToClipboard()">Copier mon lien d'affiliation</button>
+
+        {% if modify_project == false %}
+            <form id="modify_projectForm" method="post">
+                <input type="hidden" id="modify_project" name="modify_project" value="true">
+                <button type="submit" class="my_btn" id="btn_modify_project">Modifier le projet {{project_name}}</button>
+            </form>
+        {%else%}
+        <div class="d-flex flex-row justify-content-around" style="width: 100%;">
+            <!-- Bouton concernant le RIB -->
+            {%if admin_rib %}
+            <button onclick="window.location.href='/rib'" class="my_small_btn">Modifier mon RIB</button>
+            {%else%}
+                <button onclick="window.location.href='/rib'" class="my_small_btn">Ajouter mon RIB</button>
+            {%endif%}
+
+            <!-- Bouton concernant le renommage du projet -->
+            <button onclick="window.location.href='/rename_project'" class="my_small_btn">Renommer le projet</button>
+
+            <!-- Bouton concernant la suppression du projet -->
+            <button onclick="openModal_delete_project()" class="my_small_btn">Supprimer le projet</button>
         </div>
 
-        <div class="col offset-md-3 col-md-6 col-sm-12 text-center mt-4">
-                <a href="/rename_project" class="btn btn-primary">Renommer le projet {{project_name}}</a>
-        </div>
+        {%endif%}
 
-        <div class="col offset-md-3 col-md-6 col-sm-12 text-center mt-4 mb-5">
-            <button onclick="openModal_delete_project()" class="btn btn-danger">Supprimer votre projet</button>
-        </div>
 
     {%else%}
-        <div class="col offset-md-3 col-md-6 col-sm-12 text-center mt-4">
-            <div class="d-grid gap-2 col-12 mx-auto">
-                <a href="/create_project" class="btn btn-primary">Créer un projet</a>
-            </div>
-        </div>
+
+        <button onclick="window.location.href='/create_project'" class="my_btn">Créer un projet</button>
+
     {%endif%}
 
-
-<hr>
-
-
-    <h1 class="page_title mt-4">Les projets dont je fais partie</h1>
+    
     {%if projects_dict_special %}
-        {% for project_name, project_id in projects_dict_special.items() %}
-            <div class="container d-flex justify-content-center align-items-center">
-                <h3>{{ project_name }}</h3>
-            </div>
+    <h1>Les projets dont je fais partie</h1>
+        {% for project_name, admin_rib in projects_dict_special.items() %}
+            {% if admin_rib %}
+                <div class="my_container">
+                    <div class="product-card" id="product_card" data-rib="{{ admin_rib }}" onclick="copyRIBToClipboard(event)">
+                        <div class="product-title">{{ project_name }}</div>
+                        <div class="product-description">Cliquez pour obtenir le RIB</div>
+                    </div>
+                </div>
+            {%else%}
+                <div class="my_container">
+                    <div class="product-card" id="product_card">
+                        <div class="product-title">{{ project_name }}</div>
+                    </div>
+                </div>
+            {%endif%}
         {% endfor %}
+
+
     {%else%}
-        <div class="text-center">
-            <p>Aucun projet rejoint pour le moment.</p>
-        </div>
+    <!-- Je ne mets rien -->
     {%endif%}
 
     {% if user_participations_side_project %}
-    
-        <hr>
-
         <h1 class="page_title mt-4">Ma participation aux listes de naissance</h1>
-
             <table>
                 <thead>
                     <tr>
@@ -114,65 +129,12 @@
             </table>
 
     {%else%}
-
-    <p class="text-center"></p>
-
+    <!-- Je ne mets rien -->
     {%endif%}
-
-        <hr>
-
-    <div class="col offset-md-3 col-md-6 col-sm-12 text-center mt-4">
-        <div class="d-grid gap-2 col-12 mx-auto">
-            <a href="/join_project" class="btn btn-primary">Rejoindre un projet</a>
-        </div>
-    </div>
+        <a href="/join_project" class="my_btn">Rejoindre un projet</a>
 </div>
 
 
-<!-- Styles pour la fenêtre modale -->
-<style>
-    .modal {
-        display: none; /* Masquer la fenêtre modale par défaut */
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.4);
-    }
-    
-    .modal-content {
-        background-color: #991111;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-    }
-
-    .close-icon {
-        cursor: pointer;
-    }
-
-
-    table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-
-</style>
 
 
 <!-- Structure de la fenêtre modale pour supprimer son projet -->
@@ -190,26 +152,59 @@
     </div>
 </div>
 
-<!-- Script JavaScript pour afficher et masquer la fenêtre modale -->
-<script> 
-    function openModal_delete_project() {
-        document.getElementById('myModal_delete_project').style.display = 'block';
-    }
-    
-    function closeModal_delete_project() {
-        document.getElementById('myModal_delete_project').style.display = 'none';
-    }
-</script>
+
 
 <script>
+// Afficher et masquer la fenêtre modale
+    function openModal_delete_project() {
+            document.getElementById('myModal_delete_project').style.display = 'block';
+        }
+        
+        function closeModal_delete_project() {
+            document.getElementById('myModal_delete_project').style.display = 'none';
+        }
+
+
+
+
+//Mise en forme du message informant du copier/coller du lien d'affiliation
     function copyTextToClipboard() {
         const textToCopy = "http://127.0.0.1:5000/register?project_id={{project_id}}";
+        const notification = document.createElement('div');
+        notification.classList.add('copy-notification');
+        notification.textContent = "Lien copié";
+
+        document.body.appendChild(notification);
+
         navigator.clipboard.writeText(textToCopy).then(function() {
-            alert("Lien d'affiliation copié: ");
+            setTimeout(function() {
+                notification.remove();
+            }, 2000);
         }, function(err) {
-            console.error('Erreur lors de la copie du texte: ', err);
+            console.error('Erreur lors de la copie du lien: ', err);
         });
     }
+
+//Mise en forme du message informant du copier/coller du RIB
+    function copyRIBToClipboard(event) {
+    const textToCopy = event.currentTarget.getAttribute('data-rib');
+    const notification = document.createElement('div');
+    notification.classList.add('copy-notification');
+    notification.textContent = "RIB copié";
+
+    document.body.appendChild(notification);
+
+    navigator.clipboard.writeText(textToCopy).then(function() {
+        setTimeout(function() {
+            notification.remove();
+        }, 2000);
+    }, function(err) {
+        console.error('Erreur lors de la copie du RIB: ', err);
+    });
+}
+
+
+
 </script>
 
 

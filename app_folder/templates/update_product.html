@@ -7,35 +7,35 @@
 {% block content %}
 
 {%for product in products%}
-<div class="container d-flex justify-content-center align-items-center">
-    <div class="card p-4">
-        <h1 class="text-center mb-1">Modifier le produit</h1>
+<div class="my_container">
+    <div class="inert_card">
+        <h1>Modifier le produit</h1>
         <form method="post">
-            <div class="form-group">
                 <label for="text">Titre du produit</label>
                 <input type="text" class="form-control text-center" name="product_name" placeholder="{{product.name}}" >
-            </div>
-            <div class="form-group">
+
                 <label for="text">Description</label>
                 <input type="text" class="form-control text-center" name="product_description" placeholder="{{product.description}}" >
-            </div>
-            <div class="form-group">
+
                 <label for="text">Prix</label>
                 <input type="text" class="form-control text-center" name="product_price" placeholder="{{product.price}}" >
-            </div>
-            <!-- <div class="form-group">
-                <label for="text">Photo</label>
-                <input type="text" class="form-control" name="product_photo" placeholder="{{product.photo}}" >
-            </div> -->
-            <div class="form-group">
+
                 <label for="text">url du produit</label>
-                <input type="text" class="form-control text-center" name="product_url_source" placeholder="{{url_source}}" >
-            </div>
+                <input type="text" class="form-control text-center" name="product_url_source" placeholder="{{product.url_source}}" >
             
-            <button type="submit" class="btn btn-primary btn-block mt-3">Modifier</button>
+            <div class="text-center">
+                {%if gender_choice == "Fille"%}
+                    <button type="submit" class="my_btn validate-btn gender_girl">Modifier</button>
+                {%elif gender_choice == "Garçon"%}
+                    <button type="submit" class="my_btn validate-btn gender_boy">Modifier</button>
+                {%else%}
+                    <button type="submit" class="my_btn validate-btn no_gender">Modifier</button>
+                {%endif%}
+            </div>
+
         </form>
         {% if error %}
-        <div class="alert alert-danger mt-3">{{ error }}</div>
+        <div class="alert alert-danger">{{ error }}</div>
         {% endif %}
     </div>
 </div>

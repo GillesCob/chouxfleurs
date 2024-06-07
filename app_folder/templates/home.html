@@ -5,34 +5,15 @@
 {% endblock %}
 
 {% block content %}
-<style>
-
-    .container {
-        text-align: center;
-    }
-    h1 {
-        color: #ffffff;
-        font-size: 3rem;
-        margin-bottom: 20px;
-        margin-top: 50px;
-    }
-    p {
-        color: #ffffff;
-        font-size: 1.5rem;
-    }
-</style>
 </head>
 <body>
-<div class="container">
+
+<div class="my_container">
     <h1>Page d'accueil en cours de création</h1>
     <p>En attendant, inscrivez-vous, créez un projet ou rejoignez un projet existant</p>
-    
-
+    <button type="button" class="my_btn" onclick="window.location.href='/my_projects'">Créer ou rejoindre un projet</button>
 </div>
 
-<div class="all_btn">
-    <button type="button" class="pronostics_btn btn_not_selected" onclick="window.location.href='/my_projects'">Créer ou rejoindre un projet</button>
-</div>
 
 <!--Night mode-->
 <style>
@@ -41,7 +22,5 @@
         color: white;
     }
 </style>
-
-
 
 {% endblock %}

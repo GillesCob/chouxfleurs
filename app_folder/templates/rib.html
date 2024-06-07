@@ -7,16 +7,21 @@
 
 {% block content %}
 
-    <h1 class="page_title">Mon projet {{project_name}}</h1>
-    </br>
-    <div class="container d-flex justify-content-center align-items-center">
+    <div class="my_container">
         <div class="card">
+            {% if actual_rib %}
+            <h1>Modifier mon RIB</h1>
+            {% else %}
+            <h1>Ajouter mon RIB</h1>
+            {% endif %}
             <form method="post">
-                <div class="form-group ">
-                    <label for="rib">Mon RIB</label>
+                <label for="project_name">Mon RIB</label>
+                {% if actual_rib %}
                     <input type="text" class="form-control text-center" name="rib" placeholder="{{actual_rib}}" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block mt-3">Valider</button>
+                {% else %}
+                    <input type="text" class="form-control text-center" name="rib" placeholder="Votre RIB" required>
+                {% endif %}
+                <button type="submit" class="my_btn validate-btn admin_button">Valider</button>
             </form>
         </br>
             <p>Votre rib sera accessible à chaque personne participant à votre liste de naissance</p>

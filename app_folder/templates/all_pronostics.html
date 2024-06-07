@@ -8,106 +8,100 @@
 {% block content %}
 
 {% if session.selected_project.id %}
-    <div class="container">
-        <div class="two_btn">
-            <button type="button" class="my_btn" onclick="window.location.href='/menu_2'">Mes réponses</button>
-            <button type="button" class="my_btn btn_selected {% if prono_sex == 'Fille' %}pink{% elif prono_sex == 'Garçon' %}blue{% endif %}" onclick="window.location.href='/all_pronostics'">La tendance</button>
+    <div class="my_container">
+        <div class="two_btn_container">
+            <button type="button" class="my_btn white_btn" onclick="window.location.href='/menu_2'">Mes réponses</button>
+            <button type="button" id="btn_tendency" class="my_btn btn_selected" >La tendance</button>
         </div>
 
-        <!-- Le sexe ----------------------------------------- -->
-        <div class = "guess_title">
-            <label for="name" >Le sexe</label>
+
+        <div class="inert_card">
+            <!-- Le sexe ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="name" >Le sexe</label>
+            </div>
+
+            <div class="progress-container">
+                <div class="bar-container">
+                    <div id="fill" class="fill"></div>
+                </div>
+                <div class="progress-label label-left">Fille - {{ percentage_girl }}%</div>
+                <div class="progress-label label-right">Garçon - {{ percentage_boy }}%</div>
+                <script src="script.js"></script>
+            </div>
+
+
+            <!-- Le poids ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="weight" >Le poids</label>
+                <p class="pronostic_answer">{{ average_weight }} kilogrammes</p>
+            </div>
+
+
+            <!-- La taille ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="height" >La taille</label>
+                <p class="pronostic_answer">{{ average_height }} centimètres</p>
+            </div>
+
+
+            <!-- La date ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="date" >La date</label>
+                <p class="pronostic_answer">{{ average_date }}</p>
+            </div>
+
+
+            <!-- Les noms ----------------------------------------- -->
+            {% for name, count in names.items() %}
+                {%if count > 1%}
+                    <div class = "pronostic_title">
+                        <label for="date" >Les prénoms</label>
+                        <p class="pronostic_answer">{{ count }} personnes ont choisi {{ name }}</p>
+                    </div>
+                {%endif%}
+            {% endfor %}
         </div>
         
-        <div class="progress-container">
-            <div class="bar-container progress">
-                <div id="fill" class="fill"></div>
-            </div>
-            <div class="progress-label label-left">Fille - {{ percentage_girl }}%</div>
-            <div class="progress-label label-right">Garçon - {{ percentage_boy }}%</div>
-            <script src="script.js"></script>
-        </div>
-      
-        <!-- Le poids ----------------------------------------- -->
-        <div class = "guess_title">
-            <label for="weight" >Le poids</label>
-        </div>
-        
-        <div class="text-center">
-            <p>{{ average_weight }} kilogrammes</p>
-        </div>
-
-        <!-- La taille ----------------------------------------- -->
-        <div class = "guess_title">
-            <label for="height" >La taille</label>
-        </div>
-
-        <div class="text-center">
-            <p>{{ average_height }} centimètres</p>
-        </div>
-
-
-        <!-- La date ----------------------------------------- -->
-        <div class = "guess_title">
-            <label for="date" >La date</label>
-        </div>
-
-        <div class="text-center">
-            <p>{{ average_date }}</p>
-        </div>
-
-    <!-- Les noms ----------------------------------------- -->
-    {% for name, count in names.items() %}
-        {%if count > 1%}
-            <div class = "guess_title">
-                <label for="date" >Les prénoms</label>
-            </div>
-
-            <div class="text-center">
-                <p>{{ count }} personnes ont choisi {{ name }}</p>
-            </div>
-        {%endif%}
-    {% endfor %} 
-
-
-
-
 
     </div>
 
-
-      
-
-
 {% endif %}
 
-<style>
-.progress {
-    background-color: #6495ED; /* Couleur de fond du reste à faire */
-  }
-.progress-bar-custom {
-    background-color: #FF69B4; /* Couleur de la barre de progression */
-  }
-</style>
 
 <script>
+
+//Script concernant la barre de progression
     function updateSexValue(value) {
         document.updateSexValue("sexValue").textContent = value;
     }
-
-    function updateWeightValue(value) {
-        document.getElementById("weightValue").textContent = value;
-    }
-    function updateHeightValue(value) {
-        document.getElementById("heightValue").textContent = value;
-    }
-
     window.addEventListener('load', function() {
     // Récupérer l'élément de remplissage
     var fill = document.getElementById('fill');
     // Mettre à jour la largeur de l'élément de remplissage avec la valeur spécifiée
     fill.style.width = "{{ percentage_girl }}%";
 });
+
+
+// Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
+// Voir à terme comment mettre ce code dans le fichier script.js afin d'éviter de le dupliquer partout
+
+// Récupérer le bouton par son ID
+var btn_tendency = document.getElementById('btn_tendency');
+
+// Récupérer la valeur de gender_choice
+var gender_choice = "{{gender_choice}}" ;
+
+// Définir la classe en fonction de la valeur de gender_choice
+if (gender_choice === "Fille") {
+    btn_tendency.classList.add("gender_girl");
+
+} else if (gender_choice === "Garçon") {
+    btn_tendency.classList.add("gender_boy");
+    
+} else {
+    btn_tendency.classList.add("no_gender");
+}
 
 </script>
 

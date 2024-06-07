@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Product participation
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- Loader -->
+
+
+<div class="my_container">
+    <p class="text-center">Merci pour votre participation de {{participation_amount}}€</p>
+    <p id="redirectMessage">Vous allez être redirigé dans quelques instants...</p>
+</div>
+<div id="loader" class="loader"></div>
+
+
+
+
+<style>
+    /* Styles pour le loader */
+    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        margin: auto;
+        margin-top: 50px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Styles pour masquer le loader lorsque le décompte est terminé */
+    .hidden {
+        display: none;
+    }
+</style>
+
+<script>
+    // Fonction pour le décompte du temps
+    function countdown() {
+        var seconds = 5; // Nombre de secondes avant la redirection
+
+        var timer = setInterval(function() {
+            seconds--;
+
+            if (seconds <= 0) {
+                clearInterval(timer); // Arrête le timer une fois le délai écoulé
+                window.location.href = "{{ url_for('views.confirm_participation') }}"; // Redirige vers la nouvelle page
+            }
+        }, 1000); // Mise à jour toutes les 1 seconde
+    }
+
+    // Appel de la fonction au chargement de la page
+    window.onload = function() {
+        countdown();
+    };
+
+   
+</script>
+
+{% endblock %}

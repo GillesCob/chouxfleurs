@@ -1,45 +1,44 @@
-/* styles.css */
+/* Définition de la variable pour la couleur */
+:root {
+    --my_btn_color: rgb(185, 145, 108); /* Par exemple, une couleur orange */
+}
 
-/* Center the container vertically and horizontally */
-/* .container {
+/* Mon contenair principal ------------------------------------------------------ */
+.my_container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    min-height: 100vh;
-} */
-
-/* Add padding and background color to the card */
-.card {
-    padding: 20px;
-    background-color: #eff1f4;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
     text-align: center;
-    margin-top: 100px;
-    min-width: 400px;
+
+    font-size: 0.9em;
+    font-family: jost;
+
+    margin: 20px ;
+
+    /* background-color: aqua; */
 }
-
-.card_button {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-/* Add space between form elements */
-/* .form-group {
-    margin-bottom: 20px;
-} */
-
-/* Add margin to the top of the "Already have an account?" message */
-/* .mt-3 {
-    margin-top: 15px;
-} */
-
 
 /* Styles pour le textes / titres / ... ------------------------------------------------------ */
+
+h1{
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+h2{
+    font-size: 1.4em;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+h3{
+    font-size: 1.7em;
+    margin: 10px 0;
+}
+
+
 .page_title{
     color: #000000;
     font-size: 1.5em;
@@ -55,181 +54,238 @@ h6{
     text-align: center;
 }
 
-.guess_title{
-    color: #000000;
+.pronostic_title{
     font-size: 1.5em;
     font-weight: bold;
-    text-align: center;
     margin-top: 30px;
     margin-bottom: 10px;
 }
 
-.all_btn {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    padding: 10px;
+.pronostic_answer{
+    font-size: 0.8em;
+    font-weight: bold;
+
 }
 
-
-input[type="date"]:before {
-    content: attr(placeholder) !important;
-    color: #aaa;
-    margin-right: 0.5em;
-  }
-  input[type="date"]:focus:before,
-  input[type="date"]:valid:before {
-    content: "";
-  }
-
-
-
-input[type="date"] {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  font-size: 1em;
+.product_title{
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 10px;
 }
-
-
-::placeholder {
+    
+    
+/* Styles pour les cartes ------------------------------------------------------ */
+.card {
+    padding: 20px;
+    background-color: #eff1f4;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
     text-align: center;
-  }
-
-.text-center {
-    text-align: center;
+    min-width: 400px;
+    margin-bottom: 20px;
 }
 
-.narrow-input{
-    max-width: 150px;
-}
-
-.date_birth{
+.card_button {
     display: flex;
     justify-content: center;
+    margin-top: 20px;
+}
+
+.custom-card {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    justify-content: space-around;
 }
 
 
-ul{
-    list-style-type: none;
-    }
+.product-card {
+    width: 300px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
+    cursor: pointer;
+}
+
+
+.inert_card {
+    width: 400px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.custom-card-container {
+    display: flex;
+    flex-wrap: wrap; /* Permet aux éléments de passer à la ligne si nécessaire */
+    justify-content: center; /* Centre horizontalement les éléments */
+    gap: 20px; /* Espace entre les éléments */
+}
+
+
+
+.product-card a {
+    text-decoration: none;
+    color: inherit; /* Assure que la couleur du texte reste la même que celle de son conteneur parent */
+}
+
+
+
+
+/* Styles pour l'élément input de type date */
+input[type="date"] {
+    appearance: none; /* Supprimer les styles par défaut de l'élément */
+    padding: 10px; /* Ajouter un peu d'espace autour du texte */
+    border: 1px solid #ccc; /* Ajouter une bordure grise */
+    border-radius: 5px; /* Ajouter des coins arrondis */
+    background-color: #f7f7f7; /* Ajouter une couleur de fond légère */
+  }
+  
+  /* Styles pour l'élément input de type date lorsqu'il est en focus */
+  input[type="date"]:focus {
+    outline: none; /* Supprimer la bordure de focus par défaut */
+    border-color: var(--my_btn_color); /* Modifier la couleur de la bordure lorsqu'il est en focus */
+    box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée lorsqu'il est en focus */
+  }
+  
+
 
 /* Boutons présents dans le projet ------------------------------------------------------ */
-
 .my_btn{
     width: 220px;
-    font-size: 1em;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 10px 20px;
+    margin: 10px;
+    padding: 10px 10px;
+
     text-transform: uppercase;
-    color: rgb(0, 0, 0);
-    background-color: white;
-    border: 1px solid #000000;
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    background-color: var(--my_btn_color);
+
+    border: 2px solid #000000;
     border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+
+    /* transition: background-color 1s ease; */
+
+    display: inline-block; /* Pour s'aligner avec les éléments en ligne */
+    position: relative; /* Permet de contrôler la position */
 }
+
+
+.my_small_btn{
+    width: 150px;
+    margin: 10px;
+    padding: 10px 10px;
+
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    background-color: var(--my_btn_color);
+
+    border: 2px solid #000000;
+    border-radius: 10px;
+    cursor: pointer;
+
+    /* transition: background-color 1s ease; */
+
+    display: inline-block; /* Pour s'aligner avec les éléments en ligne */
+    position: relative; /* Permet de contrôler la position */
+}
+
 
 .my_btn:hover {
     filter: brightness(1.2); /* Légèrement plus lumineux au survol */
 }
 
-.btn_selected {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    color: white;
-}
-
-
-
-.pronostics_btn{
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 16px;
-    text-transform: uppercase;
-    border-radius: 5px;
-    border: 1px solid #000000;
-    color: rgb(101, 99, 99);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 20px;
-}
-
-
-
-.pink {
-    background-color: #FF69B4;
-    color: white;
-}
-
-.blue {
-    background-color: #6495ED;
-    color: white;
-}
-
-.gray {
-    background-color: #D3D3D3;
-    color: #808080;
-}
-
-.validate-btn:hover {
+.my_small_btn:hover {
     filter: brightness(1.2); /* Légèrement plus lumineux au survol */
 }
 
-/* Bouton pour valider le pronostic */
-.validate_btn_position {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
-}
-
-
-/* Pronostic, choix fille.garçon */
-.btn_gender_choose {
+.btn_selected {
+    font-size: 1.1em;
+    font-weight: bold;
     text-decoration: underline;
     text-decoration-thickness: 2px;
-    border: 2px solid #000000;
-    color: rgb(255, 255, 255);
+    border: 3px solid #000000;
 }
 
 .gender_girl {
     background-color: #FF69B4;
-    color: white;
 }
 
 .gender_boy {
     background-color: #6495ED;
-    color: white;
 }
 
 .no_gender {
-    background-color: gray;
+    background-color: rgba(135, 131, 134, 0.739);
 }
 
-/* Validation du pronostic */
-.validate-btn {
-    color: white;
-    margin-top: 0.9em;
-    font-size: 0.9em;
+.black_admin_button {
+    background-color: rgb(76, 230, 25);
 }
 
-.two_btn {
+.red_admin_button {
+    background-color: rgb(255, 0, 0);
+}
+
+/* Permet de passer de son prono à la tendance */
+.two_btn_container {
     display: flex;
+    align-items: center;
     gap: 20px; /* Espace constant entre les boutons */
-    justify-content: center;
 }
 
-.change_prono_btn {
-    font-size: 0.9em;
+.white_btn {
+    display: flex;
+    justify-content: center;
+    background-color: rgb(247, 247, 247);
+    color: black;
 }
+
+.classic_btn {
+    background-color: rgb(247, 247, 247);
+    color: black;
+    margin: 10px; /* Ajuste la marge */
+    display: inline-block; /* Pour s'aligner avec les éléments en ligne */
+    position: relative; /* Permet de contrôler la position */
+    text-align: center; /* Alignement du texte */
+    min-height: 60px; /* Hauteur minimale */
+    line-height: 50px; /* Centre le texte verticalement */
+
+}
+
+#product_button {
+    pointer-events: none; /* Le bouton ne répondra pas aux événements de souris */
+}
+
+.product_btn:hover{
+    filter: none;
+}
+
+
 
 
 /* Barre de progression pour la moyenne gars/fille ------------------------------------------------------ */
 .progress-container {
     position: relative;
-    max-width: 600px;
     margin: 0 auto;
     border: 1px solid #000000;
     border-radius: 8px;
@@ -243,7 +299,7 @@ ul{
 .bar-container {
     width: 100%;
     height: 30px;
-    background-color: #f2f2f2;
+    background-color: #6495ED;
     position: relative;
     border-radius: 5px;
 }
@@ -294,9 +350,114 @@ ul{
 }
 
 .modal-content {
-    background-color: #886ed0;
+    background-color: #c96262;
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
 }
+
+.close-icon {
+    cursor: pointer;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0; /* Chrome, Safari, Edge, Opera */
+}
+input[type="number"]::-moz-spin-buttons {
+    display: none; /* Firefox */
+}
+
+
+
+
+
+
+
+
+
+
+/* Style du titre du produit */
+.product-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Style de la description du produit */
+.product-description {
+    font-size: 1em;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* Style du prix initial */
+.product-price-original {
+    font-size: 1.2em;
+    color: #555;
+    text-decoration: line-through;
+    margin-bottom: 5px;
+}
+
+/* Style du prix restant */
+.product-price-current {
+    font-size: 1.5em;
+    color: #d4854d;
+    font-weight: bold;
+}
+
+
+.copy-notification {
+    position: absolute;
+    top: calc(10%); /* Positionné 20px en dessous du bas de .my_container */
+    right: calc(70%); /* Positionné 200px à gauche du bord droit de .my_container */
+    background-color: rgb(185, 145, 108);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* CSS pour la boîte de dialogue personnalisée */
+.custom-alert {
+    position: fixed;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(209, 90, 90);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 9999; /* Assure que le message apparaît au-dessus du reste du contenu */
+}
+
+
+
+/* Styles pour les tableaux dans my_projects */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background-color: #f2f2f2;
+}
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+
+.back-button-container {
+    position: absolute;
+
+}
+

@@ -13,36 +13,61 @@
     </a>
 </div>
 
-
-    <p class="text-center">Merci pour votre participation de {{participation_amount}}€</p>
-
-    <div class="all_btn">
-        <button type="button" class="pronostics_btn btn_not_selected" onclick="window.location.href='/menu_1'">Retourner à la liste de naissance</button>
-        <button type="button" class="pronostics_btn btn_not_selected" onclick="window.location.href='/home_page'">Comment faire parvenir sa participation ?</button>
-    </div>
+<!-- Loader -->
 
 
+<div class="my_container">
+    {% if admin_rib %}
+        <div class="product-card" id="product_card" onclick="copyTextToClipboard()">
+            <!-- Titre du produit -->
+            <div class="product-title">Merci pour votre participation !</div>
+            <!-- Description du produit -->
+            <div class="product-description">Voici les informations bancaires afin de nous faire parvenir votre participation :</div>
+            <div class="product-description">{{ admin_rib }}</div>
+        </div>
+    {% else %}
+        <div class="inert_card" id="product_card">
+            <!-- Titre du produit -->
+            <div class="product-title">Merci pour votre participation !</div>
+            <!-- Description du produit -->
+            <div class="product-description">Le RIB n'est pas encore disponible. Vous pourrez le retrouver dans votre espace personnel une fois qu'il aura été communiqué par son propriétaire.
+            </div>
+        </div>
+    {% endif %}
+
+    
+
+    <a href="{{ url_for('views.my_projects') }}" class="product-link" style="text-decoration: none;" >
+        <div class="product-card" id="product_card">
+            <!-- Titre du produit -->
+            <div class="page_title">Retrouvez ici toutes vos participations</div>
+
+        </div>
+    </a>
+</div>
 
 <script>
 
-// Fonction pour mettre à jour la valeur du montant restent
-function updateleft_to_payValue(value) {
-    document.getElementById("left_to_payValue").textContent = value;
-}
+//Mise en forme du message informant du copier/coller
+    function copyTextToClipboard() {
+        const textToCopy = "{{ admin_rib }}";
+        const notification = document.createElement('div');
+        notification.classList.add('copy-notification');
+        notification.textContent = "RIB copié";
 
-// Mettre à jour la valeur de départ du curseur pour le montant restant à payer
-window.onload = function() {
-    var Initialleft_to_pay = "0";
-    document.getElementById("left_to_pay").value = Initialleft_to_pay;
-    updateleft_to_payValue(Initialleft_to_pay);
-};
+        document.body.appendChild(notification);
 
-    window.addEventListener('load', function() {
-    var progressBar = document.getElementById('progressBar');
-    var percentagePaid = parseInt("{{ percentage_paid_int }}");
-    progressBar.style.width = percentagePaid + "%";
-    progressBar.textContent = percentagePaid + "%";
-});
+        navigator.clipboard.writeText(textToCopy).then(function() {
+            setTimeout(function() {
+                notification.remove();
+            }, 2000);
+        }, function(err) {
+            console.error('Erreur lors de la copie du texte: ', err);
+        });
+    }
 </script>
+
+
+
 
 {% endblock %}

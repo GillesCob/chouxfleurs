@@ -6,19 +6,16 @@
 
 
 {% block content %}
-    <div class="container d-flex justify-content-center align-items-center">
-        <div class="card p-4">
-            <h1 class="text-center mb-1">Changer d'email</h1>
+    <div class="my_container">
+        <div class="inert_card">
+            <h1>Changer d'email</h1>
             <form method="post">
-                <div class="form-group">
-                    <label for="email">Adresse mail</label>
-                    <input type="email" class="form-control" name="new_email" placeholder="{{user_email}}" required>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-block mt-3">Changer</button>
+                <label for="email">Adresse mail</label>
+                <input type="email" class="form-control text-center" name="new_email" placeholder="{{user_email}}" required>                
+                <button type="submit" class="my_btn">Changer</button>
             </form>
             {% if error %}
-            <div class="alert alert-danger mt-3">{{ error }}</div>
+            <div class="alert alert-danger">{{ error }}</div>
             {% endif %}
         </div>
     </div>

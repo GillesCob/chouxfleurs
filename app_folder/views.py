@@ -90,7 +90,12 @@ def count_user_in_project(user_id):
 def create_projects_dict(user_id):
     projects_dict = {}
     user_projects = Project.objects(users=user_id)
-    projects_dict = {project.name: project.id for project in user_projects}
+    
+    for project in user_projects:
+        project_admin = project.admin
+        project_admin_id = project_admin.id
+        project_admin_rib = User.objects(id=project_admin_id).first().rib
+        projects_dict[project.name] = project_admin_rib
 
     return projects_dict
 
@@ -180,6 +185,30 @@ def my_project_participations():
     else:
         user_participations = None
 
+#Fonction afin de récupérer le choix du sexe fait par l'utilisateur afin de personnaliser les boutons des interfaces
+def get_gender_choice(current_project):
+    gender_choice = "no_gender"
+        
+    #Je récupe le choix du user concernant le sexe afin de personnaliser les boutons
+    #Je dois cependant gérer le cas ou je n'ai pas encore de pronostic pour le projet actuellement sauvegardé dans la session
+    try :
+        actual_project_pronostics_base_list = current_project.pronostic #Je récupère la liste des pronostics pour le projet actuellement sauvegardé dans la session
+        actual_project_pronostics_list = list(actual_project_pronostics_base_list)
+        
+        user_pronostics_base_list = current_user.pronostic #Je récupère la liste des pronostics pour le user actuellement connecté
+        user_pronostics_list = list(user_pronostics_base_list)
+        
+        for project_id in actual_project_pronostics_list:
+            if project_id in user_pronostics_list:
+                pronostic_utilisateur = Pronostic.objects(id=project_id).first()
+                gender_choice = pronostic_utilisateur.sex
+                
+                
+    except:
+        pass
+    
+    return gender_choice
+
 #ROUTES -------------------------------------------------------------------------------------------------------------
 @views.route('/')
 @views.route('/home_page',methods=['GET'])
@@ -245,18 +274,21 @@ def menu_1():
         
         # Trier les produits en fonction du montant restant à payer (left_to_pay)
         products = sorted(products, key=lambda x: x['left_to_pay'], reverse=True)
+        
+        #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+        gender_choice = get_gender_choice(current_project)
          
         if user_is_project_admin : #Si le user actuel est l'admin d'un projet
             user_is_admin = True
-            return render_template('menu_1.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, products=products)
+            return render_template('menu_1.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, products=products, gender_choice=gender_choice)
 
         else: #Si le user actuel n'est pas l'admin d'un projet
             user_is_admin = False
-            return render_template('menu_1.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, products=products)
+            return render_template('menu_1.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, products=products, gender_choice=gender_choice)
     
     
     except (KeyError, AttributeError):
-        flash("Veuillez créer ou rejoindre un projet avant d'accéder aux pronostics", category='error')
+        flash("Veuillez créer ou rejoindre un projet avant d'accéder à la liste de naissance", category='error')
         return redirect(url_for('views.my_projects', user=current_user, **elements_for_base))
     
 @views.route('/add_product', methods=['GET', 'POST'])
@@ -266,6 +298,9 @@ def add_product():
     elements_for_base = elements_for_base_template(user_id)
     current_project_id = session['selected_project']['id']
     current_project = Project.objects(id=current_project_id).first()
+    
+    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+    gender_choice = get_gender_choice(current_project)
     
     if request.method == 'POST':
         user = user_id
@@ -295,7 +330,7 @@ def add_product():
         return redirect(url_for('views.menu_1'))
 
                 
-    return render_template('add_product.html',  **elements_for_base)
+    return render_template('add_product.html',  **elements_for_base, gender_choice=gender_choice)
 
 @views.route('/update_product/<product_id>', methods=['GET', 'POST'])
 @login_required
@@ -305,6 +340,11 @@ def update_product(product_id):
     user_is_admin=True
     
     product = Product.objects(id=product_id).first()
+    
+    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+    current_project_id = session['selected_project']['id']
+    current_project = Project.objects(id=current_project_id).first()
+    gender_choice = get_gender_choice(current_project)
     
     products = []
     products.append({
@@ -329,8 +369,6 @@ def update_product(product_id):
             product.description = description
         if price:
             product.price = price
-        # if photo:
-        #     product.image = photo
         if url_source:
             product.url_source = url_source
         
@@ -339,11 +377,11 @@ def update_product(product_id):
         
         
         flash('Produit mis à jour avec succès !')
-        return redirect(url_for('views.menu_1'))
+        return redirect(url_for('views.product_details', product_id=product_id))
     
-    return render_template('update_product.html', user=current_user, **elements_for_base, products=products, user_is_admin=user_is_admin)
+    return render_template('update_product.html', user=current_user, **elements_for_base, products=products, user_is_admin=user_is_admin, gender_choice=gender_choice)
   
-@views.route('/product/<product_id>')
+@views.route('/product/<product_id>', methods=['GET','POST'])
 @login_required
 def product_details(product_id):
     user_id = current_user.id
@@ -352,37 +390,83 @@ def product_details(product_id):
     product = Product.objects(id=product_id).first()
     
     left_to_pay = product.price-product.already_paid
-
+    
+    participation = False
+    
+    #Je vérifie si le user actuel est l'admin du projet
+    user_is_project_admin = Project.objects(admin=user_id).first()
+    if user_is_project_admin:
+        user_is_admin = True
+    else:
+        user_is_admin = False
+    
+    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+    current_project_id = session['selected_project']['id']
+    current_project = Project.objects(id=current_project_id).first()
+    gender_choice = get_gender_choice(current_project)
+    
     if product:
-        return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay)
+        if request.method=='POST':
+            participation = request.form.get('participation')
+            return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, gender_choice=gender_choice, participation=participation, user_is_admin=user_is_admin)         
+        
+        return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, gender_choice=gender_choice, participation=participation, user_is_admin=user_is_admin)
     else:
         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
         return render_template('menu_1.html', **elements_for_base), 404
 
-@views.route('/product_participation/<product_id>')
+# @views.route('/product_participation/<product_id>')
+# @login_required
+# def product_participation(product_id):
+#     user_id = current_user.id
+#     elements_for_base = elements_for_base_template(user_id)
+    
+#     # Récupérer les détails du produit à partir de l'ID
+#     product = Product.objects(id=product_id).first()
+    
+#     #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+#     current_project_id = session['selected_project']['id']
+#     current_project = Project.objects(id=current_project_id).first()
+#     gender_choice = get_gender_choice(current_project)
+    
+#     left_to_pay = product.price-product.already_paid
+
+#     if product:
+#         return render_template('product_participation.html', product=product, **elements_for_base, left_to_pay=left_to_pay, gender_choice=gender_choice)
+#     else:
+#         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
+#         return render_template('menu_1.html', **elements_for_base), 404
+
+@views.route('/confirm_participation/', methods=['GET','POST'])
 @login_required
-def product_participation(product_id):
+def confirm_participation():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
-    # Récupérer les détails du produit à partir de l'ID
-    product = Product.objects(id=product_id).first()
     
-    left_to_pay = product.price-product.already_paid
+    current_project = session.get('selected_project')
+    current_project_id = current_project['id']
+    current_project_admin = Project.objects(id=current_project_id).first().admin
+    admin_id = current_project_admin.id
+    admin_rib = User.objects(id=admin_id).first().rib
+    
+    
+    
+    return render_template('confirm_participation.html', **elements_for_base, admin_rib=admin_rib)
 
-    if product:
-        return render_template('product_participation.html', product=product, **elements_for_base, left_to_pay=left_to_pay)
-    else:
-        # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
-        return render_template('menu_1.html', **elements_for_base), 404
 
-@views.route('/confirm_participation/<product_id>', methods=['GET','POST'])
+@views.route('/confirm_participation_loading/<product_id>', methods=['GET','POST'])
 @login_required
-def confirm_participation(product_id):
+def confirm_participation_loading(product_id):
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
     
     current_project = session.get('selected_project')
     project_id = current_project['id']
+    
+    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+    current_project_id = session['selected_project']['id']
+    current_project = Project.objects(id=current_project_id).first()
+    gender_choice = get_gender_choice(current_project)
     
     
     # Récupérer les détails du produit à partir de l'ID
@@ -405,7 +489,7 @@ def confirm_participation(product_id):
         
         participation_amount = new_participation.amount
         
-        return render_template('confirm_participation.html', product=product, **elements_for_base, participation_amount=participation_amount)
+        return render_template('confirm_participation_loading.html', product=product, **elements_for_base, participation_amount=participation_amount, gender_choice=gender_choice)
     
     if product:
         return render_template('product_participation.html', product=product, **elements_for_base)
@@ -487,7 +571,8 @@ def menu_2():
                         prono_date = pronostic_utilisateur.date
                         pronostic_done=True
                         
-                        return render_template('menu_2.html', user=current_user, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base)
+                        
+                        return render_template('menu_2.html', user=current_user, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base, )
 
                     else : #Si le pronostic du user actuel n'est pas lié au projet actuellement sauvegardé dans la session, je créé un nouveau pronostic pour ce projet
                         result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project)
@@ -522,6 +607,7 @@ def update_pronostic():
     current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
     current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
     pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
+    
 
     for pronostic in user.pronostic:
         if pronostic in pronostics_for_current_project:
@@ -565,6 +651,7 @@ def update_pronostic():
                 prono_height = pronostic_utilisateur.height
                 prono_date = pronostic_utilisateur.date
                 
+                
                 flash('Pronostic mis à jour avec succès !')
                 return render_template('menu_2.html', user=current_user, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base)
     
@@ -585,15 +672,8 @@ def all_pronostics():
     
     user_id = current_user.id
     
-    #Je récupère le sexe choisi par le user afin de mettre à jour les couleurs en conséquence
-    current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
-    current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
-    pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
-
-    for pronostic in user.pronostic:
-        if pronostic in pronostics_for_current_project:
-            pronostic_utilisateur = Pronostic.objects(id=pronostic).first()
-            prono_sex = pronostic_utilisateur.sex
+    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+    gender_choice = get_gender_choice(current_project)
     
     
     number_of_pronostics = len(pronostics)
@@ -644,7 +724,7 @@ def all_pronostics():
     names = dict(sorted(names.items(), key=lambda item: item[1], reverse=True))
 
     
-    return render_template('all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, **elements_for_base, prono_sex=prono_sex)
+    return render_template('all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, **elements_for_base, gender_choice=gender_choice)
 
 
 #ROUTES "PHOTOS" -------------------------------------------------------------------------------------------------------------
@@ -687,25 +767,31 @@ def my_projects():
     
     elements_for_base = elements_for_base_template(user_id)
     projects_dict_special = elements_for_base['projects_dict'].copy()
-    print(type(projects_dict_special))
     
     user_email = User.objects(id=user_id).first().email
     
     user_participations_side_project = user_participations_side_project_func()
     
+    modify_project = False
+    
     if admin_project: #Si le user actuel est l'admin d'un projet
+        
+        admin_rib = User.objects(id=user_id).first().rib
         
         user_is_admin = True
         project_id = admin_project.id
         project_name = admin_project.name
         projects_dict_special.pop(project_name) #Je retire le projet pour lequel le user actuel est l'admin de la liste des projets (utile dans la liste des projets dont il fait partie dans la page my_projects)
         
-        
         #Je vais récupérer ici les infos concernant les participants à la liste de naissance
         user_participations = my_project_participations()
+        
+        #Je récupe l'info pour savoir si l'admin veut modifier son projet
+        if request.method == 'POST':
+            modify_project = request.form.get('modify_project_open')
                 
 
-        return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project)
+        return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_rib=admin_rib, modify_project=modify_project)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
@@ -735,7 +821,7 @@ def rib():
         return redirect(url_for('views.my_projects', **elements_for_base))
     
     
-    return render_template('rib.html', user=current_user, **elements_for_base, project_name=project_name)
+    return render_template('rib.html', user=current_user, **elements_for_base, project_name=project_name, actual_rib=user.rib)
    
 @views.route('/create_project', methods=['GET', 'POST'])
 @login_required
