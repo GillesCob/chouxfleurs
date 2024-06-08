@@ -20,15 +20,16 @@
     {% if admin_rib %}
         <div class="product-card" id="product_card" onclick="copyTextToClipboard()">
             <!-- Titre du produit -->
-            <div class="product-title">Merci pour votre participation !</div>
+            <h2>Votre participation de {{participation}}€ a bien été prise en compte, merci beaucoup !</h2>
+
             <!-- Description du produit -->
-            <div class="product-description">Voici les informations bancaires afin de nous faire parvenir votre participation :</div>
+            <div class="product-description">Voici les informations bancaires afin de nous la faire parvenir :</div>
             <div class="product-description">{{ admin_rib }}</div>
         </div>
     {% else %}
         <div class="inert_card" id="product_card">
             <!-- Titre du produit -->
-            <div class="product-title">Merci pour votre participation !</div>
+            <h2>Votre participation de {{participation}}€ a bien été prise en compte, merci beaucoup !</h2>
             <!-- Description du produit -->
             <div class="product-description">Le RIB n'est pas encore disponible. Vous pourrez le retrouver dans votre espace personnel une fois qu'il aura été communiqué par son propriétaire.
             </div>

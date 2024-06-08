@@ -6,6 +6,11 @@
 
 
 {% block content %}
+ <!-- Récupération du prono concernant le sexe afin de mettre en forme les boutons en conséquence -->
+ <div id="gender_choice" data-gender="{{ session['gender_choice'] }}"></div>
+ <!-- Récupération de l'info pour savoir si l'utilisateur est admin -->
+ <div id="user_is_admin" data-user="{{ session['user_is_admin'] }}"></div>
+
 <div>
     <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
     <a href="{{ url_for('views.menu_1') }}">
@@ -34,7 +39,7 @@
         </div>
     </a>
 
-    {% if user_is_admin %}
+    {% if session['user_is_admin'] %}
         <div class="card_button gap-2">
             {% if product.price != left_to_pay %}
             <button type="submit" class="btn btn-success" id="bouton" disabled>Modifier</button>
@@ -50,10 +55,9 @@
                 <button type="submit" class="btn btn-danger">Supprimer</button>
             </form>
             {% endif %}
-
-
         </div>
     {% endif %}
+
     {% if participation == false %}
     <form id="participationForm" method="post">
         <input type="hidden" id="participation" name="participation" value="true">
@@ -81,93 +85,95 @@
 
 <script>
 
-//Ci-dessous tous les éléments qui seront chargé APRES le chargement de la page html
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // Sélection des éléments par leur ID et ajout du gestionnaire d'événements
-    document.getElementById("product_card").addEventListener("click", checkUrl);
+    //Ci-dessous tous les éléments qui seront chargé APRES le chargement de la page html
+    document.addEventListener('DOMContentLoaded', function() {
 
-    // Fonction pour vérifier l'URL
-    function checkUrl(event) {
-        var url = "{{ product.url_source }}"; // Récupère l'URL depuis le code HTML
+        // Sélection des éléments par leur ID et ajout du gestionnaire d'événements
+        document.getElementById("product_card").addEventListener("click", checkUrl);
 
-        if (!isValidUrl(url)) {
-            event.preventDefault(); // Empêche l'ouverture du lien s'il est invalide
-            showCustomAlert("L'URL est actuellement indisponible. Merci de réessayer ultérieurement.");
-        }
-    }
+        // Fonction pour vérifier l'URL
+        function checkUrl(event) {
+            var url = "{{ product.url_source }}"; // Récupère l'URL depuis le code HTML
 
-    // Fonction pour afficher une boîte de dialogue personnalisée
-    function showCustomAlert(message) {
-        const alertBox = document.createElement('div');
-        alertBox.classList.add('custom-alert');
-        alertBox.textContent = message;
-        document.body.appendChild(alertBox);
-
-        // Supprimer la boîte de dialogue après quelques secondes
-        setTimeout(function() {
-            alertBox.remove();
-        }, 3000);
-    }
-
-    // Fonction pour vérifier si l'URL est valide
-    function isValidUrl(url) {
-        // Expression régulière pour vérifier si l'URL est valide
-        var pattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
-        return pattern.test(url);
-    }
-
-    // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
-    var button = document.getElementById('my_button');
-    var button2 = document.getElementById('btn_participation');
-
-
-    var gender_choice = "{{gender_choice}}";
-    if (gender_choice === "Fille") {
-        if (button) button.classList.add("gender_girl");
-        if (button2) button2.classList.add("gender_girl");
-    } else if (gender_choice === "Garçon") {
-        if (button) button.classList.add("gender_boy");
-        if (button2) button2.classList.add("gender_boy");
-    } else {
-        if (button) button.classList.add("no_gender");
-        if (button2) button2.classList.add("no_gender");
-    }
-
-    // Écouteur d'événement pour le bouton de participation
-    var btnParticipation = document.getElementById('btn_participation');
-    if (btnParticipation) {
-        btnParticipation.addEventListener('click', function() {
-            document.getElementById('participation').value = 'true';
-            document.getElementById('participationForm').submit();
-        });
-    }
-
-    // Mise à jour du range et de l'input pour le montant de la participation
-    const range = document.getElementById('participation_range');
-    const input = document.getElementById('price_input');
-    if (range && input) {
-        input.value = range.value;
-
-        window.updatePriceFromRange = function(value) {
-            input.value = value;
+            if (!isValidUrl(url)) {
+                event.preventDefault(); // Empêche l'ouverture du lien s'il est invalide
+                showCustomAlert("L'URL est actuellement indisponible. Merci de réessayer ultérieurement.");
+            }
         }
 
-        window.updateRangeFromInput = function(value) {
-            range.value = value;
+        // Fonction pour afficher une boîte de dialogue personnalisée
+        function showCustomAlert(message) {
+            const alertBox = document.createElement('div');
+            alertBox.classList.add('custom-alert');
+            alertBox.textContent = message;
+            document.body.appendChild(alertBox);
+
+            // Supprimer la boîte de dialogue après quelques secondes
+            setTimeout(function() {
+                alertBox.remove();
+            }, 3000);
         }
-    }
 
-});
+        // Fonction pour vérifier si l'URL est valide
+        function isValidUrl(url) {
+            // Expression régulière pour vérifier si l'URL est valide
+            var pattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
+            return pattern.test(url);
+        }
+
+        // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
+        var button = document.getElementById('my_button');
+        var button2 = document.getElementById('btn_participation');
+
+        var genderChoiceElement = document.getElementById('gender_choice');
+        var genderChoice = genderChoiceElement.dataset.gender;
+        
+        if (genderChoice === "Fille") {
+            if (button) button.classList.add("gender_girl");
+            if (button2) button2.classList.add("gender_girl");
+        } else if (genderChoice === "Garçon") {
+            if (button) button.classList.add("gender_boy");
+            if (button2) button2.classList.add("gender_boy");
+        } else {
+            if (button) button.classList.add("no_gender");
+            if (button2) button2.classList.add("no_gender");
+        }
+
+        // Écouteur d'événement pour le bouton de participation
+        var btnParticipation = document.getElementById('btn_participation');
+        if (btnParticipation) {
+            btnParticipation.addEventListener('click', function() {
+                document.getElementById('participation').value = 'true';
+                document.getElementById('participationForm').submit();
+            });
+        }
+
+        // Mise à jour du range et de l'input pour le montant de la participation
+        const range = document.getElementById('participation_range');
+        const input = document.getElementById('price_input');
+        if (range && input) {
+            input.value = range.value;
+
+            window.updatePriceFromRange = function(value) {
+                input.value = value;
+            }
+
+            window.updateRangeFromInput = function(value) {
+                range.value = value;
+            }
+        }
+
+    });
 
 
-document.getElementById("bouton").addEventListener("mouseover", function() {
-    document.getElementById("message").style.display = "block";
-});
+    document.getElementById("bouton").addEventListener("mouseover", function() {
+        document.getElementById("message").style.display = "block";
+    });
 
-document.getElementById("bouton").addEventListener("mouseout", function() {
-    document.getElementById("message").style.display = "none";
-});
+    document.getElementById("bouton").addEventListener("mouseout", function() {
+        document.getElementById("message").style.display = "none";
+    });
+
 
 </script>
 

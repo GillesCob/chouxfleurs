@@ -5,41 +5,56 @@
 {% endblock %}
 
 {% block content %}
+ <!-- Récupération du prono concernant le sexe afin de mettre en forme les boutons en conséquence -->
+ <div id="gender_choice" data-gender="{{ session['gender_choice'] }}"></div>
 
-{%for product in products%}
-<div class="my_container">
-    <div class="inert_card">
-        <h1>Modifier le produit</h1>
-        <form method="post">
-                <label for="text">Titre du produit</label>
-                <input type="text" class="form-control text-center" name="product_name" placeholder="{{product.name}}" >
 
-                <label for="text">Description</label>
-                <input type="text" class="form-control text-center" name="product_description" placeholder="{{product.description}}" >
+    <div class="my_container">
+        <div class="inert_card">
+            <h1>Modifier le produit</h1>
+            <form method="post">
+                    <label for="text">Titre du produit</label>
+                    <input type="text" class="form-control text-center" name="product_name" placeholder="{{product.name}}" >
 
-                <label for="text">Prix</label>
-                <input type="text" class="form-control text-center" name="product_price" placeholder="{{product.price}}" >
+                    <label for="text">Description</label>
+                    <input type="text" class="form-control text-center" name="product_description" placeholder="{{product.description}}" >
 
-                <label for="text">url du produit</label>
-                <input type="text" class="form-control text-center" name="product_url_source" placeholder="{{product.url_source}}" >
-            
-            <div class="text-center">
-                {%if gender_choice == "Fille"%}
-                    <button type="submit" class="my_btn validate-btn gender_girl">Modifier</button>
-                {%elif gender_choice == "Garçon"%}
-                    <button type="submit" class="my_btn validate-btn gender_boy">Modifier</button>
-                {%else%}
-                    <button type="submit" class="my_btn validate-btn no_gender">Modifier</button>
-                {%endif%}
-            </div>
+                    <label for="text">Prix</label>
+                    <input type="text" class="form-control text-center" name="product_price" placeholder="{{product.price}}" >
 
-        </form>
-        {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
+                    <label for="text">url du produit</label>
+                    <input type="text" class="form-control text-center" name="product_url_source" placeholder="{{product.url_source}}" >
+                
+                    <button type="submit" class="my_btn" id="my_button">Modifier</button>
+
+            </form>
+            {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+        </div>
     </div>
-</div>
-{%endfor%}
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Mise en forme boutons en fonction su sexe
+        // Récupération du prono
+        var genderChoiceElement = document.getElementById('gender_choice');
+        var genderChoice = genderChoiceElement.dataset.gender;
+
+        // Récupération de l'id du bouton
+        var button = document.getElementById('my_button');
+
+        // Définir la classe en fonction de la valeur de gender_choice
+        if (genderChoice === "Fille") {
+            button.classList.add("gender_girl");
+        } else if (genderChoice === "Garçon") {
+            button.classList.add("gender_boy");
+        } else {
+            button.classList.add("no_gender");
+        }
+    });
+</script>
 
 
 {% endblock %}

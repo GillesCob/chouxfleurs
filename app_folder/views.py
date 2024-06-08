@@ -227,140 +227,152 @@ def home_page():
 @views.route('/menu_1')
 @login_required
 def menu_1():
+    # Elements initiaux : 
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
-    
-    # Si le user est déjà dans un projet et que je n'ai rien dans la session (parce que je viens de me connecter), je récupère le premier projet dans lequel le user est afin d'ouvrir une session et ne pas avoir à choisir un projet à chaque fois que je me connecte.
-    #Si une session est déjà ouverte, je skip cette étape
+
+    # Pas de projet dans la session, je récupe le premier dans lequel le user est afin d'en créer une
     if 'selected_project' not in session:
-        user_in_project = Project.objects(users__contains=user_id)
+        user_in_project = Project.objects(users__contains=user_id) #user_id dans la liste users d'un projet ?
+        
         if user_in_project:
             first_project = user_in_project.first() 
-            first_project_id = first_project.id
             
-            # Ajouter les données du premier projet trouvé dans la session
-            session['selected_project'] = {
-                'id': str(first_project_id),
+            session['selected_project'] = { #Création de la session
+                'id': str(first_project.id),
                 'name': first_project.name
             }
     
-    try:
-        current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
-        current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
-    
-    
-        user_is_project_admin = Project.objects(admin=user_id).first()
+    try: #Si je n'ai pas de projet dans la session, erreur donc go to except
         
+        #Sinon...
+        
+        # Objectifs ici : 
+        # - Récupérer le projet dans la session
+        # - Récupérer le prono concernant le sexe puis envoyer cette data dans la session
+        # - Identifier si le user connecté est l'admin de ce projet
+        # - Récupérer les produits de ce projet
+        # - Organisation des produits en fonction du montant restant à payer
+        # - Routes différentes afin de permettre ou non l'ajout de produit
+        
+        # -----------------
         current_project_id = session['selected_project']['id']
-        current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
+        current_project = Project.objects(id=current_project_id).first()
         
-        #Je souhaite maintenant récupérer les produits présents dans la Listfield "product" de mon projet
+        # -----------------
+        gender_choice = get_gender_choice(current_project)
+        session['gender_choice'] = gender_choice
+        
+        # -----------------
+        user_id = current_user.id
+        admin_id = current_project.admin.id
+        user_is_admin = (user_id == admin_id)
+        session['admin_id'] = admin_id
+        session['user_is_admin'] = user_is_admin
+        
+        # -----------------
         products_for_current_project = current_project.product
-        products = []
         
-        for product_id in products_for_current_project:
-            product = Product.objects(id=product_id).first()
-            if product:
+        if products_for_current_project:
+            
+            products = []
+
+            for product_id in products_for_current_project:
+                product = Product.objects(id=product_id).first()
                 products.append({
                     'name': product.name,
                     'description': product.description,
                     'price': product.price,
-                    # 'image': product.image,
                     'url_source': product.url_source,
                     'already_paid':product.already_paid,
                     'id': product.id,
                     'left_to_pay': product.price-product.already_paid
                 })
         
-        # Trier les produits en fonction du montant restant à payer (left_to_pay)
-        products = sorted(products, key=lambda x: x['left_to_pay'], reverse=True)
-        
-        #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
-        gender_choice = get_gender_choice(current_project)
-         
-        if user_is_project_admin : #Si le user actuel est l'admin d'un projet
-            user_is_admin = True
-            return render_template('menu_1.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, products=products, gender_choice=gender_choice)
-
-        else: #Si le user actuel n'est pas l'admin d'un projet
-            user_is_admin = False
-            return render_template('menu_1.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, products=products, gender_choice=gender_choice)
-    
+            # -----------------
+            products = sorted(products, key=lambda x: x['left_to_pay'], reverse=True)
+            
+            # -----------------
+            if user_is_admin :
+                return render_template('menu_1.html', **elements_for_base, products=products)
+            else:
+                return render_template('menu_1.html', **elements_for_base, products=products)
+            
+        else:
+            return render_template('menu_1.html', user_is_admin=user_is_admin, **elements_for_base)
     
     except (KeyError, AttributeError):
         flash("Veuillez créer ou rejoindre un projet avant d'accéder à la liste de naissance", category='error')
-        return redirect(url_for('views.my_projects', user=current_user, **elements_for_base))
+        return redirect(url_for('views.my_projects', **elements_for_base))
     
 @views.route('/add_product', methods=['GET', 'POST'])
 @login_required
 def add_product():
+    #Prérequis grâce à la route menu_1
+        # J'ai déjà créé une session avec : 
+            # - l'id du projet actuellement sélectionné
+            # - le nom du projet actuellement sélectionné
+            # - le choix du sexe fait par le user actuellement connecté
+            # - L'info si le user actuel est l'admin du projet actuellement sélectionné
+            # - l'id de l'admin du projet
+
+    #A -----------------
     user_id = current_user.id
+    #B -----------------
     elements_for_base = elements_for_base_template(user_id)
-    current_project_id = session['selected_project']['id']
-    current_project = Project.objects(id=current_project_id).first()
     
-    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
-    gender_choice = get_gender_choice(current_project)
     
+    #Ajout d'un nouveau produit
     if request.method == 'POST':
-        user = user_id
-        project = current_project_id
-        
-        # url = request.form['url']
-        # photo = get_amazon_product_image(url)
-        
+       
+        current_project_id = session['selected_project']['id']
         name = request.form.get('product_name')
         description = request.form.get('product_description')
         price = request.form.get('product_price')
-        # photo = request.form.get('product_photo')
-        url_source = request.form.get('product_url_source')
         already_paid = 0
+        url_source = request.form.get('product_url_source')
         
-        new_product = Product(user=user, project=project, name=name, description=description, price=price, url_source=url_source, already_paid=already_paid)
+        # Création du nouveau produit avec envoi des infos précedemment collectées
+        new_product = Product(project=current_project_id, name=name, description=description, price=price, url_source=url_source, already_paid=already_paid)
         new_product.save()
         
+        # J'ajoute l'id du nouveau produit dans la liste des produits de mon objet Project
+        current_project = Project.objects(id=current_project_id).first()
         new_product_id = new_product.id
+        print(f"ID du nouveau produit : {new_product_id}, c'est un {type(new_product_id)}")
         
-        #J'ajoute l'id du nouveau produit dans la class Project
         current_project.product.append(new_product_id)
         current_project.save()
         
         flash(f'Produit créé avec succès !', category='success')
         
         return redirect(url_for('views.menu_1'))
-
                 
-    return render_template('add_product.html',  **elements_for_base, gender_choice=gender_choice)
+    return render_template('add_product.html',  **elements_for_base)
 
 @views.route('/update_product/<product_id>', methods=['GET', 'POST'])
 @login_required
 def update_product(product_id):
+    #Prérequis grâce à la route menu_1
+        # J'ai déjà créé une session avec : 
+            # - l'id du projet actuellement sélectionné
+            # - le nom du projet actuellement sélectionné
+            # - le choix du sexe fait par le user actuellement connecté
+            # - L'info si le user actuel est l'admin du projet actuellement sélectionné
+
+    #A -----------------
     user_id = current_user.id
+    #B -----------------
     elements_for_base = elements_for_base_template(user_id)
-    user_is_admin=True
     
     product = Product.objects(id=product_id).first()
-    
-    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
-    current_project_id = session['selected_project']['id']
-    current_project = Project.objects(id=current_project_id).first()
-    gender_choice = get_gender_choice(current_project)
-    
-    products = []
-    products.append({
-                'name': product.name,
-                'description': product.description,
-                'price': product.price,
-                # 'image': product.image,
-                'url_source': product.url_source,
-                'id': product.id
-            })
-    
+
     if request.method == 'POST':
         name = request.form.get('product_name')
         description = request.form.get('product_description')
         price = request.form.get('product_price')
-        # photo = request.form.get('product_photo')
         url_source = request.form.get('product_url_source')
         
         if name:
@@ -372,124 +384,92 @@ def update_product(product_id):
         if url_source:
             product.url_source = url_source
         
-        # Enregistrer les modifications
         product.save()
-        
         
         flash('Produit mis à jour avec succès !')
         return redirect(url_for('views.product_details', product_id=product_id))
     
-    return render_template('update_product.html', user=current_user, **elements_for_base, products=products, user_is_admin=user_is_admin, gender_choice=gender_choice)
+    return render_template('update_product.html', user=current_user, **elements_for_base, product=product)
   
-@views.route('/product/<product_id>', methods=['GET','POST'])
+@views.route('/product_details/<product_id>', methods=['GET','POST'])
 @login_required
 def product_details(product_id):
+    #Prérequis grâce à la route menu_1
+        # J'ai déjà créé une session avec : 
+            # - l'id du projet actuellement sélectionné
+            # - le nom du projet actuellement sélectionné
+            # - le choix du sexe fait par le user actuellement connecté
+            # - L'info si le user actuel est l'admin du projet actuellement sélectionné
+            # - l'id de l'admin du projet
+
+    #A -----------------
     user_id = current_user.id
+    #B -----------------
     elements_for_base = elements_for_base_template(user_id)
-    # Récupérer les détails du produit à partir de l'ID
+    
+        
+    # Je récupe l'objet Product concerné
     product = Product.objects(id=product_id).first()
     
+    #Je calcule le montant restant à payer
     left_to_pay = product.price-product.already_paid
     
+    #Reinitialisation de cette variable à chaque fois que je charge la page
     participation = False
-    
-    #Je vérifie si le user actuel est l'admin du projet
-    user_is_project_admin = Project.objects(admin=user_id).first()
-    if user_is_project_admin:
-        user_is_admin = True
-    else:
-        user_is_admin = False
-    
-    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
-    current_project_id = session['selected_project']['id']
-    current_project = Project.objects(id=current_project_id).first()
-    gender_choice = get_gender_choice(current_project)
     
     if product:
         if request.method=='POST':
             participation = request.form.get('participation')
-            return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, gender_choice=gender_choice, participation=participation, user_is_admin=user_is_admin)         
+            return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)         
         
-        return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, gender_choice=gender_choice, participation=participation, user_is_admin=user_is_admin)
+        return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
     else:
         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
         return render_template('menu_1.html', **elements_for_base), 404
 
-# @views.route('/product_participation/<product_id>')
-# @login_required
-# def product_participation(product_id):
-#     user_id = current_user.id
-#     elements_for_base = elements_for_base_template(user_id)
-    
-#     # Récupérer les détails du produit à partir de l'ID
-#     product = Product.objects(id=product_id).first()
-    
-#     #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
-#     current_project_id = session['selected_project']['id']
-#     current_project = Project.objects(id=current_project_id).first()
-#     gender_choice = get_gender_choice(current_project)
-    
-#     left_to_pay = product.price-product.already_paid
-
-#     if product:
-#         return render_template('product_participation.html', product=product, **elements_for_base, left_to_pay=left_to_pay, gender_choice=gender_choice)
-#     else:
-#         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
-#         return render_template('menu_1.html', **elements_for_base), 404
-
-@views.route('/confirm_participation/', methods=['GET','POST'])
-@login_required
-def confirm_participation():
-    user_id = current_user.id
-    elements_for_base = elements_for_base_template(user_id)
-    
-    current_project = session.get('selected_project')
-    current_project_id = current_project['id']
-    current_project_admin = Project.objects(id=current_project_id).first().admin
-    admin_id = current_project_admin.id
-    admin_rib = User.objects(id=admin_id).first().rib
-    
-    
-    
-    return render_template('confirm_participation.html', **elements_for_base, admin_rib=admin_rib)
-
-
 @views.route('/confirm_participation_loading/<product_id>', methods=['GET','POST'])
 @login_required
 def confirm_participation_loading(product_id):
+    #Prérequis grâce à la route menu_1
+    # J'ai déjà créé une session avec : 
+        # - l'id du projet actuellement sélectionné
+        # - le nom du projet actuellement sélectionné
+        # - le choix du sexe fait par le user actuellement connecté
+        # - L'info si le user actuel est l'admin du projet actuellement sélectionné
+        # - l'id de l'admin du projet
+
+    #A -----------------
     user_id = current_user.id
+    #B -----------------
     elements_for_base = elements_for_base_template(user_id)
     
-    current_project = session.get('selected_project')
-    project_id = current_project['id']
+    #Cette page sert à enregistrer la participation du user à un produit sur la page product_details
+    # J'ai la participation, j'ai l'id du produit, j'ai le projet, ... Je vais mettre tout ça dans la bdd
     
-    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
-    current_project_id = session['selected_project']['id']
-    current_project = Project.objects(id=current_project_id).first()
-    gender_choice = get_gender_choice(current_project)
-    
-    
-    # Récupérer les détails du produit à partir de l'ID
-    product = Product.objects(id=product_id).first()
-    
-    user = User.objects(id=user_id).first()
-    
+    #Le passage sur cette page est temporaire et une réorientation automatique est alors faite sur la page confirm_participation
+    #Cela évite lors du rechargement de la page de renvoyer un formulaire déjà envoyé
+
     if request.method == 'POST':
+        # Je récupe toutes les datas nécessaires à la création de la participation
+        user = User.objects(id=user_id).first()
+        project = session.get('selected_project', {}).get('id')
         participation = request.form.get('participation_range')
         
-        new_participation = Participation(user=user_id, project=project_id, product=product_id, amount=participation, participation_date=datetime.now())
+        new_participation = Participation(user=user_id, project=project, product=product_id, amount=participation, participation_date=datetime.now())
         new_participation.save()
+        
+        #J'ajoute l'id de la participation dans mon objet Product
+        product = Product.objects(id=product_id).first()
         
         product.already_paid += int(participation)
         product.participation.append(new_participation.id)
         product.save()
         
+        #J'ajoute l'id de la participation dans mon objet User
         user.participation.append(new_participation.id)
         user.save()
-        
-        participation_amount = new_participation.amount
-        
-        return render_template('confirm_participation_loading.html', product=product, **elements_for_base, participation_amount=participation_amount, gender_choice=gender_choice)
+                
+        return render_template('confirm_participation_loading.html', product=product, **elements_for_base, participation=participation,)
     
     if product:
         return render_template('product_participation.html', product=product, **elements_for_base)
@@ -498,34 +478,69 @@ def confirm_participation_loading(product_id):
         return render_template('menu_1.html', **elements_for_base), 404
 
 
+@views.route('/confirm_participation/<participation>', methods=['GET','POST'])
+@login_required
+def confirm_participation(participation):
+    #Prérequis grâce à la route menu_1
+    # J'ai déjà créé une session avec : 
+        # - l'id du projet actuellement sélectionné
+        # - le nom du projet actuellement sélectionné
+        # - le choix du sexe fait par le user actuellement connecté
+        # - L'info si le user actuel est l'admin du projet actuellement sélectionné
+        # - l'id de l'admin du projet
+
+    #A -----------------
+    user_id = current_user.id
+    #B -----------------
+    elements_for_base = elements_for_base_template(user_id)
+    
+    #Récupération du RIB de l'admin du projet
+    admin_id = session['admin_id']
+    admin_rib = User.objects(id=admin_id).first().rib
+
+    return render_template('confirm_participation.html', **elements_for_base, admin_rib=admin_rib, participation = participation)
+
+
 @views.route('/delete_product/<product_id>', methods=['GET','POST'])
 @login_required
 def delete_product(product_id):
-    user_id = current_user.id
-    elements_for_base = elements_for_base_template(user_id)
-    user_is_admin = True
-        
-    # Conversion de product_id en ObjectId
-    product_id = ObjectId(product_id)
-    
+    #Prérequis grâce à la route menu_1
+    # J'ai déjà créé une session avec : 
+        # - l'id du projet actuellement sélectionné
+        # - le nom du projet actuellement sélectionné
+        # - le choix du sexe fait par le user actuellement connecté
+        # - L'info si le user actuel est l'admin du projet actuellement sélectionné
+        # - l'id de l'admin du projet
+
     # Je récupère l'objet Product concerné
     product = Product.objects(id=product_id).first()
+    # Je récupère la liste des participations pour ce produit
     participation_list = product.participation
-    
+
+    #Je supprime tous les objets Participation dont l'id est dans la liste participation_list de mon objet Product
     for participation_id in participation_list:
         Participation.objects(id=participation_id).delete()
 
+    # Suppression du produit dans le projet
+    project_id = session['selected_project']['id']
+    project = Project.objects(id=project_id).first()
     
-    # Suppression du produit dans les projets
-    project_with_product = Project.objects(product=product_id).first()
-    if project_with_product:
-        project_with_product.update(pull__product=product_id)
-        
-        product.delete()
-        flash('Produit supprimé avec succès !', category='success') 
-        return redirect(url_for('views.menu_1'))
+    #Je récupère la liste des produits du projet
+    products_in_project = project.product
+    
+    for product_in_project in products_in_project:
+        #Je transforme products_in_project en str pour pouvoir comparer
+        product_in_project_str = str(product_in_project)
 
-    return render_template('menu_1.html', user_is_admin=user_is_admin, **elements_for_base)
+        if product_in_project_str == product_id:
+            project.update(pull__product=product_in_project)
+            project.save()
+                
+    product.delete()
+    
+    flash('Produit supprimé avec succès !', category='success')
+
+    return redirect(url_for('views.menu_1'))
 
 #ROUTES "PRONOS" -------------------------------------------------------------------------------------------------------------
 @views.route('/menu_2', methods=['GET', 'POST'])

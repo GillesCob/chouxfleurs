@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Change username
+    Add product
 {% endblock %}
 
 
 {% block content %}
+ <!-- Récupération du prono concernant le sexe afin de mettre en forme les boutons en conséquence -->
+ <div id="gender_choice" data-gender="{{ session['gender_choice'] }}"></div>
+
     <div class="back-button-container">
         <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
         <a href="{{ url_for('views.menu_1') }}">
@@ -45,6 +48,7 @@
 
 
 <script>
+
     const range = document.getElementById('product_price');
     const input = document.getElementById('price_input');
 
@@ -59,23 +63,22 @@
         range.value = value;
     }
 
-        // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
-        // Voir à terme comment mettre ce code dans le fichier script.js afin d'éviter de le dupliquer partout
-            // Récupérer le bouton par son ID
-            var button = document.getElementById('my_button');
+// Mise en forme boutons en fonction su sexe
+    // Récupération du prono
+    var genderChoiceElement = document.getElementById('gender_choice');
+    var genderChoice = genderChoiceElement.dataset.gender;
 
-        // Récupérer la valeur de gender_choice
-        var gender_choice = "{{gender_choice}}" ;
+    // Récupération de l'id du bouton
+    var button = document.getElementById('my_button');
 
-
-        // Définir la classe en fonction de la valeur de gender_choice
-        if (gender_choice === "Fille") {
-            button.classList.add("gender_girl");
-        } else if (gender_choice === "Garçon") {
-            button.classList.add("gender_boy");
-        } else {
-            button.classList.add("no_gender");
-}
+    // Définir la classe en fonction de la valeur de gender_choice
+    if (genderChoice === "Fille") {
+        button.classList.add("gender_girl");
+    } else if (genderChoice === "Garçon") {
+        button.classList.add("gender_boy");
+    } else {
+        button.classList.add("no_gender");
+    }
 
 </script>
 

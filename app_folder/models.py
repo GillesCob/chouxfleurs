@@ -39,13 +39,11 @@ class Pronostic(Document):
 class Product(Document):
     meta = {'collection': 'Products_collection'}
     
-    user = ReferenceField('User', reverse_delete_rule=CASCADE)
     project = ReferenceField('Project', reverse_delete_rule=CASCADE)
     name = StringField(max_length=150)
     description = StringField(max_length=150)
     price = IntField()
     already_paid = IntField()
-    image = StringField(max_length=300)
     url_source = StringField(max_length=150)
     participation = ListField()
     

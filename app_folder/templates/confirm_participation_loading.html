@@ -17,7 +17,7 @@
 
 
 <div class="my_container">
-    <p class="text-center">Merci pour votre participation de {{participation_amount}}€</p>
+    <p class="text-center">Merci pour votre participation de {{participation}}€</p>
     <p id="redirectMessage">Vous allez être redirigé dans quelques instants...</p>
 </div>
 <div id="loader" class="loader"></div>
@@ -59,7 +59,7 @@
 
             if (seconds <= 0) {
                 clearInterval(timer); // Arrête le timer une fois le délai écoulé
-                window.location.href = "{{ url_for('views.confirm_participation') }}"; // Redirige vers la nouvelle page
+                window.location.href = "{{ url_for('views.confirm_participation', participation=participation) }}"; // Redirige vers la nouvelle page
             }
         }, 1000); // Mise à jour toutes les 1 seconde
     }
