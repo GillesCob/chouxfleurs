@@ -14,7 +14,6 @@
 
         <h1>Mon projet {{project_name}}</h1>
         
-        
         {% if user_participations %}
         <h2>Participations à ma liste de naissance</h2>
             <table>
@@ -33,7 +32,7 @@
                             <tr>
                                 <td>{{ email }}</td>
                                 <td>{{ participation[1] }}</td>
-                                <td>{{ participation[2] }}€</td>
+                                <td>{{ participation[2] }}</td>
                                 <td>{{ participation[3] }}</td>
                             </tr>
                         {% endfor %}
@@ -120,7 +119,7 @@
                             <tr>
                                 <td>{{ project_name }}</td>
                                 <td>{{ participation[0] }}</td>
-                                <td>{{ participation[1] }}€</td>
+                                <td>{{ participation[1] }}</td>
                                 <td>{{ participation[2] }}</td>
                             </tr>
                         {% endfor %}

@@ -41,72 +41,68 @@
 
     {% if session['user_is_admin'] %}
         <div class="card_button gap-2">
-            {% if product.price != left_to_pay %}
-            <button type="submit" class="btn btn-success" id="bouton" disabled>Modifier</button>
-            <!-- <div id="message" style="display: none;">Message à afficher lorsque survolé</div> -->
-
-            <button type="submit" class="btn btn-danger" disabled>Supprimer</button>
-
-            {%else%}
             <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
             
             <form action="{{ url_for('views.delete_product', product_id=product.id) }}" method="post">
                 <input type="hidden" name="product_id" value="product.id">
                 <button type="submit" class="btn btn-danger">Supprimer</button>
             </form>
-            {% endif %}
         </div>
-    {% endif %}
 
+    {%else%}
+        {% if participation == false %}
+        <!-- Participation financiere -->
+        <form id="participationForm" method="post">
+            <input type="hidden" id="participation" name="participation" value="true">
+            <button type="submit" class="my_btn" id="btn_participation">Participer (€)</button>
+        </form>
+        <!-- Don -->
+        <form id="donationForm" method="post">
+            <input type="hidden" id="donation" name="donation" value="true">
+            <button type="submit" class="my_btn" id="btn_donation">Don</button>
+        </form>
+        <!-- Prêt -->
+        <form id="lendingForm" method="post">
+            <button type="submit" class="my_btn" id="btn_lending" name="lending" value="true">Prêt</button>
+        </form>
 
-    {% if participation == false %}
-    <!-- Participation financiere -->
-    <form id="participationForm" method="post">
-        <input type="hidden" id="participation" name="participation" value="true">
-        <button type="submit" class="my_btn" id="btn_participation">Participer (€)</button>
-    </form>
-    <!-- Don -->
-    <form id="donationForm" method="post">
-        <input type="hidden" id="donation" name="donation" value="true">
-        <button type="submit" class="my_btn" id="btn_donation">Don</button>
-    </form>
-    <!-- Prêt -->
-    <form id="lendingForm" method="post">
-        <button type="submit" class="my_btn" id="btn_lending" name="lending" value="true">Prêt</button>
-    </form>
+        {% elif participation == "payment" %}
+        
+            <p>La confirmation de votre participation est à titre indicatif, nous nous chargerons d'acheter les produits une fois ceux-ci financés.</p>
 
-    {% elif participation == "payment" %}
-    
-        <p>La confirmation de votre participation est à titre indicatif, nous nous chargerons d'acheter les produits une fois ceux-ci financés.</p>
+            <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
+                <input type="range" class="form-range" id="participation_range" name="participation_range" min="1" max="{{left_to_pay}}" step="1" value="0" oninput="updatePriceFromRange(this.value)">
+                <input type="number" id="price_input" min="1" max="1000" step="1" value="1" class="text-center" oninput="updateRangeFromInput(this.value)">
+                <span>€</span>
 
+                <div>
+                    <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="€">Participer</button>
+                </div>
+            </form>
+
+        {% elif participation == "donation" %}
+        Souhaitez-vous vraiment faire un don ?
         <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
-            <input type="range" class="form-range" id="participation_range" name="participation_range" min="1" max="{{left_to_pay}}" step="1" value="0" oninput="updatePriceFromRange(this.value)">
-            <input type="number" id="price_input" min="1" max="1000" step="1" value="1" class="text-center" oninput="updateRangeFromInput(this.value)">
-            <span>€</span>
-
             <div>
-                <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="€">Participer</button>
+                <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="donation">Donner ce produit</button>
             </div>
         </form>
 
-    {% elif participation == "donation" %}
-    Souhaitez-vous vraiment faire un don ?
-    <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
-        <div>
-            <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="donation">Donner ce produit</button>
-        </div>
-    </form>
+        {% elif participation == "lending" %}
+        Souhaitez-vous vraiment nous prêter ce produit ?
+        <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
+            <div>
+                <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="lending">Prêter ce produit</button>
+            </div>
+        </form>
 
-    {% elif participation == "lending" %}
-    Souhaitez-vous vraiment nous prêter ce produit ?
-    <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
-        <div>
-            <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="lending">Prêter ce produit</button>
-        </div>
-    </form>
+        {% elif participation == "confirmed" %}
+        {% endif %}
 
-    {% elif participation == "confirmed" %}
     {% endif %}
+
+
+    
 
     
 

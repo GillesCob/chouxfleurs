@@ -117,7 +117,6 @@ def user_participations_side_project_func():
             participation_id = ObjectId(participation) #Je récupère l'id de la participation
             participation_obj = Participation.objects(id=participation_id).first() #Je récupère l'objet Participation
             #Je récupère l'id du produit pour lequel la participation a été faite
-            #ATTENTION : potentiel soucis ici
             product_id = participation_obj.product.id
             
             #Je récupère l'id du projet pour lequel la participation a été faite
@@ -125,11 +124,16 @@ def user_participations_side_project_func():
             
             project_name = Project.objects(id=project_id).first().name #Je récupère le nom du projet
             
-
             product_name = Product.objects(id=product_id).first().name #Je récupère le nom du produit
             
-
-            participation_amount = participation_obj.amount #Je récupère le montant de la participation
+            
+            if participation_obj.type == "€":
+                participation_amount = participation_obj.amount #Je récupère le montant de la participation
+                participation_amount = f"{participation_amount}€"
+            elif participation_obj.type  == "donation":
+                participation_amount = "Don"
+            else:
+                participation_amount = "Prêt"
             participation_date = participation_obj.participation_date #Je récupère la date de la participation
             participation_date = participation_date.strftime('%d-%m-%Y')
             
@@ -150,7 +154,6 @@ def my_project_participations():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
     admin_project = Project.objects(admin=user_id).first()
-    user_email = User.objects(id=user_id).first().email
     
     user_participations = {}
     
@@ -162,7 +165,9 @@ def my_project_participations():
     
     
     for project_product in project_products: #Pour chaque produit de ce projet
+        print(f"Produit : {project_products}")
         product_id = ObjectId(project_product) #Je récupère son id
+        print(f"ID du produit : {product_id}, c'est un {type(product_id)}")
         #J'ai l'id de mon produit, je vais aller chercher les id des participations pour ce produit
         product_participations = Participation.objects(product=product_id)
         
@@ -170,11 +175,17 @@ def my_project_participations():
             user = product_participation.user
             user_id = ObjectId(user.id)
             
-            
             product_name = Product.objects(id=product_id).first().name
             participant_id = product_participation.user.id
             participant_mail = User.objects(id=participant_id).first().email
-            amount = product_participation.amount
+            
+            if product_participation.type == "€":
+                amount = product_participation.amount
+                amount = f"{amount}€"
+            elif product_participation.type == "donation":
+                amount = "Don"
+            else:
+                amount = "Prêt"
             date = product_participation.participation_date
             date = date.strftime('%d-%m-%Y')
 
@@ -184,10 +195,8 @@ def my_project_participations():
             
             user_participations[participant_mail].append((participant_mail, product_name, amount, date))
             
-        return user_participations
-    
-    else:
-        user_participations = None
+    return user_participations
+
 
 #Fonction afin de récupérer le choix du sexe fait par l'utilisateur afin de personnaliser les boutons des interfaces
 def get_gender_choice(current_project):
@@ -833,7 +842,6 @@ def my_projects():
         if request.method == 'POST':
             modify_project = request.form.get('modify_project_open')
                 
-
         return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_rib=admin_rib, modify_project=modify_project)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
@@ -1022,19 +1030,28 @@ def delete_project():
     user_id = current_user.id #J'ai l'id de ce user
     elements_for_base = elements_for_base_template(user_id)
 
-    #A faire :
-    project = Project.objects(admin=user_id).first() #J'ai l'objet project que je souhaite supprimer pour lequel le user actuel est l'admin
-    products_in_project = project.product
+    #Récupération de toutes les participations pour le mrojet en cours
+    project = Project.objects(admin=user_id).first() #Récup du projet
+    products_in_project = project.product #Récup de la liste des produits du projet
     products_participations = []
     
-    for product in products_in_project:
-        participations = product.participation
+    for product_id in products_in_project:
+        product = Product.objects(id=(product_id)).first() #J'ai l'objet produit
+        
+        participations = product.participation #Je récupère la liste des participations pour ce produit
+        
         for participation in participations:
-            products_participations.append(participation)
+            participation_id = str(participation)
+            products_participations.append(participation_id) #J'ajoute toutes les participations dans une liste
             
-            for user in project.users:
+            for user in project.users: #Pour chaque user dans le projet que je souhaite supprimer
+                user_obj = User.objects(id=user).first()
+                user_participations = user_obj.participation #Je récupère la liste des participations pour ce user
+                for user_participation in user_participations:
+                    if user_participation == participation: #Si la participation du user est dans la liste des participations du projet
+                        user_participations.remove(user_participation)
+                        user_obj.save()
                 
-    
     project.delete() #Je supprime le projet de la collection des projets
     
     session.clear()
