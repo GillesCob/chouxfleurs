@@ -107,7 +107,6 @@ def project_name_in_session():
 
 #Fonction pour récupérer SA participation aux projets autres que le siens
 def user_participations_side_project_func():
-    
     user_participations_side_project = {}
     
     #J'ai dans ma class user la liste des participations
@@ -118,13 +117,18 @@ def user_participations_side_project_func():
             participation_id = ObjectId(participation) #Je récupère l'id de la participation
             participation_obj = Participation.objects(id=participation_id).first() #Je récupère l'objet Participation
             #Je récupère l'id du produit pour lequel la participation a été faite
-            
+            #ATTENTION : potentiel soucis ici
             product_id = participation_obj.product.id
+            
             #Je récupère l'id du projet pour lequel la participation a été faite
             project_id = participation_obj.project.id
             
             project_name = Project.objects(id=project_id).first().name #Je récupère le nom du projet
+            
+
             product_name = Product.objects(id=product_id).first().name #Je récupère le nom du produit
+            
+
             participation_amount = participation_obj.amount #Je récupère le montant de la participation
             participation_date = participation_obj.participation_date #Je récupère la date de la participation
             participation_date = participation_date.strftime('%d-%m-%Y')
@@ -419,8 +423,15 @@ def product_details(product_id):
     
     if product:
         if request.method=='POST':
-            participation = request.form.get('participation')
-            return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)         
+            if 'participation' in request.form:
+                participation = "payment"
+                return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+            elif 'donation' in request.form:
+                participation = "donation"
+                return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+            else:
+                participation = "lending"
+                return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
         
         return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
     else:
@@ -453,16 +464,34 @@ def confirm_participation_loading(product_id):
         # Je récupe toutes les datas nécessaires à la création de la participation
         user = User.objects(id=user_id).first()
         project = session.get('selected_project', {}).get('id')
-        participation = request.form.get('participation_range')
         
-        new_participation = Participation(user=user_id, project=project, product=product_id, amount=participation, participation_date=datetime.now())
+        type_of_participation = request.form.get('submit_btn')
+        if type_of_participation == "€":
+            type = "€"
+            participation = request.form.get('participation_range')
+        elif type_of_participation == "donation":
+            type = "donation"
+            participation = 0
+        else:
+            type = "lending"
+            participation = 0
+
+        
+        new_participation = Participation(user=user_id, type=type, project=project, product=product_id, amount=participation, participation_date=datetime.now())
         new_participation.save()
         
         #J'ajoute l'id de la participation dans mon objet Product
         product = Product.objects(id=product_id).first()
         
-        product.already_paid += int(participation)
-        product.participation.append(new_participation.id)
+        if type == "€":
+            product.already_paid += int(participation)
+            product.participation.append(new_participation.id)
+        elif type == "donation" or type == "lending":
+            previous_participation = product.already_paid
+            value_donation = product.price - previous_participation
+            product.already_paid += value_donation
+            product.participation.append(new_participation.id)
+            
         product.save()
         
         #J'ajoute l'id de la participation dans mon objet User
@@ -568,7 +597,6 @@ def menu_2():
         current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
         current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
         pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
-        
         if pronostics_for_current_project : #J'ai au moins 1 pronostic pour le projet sélectionné
 
             if current_user.pronostic : #Si le user actuel a déjà un pronostic, peut-importe sur quel projet
@@ -784,7 +812,7 @@ def my_projects():
     projects_dict_special = elements_for_base['projects_dict'].copy()
     
     user_email = User.objects(id=user_id).first().email
-    
+
     user_participations_side_project = user_participations_side_project_func()
     
     modify_project = False
@@ -994,8 +1022,18 @@ def delete_project():
     user_id = current_user.id #J'ai l'id de ce user
     elements_for_base = elements_for_base_template(user_id)
 
-    
+    #A faire :
     project = Project.objects(admin=user_id).first() #J'ai l'objet project que je souhaite supprimer pour lequel le user actuel est l'admin
+    products_in_project = project.product
+    products_participations = []
+    
+    for product in products_in_project:
+        participations = product.participation
+        for participation in participations:
+            products_participations.append(participation)
+            
+            for user in project.users:
+                
     
     project.delete() #Je supprime le projet de la collection des projets
     

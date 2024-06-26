@@ -51,6 +51,7 @@ class Participation(Document):
     meta = {'collection': 'Participation_collection'}
 
     user = ReferenceField('User')
+    type = StringField(max_length=150)
     project = ReferenceField('Project', reverse_delete_rule=CASCADE)
     product = ReferenceField('Product')
     amount = IntField()
