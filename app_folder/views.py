@@ -73,7 +73,7 @@ def elements_for_base_template(user_id):
     count_projects = count_user_in_project(user_id)
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
-    
+        
     return {
         'count_projects' : count_projects,
         'projects_dict' : projects_dict,
@@ -92,10 +92,15 @@ def create_projects_dict(user_id):
     user_projects = Project.objects(users=user_id)
     
     for project in user_projects:
+        project_id =  str(project.id)
+        
         project_admin = project.admin
         project_admin_id = project_admin.id
         project_admin_rib = User.objects(id=project_admin_id).first().rib
-        projects_dict[project.name] = project_admin_rib
+        projects_dict[project.name] = {
+            "project_id_key": project_id,
+            "admin_rib_key": project_admin_rib
+        }
 
     return projects_dict
 
@@ -226,7 +231,6 @@ def get_gender_choice(current_project):
 @views.route('/')
 @views.route('/home_page',methods=['GET'])
 def home_page():
-    
     if current_user.is_authenticated:
         user_id = current_user.id
         elements_for_base = elements_for_base_template(user_id)
@@ -515,7 +519,6 @@ def confirm_participation_loading(product_id):
         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
         return render_template('menu_1.html', **elements_for_base), 404
 
-
 @views.route('/confirm_participation/<participation>', methods=['GET','POST'])
 @login_required
 def confirm_participation(participation):
@@ -537,7 +540,6 @@ def confirm_participation(participation):
     admin_rib = User.objects(id=admin_id).first().rib
 
     return render_template('confirm_participation.html', **elements_for_base, admin_rib=admin_rib, participation = participation)
-
 
 @views.route('/delete_product/<product_id>', methods=['GET','POST'])
 @login_required
@@ -958,16 +960,16 @@ def join_project():
 def select_project():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
-
+    
     
     projects = Project.objects(users__contains=current_user.id)
     
     projects_dict = {}  
     for project in projects:
         projects_dict[project.name] = str(project.id)
-        
         if request.method == 'POST':
             project_id = request.form.get('project_id')
+            
             project_name = Project.objects(id=project_id).first().name
             session['selected_project'] = {'id': project_id, 'name': project_name}
             flash(f'Vous êtes maintenant connecté à "{project_name}" !')

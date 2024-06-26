@@ -80,10 +80,10 @@
     
     {%if projects_dict_special %}
     <h1>Les projets dont je fais partie</h1>
-        {% for project_name, admin_rib in projects_dict_special.items() %}
-            {% if admin_rib %}
+        {% for project_name, project_details in projects_dict_special.items() %}
+            {% if project_details.admin_rib_key %}
                 <div class="my_container">
-                    <div class="product-card" id="product_card" data-rib="{{ admin_rib }}" onclick="copyRIBToClipboard(event)">
+                    <div class="product-card" id="product_card" data-rib="{{ project_details.admin_rib_key }}" onclick="copyRIBToClipboard(event)">
                         <div class="product-title">{{ project_name }}</div>
                         <div class="product-description">Cliquez pour obtenir le RIB</div>
                     </div>

@@ -32,9 +32,9 @@
                         {{project_name_in_session}}</a>
                         <ul class="dropdown-menu">
                             <li class="nav-item">
-                                {% for project_name, project_id in projects_dict.items() %}
+                                {% for project_name, project_details in projects_dict.items() %}
                                     <form action="select_project" method="post">
-                                        <input type="hidden" name="project_id" value="{{ project_id }}">
+                                        <input type="hidden" name="project_id" value="{{project_details.project_id_key}}">
                                         <button type="submit" class="nav-link">{{ project_name }}</button>
                                     </form>
                                 {% endfor %}
@@ -48,7 +48,7 @@
 
                     <!-- J'affiche juste le nom du seul projet dont le user fait partie -->
                     {%else%} 
-                        {% for project_name, project_id in projects_dict.items() %}
+                        {% for project_name, project_details in projects_dict.items() %}
                             <a class="navbar-brand" href="{{url_for('views.home_page')}}">{{project_name}}</a>
                         {% endfor %}
 
