@@ -19,7 +19,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Email</th>
+                        <th>Utilisateur</th>
                         <th>Produit</th>
                         <th>Participation</th>
                         <th>Date</th>
@@ -27,10 +27,10 @@
                 </thead>
 
                 <tbody>
-                    {% for email, participations in user_participations.items() %}
+                    {% for username, participations in user_participations.items() %}
                         {% for participation in participations %}
                             <tr>
-                                <td>{{ email }}</td>
+                                <td>{{ username }}</td>
                                 <td>{{ participation[1] }}</td>
                                 <td>{{ participation[2] }}</td>
                                 <td>{{ participation[3] }}</td>

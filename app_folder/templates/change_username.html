@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Change username
+{% endblock %}
+
+
+{% block content %}
+    <div class="my_container">
+        <div class="inert_card">
+            <h1>Changer de nom d'utilisateur</h1>
+            <form method="post">
+                <label for="username">Nom</label>
+                <input type="username" class="form-control text-center" name="new_username" placeholder="{{user_username}}" required>                
+                <button type="submit" class="my_btn">Changer</button>
+            </form>
+            {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

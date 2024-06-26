@@ -40,6 +40,16 @@
     </a>
 
     {% if session['user_is_admin'] %}
+        {% if left_to_pay != product.price %}
+        <div class="card_button gap-2">
+            <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
+            
+            <form action="{{ url_for('views.delete_product', product_id=product.id) }}" method="post">
+                <input type="hidden" name="product_id" value="product.id">
+                <button type="submit" class="btn btn-danger" disabled>Supprimer</button>
+            </form>
+        </div>
+        {% else %}
         <div class="card_button gap-2">
             <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
             
@@ -49,22 +59,32 @@
             </form>
         </div>
 
+        {% endif %}
+
     {%else%}
         {% if participation == false %}
-        <!-- Participation financiere -->
-        <form id="participationForm" method="post">
-            <input type="hidden" id="participation" name="participation" value="true">
-            <button type="submit" class="my_btn" id="btn_participation">Participer (€)</button>
-        </form>
-        <!-- Don -->
-        <form id="donationForm" method="post">
-            <input type="hidden" id="donation" name="donation" value="true">
-            <button type="submit" class="my_btn" id="btn_donation">Don</button>
-        </form>
-        <!-- Prêt -->
-        <form id="lendingForm" method="post">
-            <button type="submit" class="my_btn" id="btn_lending" name="lending" value="true">Prêt</button>
-        </form>
+            {% if left_to_pay != 0 %}
+                <!-- Participation financiere -->
+                <form id="participationForm" method="post">
+                    <input type="hidden" id="participation" name="participation" value="true">
+                    <button type="submit" class="my_btn" id="btn_participation">Participer (€)</button>
+                </form>
+            {% else %}
+                <p>Le produit est déjà financé !
+                </br>
+                Cependant si vous le possédez et souhaitez nous le prêter/donner, il n'est peut-être pas encore trop tard !</p>
+            {% endif %}
+
+            <!-- Don -->
+            <form id="donationForm" method="post">
+                <input type="hidden" id="donation" name="donation" value="true">
+                <button type="submit" class="my_btn" id="btn_donation">Don</button>
+            </form>
+            <!-- Prêt -->
+            <form id="lendingForm" method="post">
+                <button type="submit" class="my_btn" id="btn_lending" name="lending" value="true">Prêt</button>
+            </form>
+            
 
         {% elif participation == "payment" %}
         
@@ -154,6 +174,8 @@
         // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
         var button = document.getElementById('my_button');
         var button2 = document.getElementById('btn_participation');
+        var button3 = document.getElementById('btn_donation');
+        var button4 = document.getElementById('btn_lending');
 
         var genderChoiceElement = document.getElementById('gender_choice');
         var genderChoice = genderChoiceElement.dataset.gender;
@@ -161,12 +183,19 @@
         if (genderChoice === "Fille") {
             if (button) button.classList.add("gender_girl");
             if (button2) button2.classList.add("gender_girl");
+            if (button3) button3.classList.add("gender_girl");
+            if (button4) button4.classList.add("gender_girl");
         } else if (genderChoice === "Garçon") {
             if (button) button.classList.add("gender_boy");
             if (button2) button2.classList.add("gender_boy");
+            if (button3) button3.classList.add("gender_boy");
+            if (button4) button4.classList.add("gender_boy");
+
         } else {
             if (button) button.classList.add("no_gender");
             if (button2) button2.classList.add("no_gender");
+            if (button3) button3.classList.add("no_gender");
+            if (button4) button4.classList.add("no_gender");
         }
 
         // Écouteur d'événement pour le bouton de participation

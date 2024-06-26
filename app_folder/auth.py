@@ -58,6 +58,7 @@ def register():
     count_projects = 0
     
     if request.method == 'POST':
+        username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
@@ -75,7 +76,7 @@ def register():
         
         if password == confirm_password:
             hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-            new_user = User(email=email, password=hashed_password)              
+            new_user = User(username=username, email=email, password=hashed_password)              
                     
             new_user.save()
             

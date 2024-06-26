@@ -182,7 +182,7 @@ def my_project_participations():
             
             product_name = Product.objects(id=product_id).first().name
             participant_id = product_participation.user.id
-            participant_mail = User.objects(id=participant_id).first().email
+            participant_username = User.objects(id=participant_id).first().username
             
             if product_participation.type == "€":
                 amount = product_participation.amount
@@ -195,10 +195,10 @@ def my_project_participations():
             date = date.strftime('%d-%m-%Y')
 
             # Ajoutez la participation au dictionnaire user_participations
-            if participant_mail not in user_participations:
-                user_participations[participant_mail] = []  # Créez une liste vide pour chaque nouvel utilisateur
+            if participant_username not in user_participations:
+                user_participations[participant_username] = []  # Créez une liste vide pour chaque nouvel utilisateur
             
-            user_participations[participant_mail].append((participant_mail, product_name, amount, date))
+            user_participations[participant_username].append((participant_username, product_name, amount, date))
             
     return user_participations
 
@@ -513,8 +513,9 @@ def confirm_participation_loading(product_id):
         #J'ajoute l'id de la participation dans mon objet User
         user.participation.append(new_participation.id)
         user.save()
+
                 
-        return render_template('confirm_participation_loading.html', product=product, **elements_for_base, participation=participation,)
+        return render_template('confirm_participation_loading.html', product=product, **elements_for_base, participation=participation)
     
     if product:
         return render_template('product_participation.html', product=product, **elements_for_base)
@@ -541,8 +542,11 @@ def confirm_participation(participation):
     #Récupération du RIB de l'admin du projet
     admin_id = session['admin_id']
     admin_rib = User.objects(id=admin_id).first().rib
+    
+    #Récupération du nom du user
+    username = current_user.username
 
-    return render_template('confirm_participation.html', **elements_for_base, admin_rib=admin_rib, participation = participation)
+    return render_template('confirm_participation.html', **elements_for_base, admin_rib=admin_rib, participation=participation, username=username)
 
 @views.route('/delete_product/<product_id>', methods=['GET','POST'])
 @login_required
@@ -1005,6 +1009,26 @@ def rename_project():
         
     return render_template('rename_project.html', user=current_user, actual_name=actual_name, **elements_for_base)
 
+@views.route('/change_username', methods=['GET', 'POST'])
+@login_required
+def change_username():
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+
+    user_username = current_user.username
+    user = User.objects(id=user_id).first()
+
+    if request.method == 'POST':
+        new_username = request.form.get('new_username')
+
+        user.username = new_username
+        user.save()
+        
+        flash(f"Nom d'utilisateur modifié avec succès !", category='success')
+        return redirect(url_for('views.my_profil'))
+        
+    return render_template('change_username.html', user=current_user, user_username=user_username, **elements_for_base)
+
 @views.route('/change_email', methods=['GET', 'POST'])
 @login_required
 def change_email():
@@ -1014,17 +1038,14 @@ def change_email():
     user_email = current_user.email
     user = User.objects(id=user_id).first()
 
-    
-    
     if request.method == 'POST':
         new_email = request.form.get('new_email')
 
         user.email = new_email
         user.save()
         
-                
         flash(f"Adresse mail modifiée avec succès !", category='success')
-        return redirect(url_for('views.my_account', **elements_for_base, user_email=user_email))
+        return redirect(url_for('views.my_profil'))
         
     return render_template('change_email.html', user=current_user, user_email=user_email, **elements_for_base)
 

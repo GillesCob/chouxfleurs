@@ -6,6 +6,7 @@ from mongoengine import Document, StringField, ReferenceField, CASCADE, ListFiel
 class User(Document, UserMixin):
     meta = {'collection': 'users_collection'}
 
+    username = StringField(max_length=150, required=True)
     email = EmailField(max_length=150, unique=True, required=True)
     password = StringField(max_length=150, required=True)
     roles = StringField(max_length=50, default='guest')

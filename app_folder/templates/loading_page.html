@@ -10,7 +10,6 @@
 
 <!-- Loader -->
 
-
 <div class="my_container">
     <p class="text-center">Merci pour votre participation de {{participation_amount}}€</p>
     <p id="redirectMessage">Vous allez être redirigé dans quelques instants...</p>
@@ -23,8 +22,8 @@
 <style>
     /* Styles pour le loader */
     .loader {
-        border: 16px solid #f3f3f3; /* Light grey */
-        border-top: 16px solid #3498db; /* Blue */
+        border: 16px solid #f3f3f3;
+        border-top: 16px solid #34db53;
         border-radius: 50%;
         width: 120px;
         height: 120px;
@@ -45,9 +44,11 @@
 </style>
 
 <script>
+
+
     // Fonction pour le décompte du temps
     function countdown() {
-        var seconds = 5; // Nombre de secondes avant la redirection
+        var seconds = 3; // Nombre de secondes avant la redirection
 
         var timer = setInterval(function() {
             seconds--;
