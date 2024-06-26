@@ -12,6 +12,7 @@ auth = Blueprint("auth", __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    session.clear()
     count_projects = 0
     
     if current_user.is_authenticated:
@@ -35,18 +36,17 @@ def login():
                         flash(f'Projet {project_name} rejoint avec succès !', category='success')
                         login_user(user, remember=True)
                         
-                        
                         session['selected_project'] = {
                         'id': str(project.id),
                         'name': project.name
-            }
+                        }
                         return redirect(url_for('views.menu_2', count_projects=count_projects))
                     
                     else:
                         login_user(user, remember=True)
                         return redirect(url_for('views.home_page', count_projects=count_projects))
                 else:
-                    flash('Mauvais mot de passe !', category='error')
+                    return render_template('login.html', error="Mauvais mot de passe !", count_projects=count_projects)
             
             else:
                 return render_template('login.html', error="Nom d'utilisateur incorrect", count_projects=count_projects)
@@ -54,6 +54,7 @@ def login():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    session.clear()
     count_projects = 0
     
     if request.method == 'POST':
@@ -85,9 +86,11 @@ def register():
                 project_name = project.name
                 new_user_id = new_user.id
                 project.update(push__users=new_user_id)
-                flash(f'Compte créé et projet {project_name} rejoint avec succès !', category='success')
+                # flash(f'Compte créé et projet {project_name} rejoint avec succès !', category='success')
+                
+                return render_template('login.html', message=f"Connectez-vous pour rejoindre le projet {project_name}", count_projects=count_projects)
             
-                return redirect(url_for('auth.login'))
+                # return redirect(url_for('auth.login'))
             
             flash(f'Compte créé avec succès !', category='success')
             return redirect(url_for('auth.login'))
@@ -135,12 +138,16 @@ def logout():
 @login_required
 def delete_account():
     
-    # Récupérer l'utilisateur actuel et le supprimer de la base de données
     user = User.objects(id=current_user.id).first() #Je récupère le user à supprimer
+    
     user_pronostics = Pronostic.objects(user=user) #Je récupère tous les Objets pronostics du user
-    pronostic_ids = [pronostic.id for pronostic in user_pronostics] #Je récupère les ids des pronostics sous forme de liste
+    pronostic_ids = [pronostic.id for pronostic in user_pronostics] #Je récupère les ids des pronostics sous forme de liste    
+    
+    
     for pronostic_id in pronostic_ids:
         Project.objects(pronostic=pronostic_id).update(pull__pronostic=pronostic_id) #Je supprime les pronostics du user dans les projets
+        
+
     
     user.delete()
     

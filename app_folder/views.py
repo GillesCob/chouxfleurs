@@ -358,7 +358,6 @@ def add_product():
         # J'ajoute l'id du nouveau produit dans la liste des produits de mon objet Project
         current_project = Project.objects(id=current_project_id).first()
         new_product_id = new_product.id
-        print(f"ID du nouveau produit : {new_product_id}, c'est un {type(new_product_id)}")
         
         current_project.product.append(new_product_id)
         current_project.save()
@@ -390,6 +389,7 @@ def update_product(product_id):
         name = request.form.get('product_name')
         description = request.form.get('product_description')
         price = request.form.get('product_price')
+        left_to_pay = request.form.get('product_left_to_pay')
         url_source = request.form.get('product_url_source')
         
         if name:
@@ -398,6 +398,9 @@ def update_product(product_id):
             product.description = description
         if price:
             product.price = price
+        if left_to_pay:
+            already_paid = product.price - int(left_to_pay)
+            product.already_paid = already_paid
         if url_source:
             product.url_source = url_source
         
@@ -1028,14 +1031,17 @@ def change_email():
 @views.route('/delete_project', methods=['POST'], )
 @login_required
 def delete_project():
-    # Récupérer le projet actuel et le supprimer de la base de données
     user_id = current_user.id #J'ai l'id de ce user
     elements_for_base = elements_for_base_template(user_id)
 
-    #Récupération de toutes les participations pour le mrojet en cours
+    #Récupération de toutes les participations pour le projet en cours
     project = Project.objects(admin=user_id).first() #Récup du projet
+    
     products_in_project = project.product #Récup de la liste des produits du projet
     products_participations = []
+    
+    pronostics_in_project = project.pronostic #Récup de la liste des pronostics du projet
+    pronostics_participations = []
     
     for product_id in products_in_project:
         product = Product.objects(id=(product_id)).first() #J'ai l'objet produit
@@ -1043,16 +1049,26 @@ def delete_project():
         participations = product.participation #Je récupère la liste des participations pour ce produit
         
         for participation in participations:
-            participation_id = str(participation)
-            products_participations.append(participation_id) #J'ajoute toutes les participations dans une liste
+            products_participations.append(str(participation)) #J'ajoute toutes les participations dans une liste
             
-            for user in project.users: #Pour chaque user dans le projet que je souhaite supprimer
-                user_obj = User.objects(id=user).first()
-                user_participations = user_obj.participation #Je récupère la liste des participations pour ce user
-                for user_participation in user_participations:
-                    if user_participation == participation: #Si la participation du user est dans la liste des participations du projet
-                        user_participations.remove(user_participation)
-                        user_obj.save()
+    for pronostic in pronostics_in_project:
+        pronostics_participations.append(str(pronostic))
+                 
+            
+            
+    for user in project.users: #Pour chaque user dans le projet que je souhaite supprimer
+        user_obj = User.objects(id=user).first()
+        
+        user_participations = user_obj.participation #Je récupère la liste des participations pour ce user
+        user_pronostics = user_obj.pronostic #Je récupère la liste des pronostics pour ce user
+        for user_participation in user_participations:
+            if user_participation == participation: #Si la participation du user est dans la liste des participations du projet
+                user_participations.remove(user_participation)
+                user_obj.save()
+        for user_pronostic in user_pronostics:
+            if user_pronostic == pronostic:
+                user_pronostics.remove(user_pronostic)
+                user_obj.save()
                 
     project.delete() #Je supprime le projet de la collection des projets
     
