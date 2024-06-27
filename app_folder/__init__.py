@@ -14,6 +14,8 @@ load_dotenv(find_dotenv())
 #Récupération des variables d'environnement
 MONGODB_USERNAME = os.environ.get("MONGODB_USERNAME")
 MONGODB_PASSWORD = os.environ.get("MONGODB_PASSWORD")
+MONGODB_URL = os.environ.get("MONGODB_URL")
+MONGODB_MODE = os.environ.get("MONGODB_MODE")
 
 
 db = MongoEngine() #Je créé une instance de MongoEngine
@@ -37,7 +39,7 @@ def create_app():
     app.register_blueprint(auth, url_prefix="/")
     
     
-    app.config['MONGODB_HOST'] = f'mongodb+srv://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@cluster0.fyqnwvu.mongodb.net/'
+    app.config['MONGODB_HOST'] = f'mongodb+srv://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_URL}/{MONGODB_MODE}'
     app.config['MESSAGE_FLASHING_OPTIONS'] = {'duration': 5}
     
 
