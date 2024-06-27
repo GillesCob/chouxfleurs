@@ -67,7 +67,6 @@ def new_pronostic(user, current_project_id, current_project, pronostics_for_curr
                     'prono_date': prono_date
                 }
 
-
 #La navbar est évolutive en fonction de l'utilisateur connecté, des projets. Je dois lui envoyer des données et celles-ci doivent être les mêmes pour chaque route. Je crée donc une fonction qui va me permettre de récupérer ces données et de les envoyer dans chaque route. Je n'ai ainsi pas à modifier chaque route à chaque fois que je veux ajouter des éléments à la navbar.
 def elements_for_base_template(user_id):
     count_projects = count_user_in_project(user_id)
@@ -79,7 +78,6 @@ def elements_for_base_template(user_id):
         'projects_dict' : projects_dict,
         'project_name_in_session' : project_in_session
             }
-
 
 #Fonctions appelées par elements_for_base_template()
 def count_user_in_project(user_id):
@@ -108,7 +106,6 @@ def project_name_in_session():
     if 'selected_project' in session:
         current_project_name = session['selected_project']['name']
         return current_project_name
-
 
 #Fonction pour récupérer SA participation aux projets autres que le siens
 def user_participations_side_project_func():
@@ -202,7 +199,6 @@ def my_project_participations():
             
     return user_participations
 
-
 #Fonction afin de récupérer le choix du sexe fait par l'utilisateur afin de personnaliser les boutons des interfaces
 def get_gender_choice(current_project):
     gender_choice = "no_gender"
@@ -238,7 +234,6 @@ def home_page():
     
     count_projects=0
     return render_template('home.html', count_projects=count_projects)
-
 
 #ROUTES "LISTE NAISSANCE" -------------------------------------------------------------------------------------------------------------
 @views.route('/menu_1')

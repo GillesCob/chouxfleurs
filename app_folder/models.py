@@ -45,7 +45,7 @@ class Product(Document):
     description = StringField(max_length=150)
     price = IntField()
     already_paid = IntField()
-    url_source = StringField(max_length=150)
+    url_source = StringField(max_length=300)
     image_url = StringField(max_length=300)
     participation = ListField()
     
