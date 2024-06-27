@@ -9,9 +9,13 @@
 
 {% if session.selected_project.id %}
     <div class="my_container">
-        <div class="two_btn_container">
+        <!-- <div class="two_btn_container">
             <button type="button" class="my_btn white_btn" onclick="window.location.href='/menu_2'">Mes réponses</button>
             <button type="button" id="btn_tendency" class="my_btn btn_selected" >La tendance</button>
+        </div> -->
+        <div class="two_btn_container">
+                <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/menu_2'">Mes réponses</button>
+                <button type="button" class="my_btn btn_selected" >La tendance</button>
         </div>
 
 

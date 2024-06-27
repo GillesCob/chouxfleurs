@@ -9,111 +9,155 @@
 
 {% if session.selected_project.id %}
     {% if pronostic_done %}
-    <div class="my_container">
-        <div class="two_btn_container">
-            <button type="button" id="btn_my_answers" class="my_btn btn_selected">Mes réponses</button>
-            <button type="button" class="my_btn white_btn" onclick="window.location.href='/all_pronostics'">La tendance</button>
-        </div>
-
-        <div class="inert_card">
-            <!-- Le sexe ----------------------------------------- -->
-            <div class = "pronostic_title">
-                <label for="name" >Le sexe</label>
-                <p class="pronostic_answer">{{ prono_sex }}</p>
-            </div>
-
-            <!-- Le nom ----------------------------------------- -->
-            <div class = "pronostic_title">
-                <label for="name" >Le prénom</label>
-                <p class="pronostic_answer">{{ prono_name }}</p>
-            </div>
-
-            <!-- Le poids ----------------------------------------- -->
-            <div class = "pronostic_title">
-                <label for="weight" >Le poids</label>
-                <p class="pronostic_answer">{{ prono_weight }} kilogrammes</p>
-            </div>
-
-            <!-- La taille ----------------------------------------- -->
-            <div class = "pronostic_title">
-                <label for="height" >La taille</label>
-                <p class="pronostic_answer">{{ prono_height }} centimètres</p>
-            </div>
-
-            <!-- La date ----------------------------------------- -->
-            <div class = "pronostic_title">
-                <label for="date" >La date</label>
-                <p class="pronostic_answer">{{ prono_date }}</p>
-            </div>
-
-            <!-- Changer de pronostic ----------------------------------------- -->
-            <div class="text-center">
-                    <button onclick="window.location.href='/update_pronostic'" id="btn_change_prono" class="my_btn validate-btn">Changer de pronostic</button>
-            </div>
-
-        </div>
-        
-    </div>
-        
-    {% else %}
-    <div>
         <div class="my_container">
-            <h1>A vos pronostics !</h1>
-            <form method="post">
-                <input type="hidden" name="project_id" value="{{ session.selected_project.id }}">
+            <div class="two_btn_container">
+                {%if end_pronostics == True%}
+                        <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic_winner'">Le gagnant</button>
+                        <button type="button" class="my_btn btn_selected">Mes réponses</button>
+                {%else%}
+                    <button type="button" id="btn_my_answers" class="my_btn btn_selected">Mes réponses</button>
+                    <button type="button" class="my_btn white_btn" onclick="window.location.href='/all_pronostics'">La tendance</button>
+                {%endif%}
+            </div>
 
+            <div class="inert_card">
                 <!-- Le sexe ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="name" >Le sexe</label>
+                    <p class="pronostic_answer">{{ prono_sex }}</p>
                 </div>
-                
-                <input type="hidden" id="selectedGender" name="sex">
-                <button type="button" class="my_btn gender_girl" id="btn_girl" onclick="selectGender('Fille')">Fille</button>
-                <button type="button" class="my_btn gender_boy" id="btn_boy" onclick="selectGender('Garçon')">Garçon</button>
-                
-    
+
                 <!-- Le nom ----------------------------------------- -->
                 <div class = "pronostic_title">
-                    <label for="name">Le prénom</label>
-                    <input type="text" class="form-control text-center" name="name" required>
+                    <label for="name" >Le prénom</label>
+                    <p class="pronostic_answer">{{ prono_name }}</p>
                 </div>
-                
 
                 <!-- Le poids ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="weight" >Le poids</label>
+                    <p class="pronostic_answer">{{ prono_weight }} kilogrammes</p>
                 </div>
-    
-                <input type="range" class="form-range" id="weight" name="weight" min="2.5" max="4.5" step="0.01" oninput="updateWeightValue(this.value)">
-                <span id="weightValue">3,50</span> kilos
-    
-    
+
                 <!-- La taille ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="height" >La taille</label>
+                    <p class="pronostic_answer">{{ prono_height }} centimètres</p>
                 </div>
-    
-                <input type="range" class="form-range" id="height" name="height" min="30" max="60" step="0.1" oninput="updateHeightValue(this.value)">
-                <span id="heightValue">45</span> Centimètres
-    
-    
+
                 <!-- La date ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="date" >La date</label>
-                    <p class="pronostic_answer">Date du terme : 10 novembre</p>
+                    <p class="pronostic_answer">{{ prono_date }}</p>
                 </div>
-                
-                <input type="date" class="form-control text-center" name="date" required>
-     
-    
-                <!-- Validation du pronostic ----------------------------------------- -->
-                <button type="submit" class="my_btn" id="validate_prono">Valider info</button>
-    
-            </form>
+
+                <!-- Changer de pronostic ----------------------------------------- -->
+                {%if end_pronostics == False%}
+                    <div class="text-center">
+                            <button onclick="window.location.href='/update_pronostic'" id="btn_change_prono" class="my_btn validate-btn">Changer de pronostic</button>
+                    </div>
+                {%endif%}
+
+                {% if user_is_admin%}
+                <div class="text-center">
+                    <button onclick="window.location.href='/update_pronostic'" id="btn_change_prono" class="my_btn validate-btn">Modifier les réponses</button>
+                </div>
+                {%endif%}
+
+            </div>
+            
         </div>
-    </div>
+        
+    {% else %}
+        {%if end_pronostics == False %}
+            <div>
+                <div class="my_container">
+                    {% if user_is_admin%}
+
+                    <h1>Le bébé est né? </br> C'est parti pour les réponses !</h1>
+
+                    {%else%}
+                    <h1>A vos pronostics !</h1>
+                    {%endif%}
+                    
+                    <form method="post">
+                        <input type="hidden" name="project_id" value="{{ session.selected_project.id }}">
+
+                        <!-- Le sexe ----------------------------------------- -->
+                        <div class = "pronostic_title">
+                            <label for="name" >Le sexe</label>
+                        </div>
+                        
+                        <input type="hidden" id="selectedGender" name="sex">
+                        <button type="button" class="my_btn gender_girl" id="btn_girl" onclick="selectGender('Fille')">Fille</button>
+                        <button type="button" class="my_btn gender_boy" id="btn_boy" onclick="selectGender('Garçon')">Garçon</button>
+                        
+            
+                        <!-- Le nom ----------------------------------------- -->
+                        <div class = "pronostic_title">
+                            <label for="name">Le prénom</label>
+                            <input type="text" class="form-control text-center" name="name" required>
+                        </div>
+                        
+
+                        <!-- Le poids ----------------------------------------- -->
+                        <div class = "pronostic_title">
+                            <label for="weight" >Le poids</label>
+                        </div>
+            
+                        <input type="range" class="form-range" id="weight" name="weight" min="2.5" max="4.5" step="0.01" oninput="updateWeightValue(this.value)">
+                        <span id="weightValue">3,50</span> kilos
+            
+            
+                        <!-- La taille ----------------------------------------- -->
+                        <div class = "pronostic_title">
+                            <label for="height" >La taille</label>
+                        </div>
+            
+                        <input type="range" class="form-range" id="height" name="height" min="30" max="60" step="0.1" oninput="updateHeightValue(this.value)">
+                        <span id="heightValue">45</span> Centimètres
+            
+            
+                        <!-- La date ----------------------------------------- -->
+                        <div class = "pronostic_title">
+                            <label for="date" >La date</label>
+                            {% if user_is_admin %}
+                            {%else%}
+                                <p class="pronostic_answer">Date du terme : 10 novembre</p>
+                            {%endif%}
+                        </div>
+                        
+                        <input type="date" class="form-control text-center" name="date" required>
+            
+            
+                        <!-- Validation du pronostic ----------------------------------------- -->
+                        {% if user_is_admin %}
+                            <!-- <button type="submit" class="my_btn" id="validate_prono">Donner les réponses</button> -->
+                            <div class="my_container">
+                                <button type="submit" class="my_btn" id="validate_prono">Donner les réponses</button>
+                            </div>
+                            {%if at_least_one_pronostic == True %}
+                                <div class="my_container">
+                                    <button type="button" class="my_btn" onclick="window.location.href='/all_pronostics'">Voir la tendance</button>
+                                </div>
+                            {%endif%}
+
+                        {%else%}
+                            <button type="submit" class="my_btn" id="validate_prono">Valider info</button>
+                        {%endif%}
+                        
+            
+                    </form>
+                </div>
+            </div>
+        {%else%}
+            <div class="my_container">
+                <h1>Les réponses ont déjà été données, c'est trop tard pour participer 😕</h1>
+            </div>
+        {%endif%}
+
+    {%endif%}
     
-    {% endif %}
 
 {% else %}
 Aucun projet sélectionné.
@@ -194,7 +238,9 @@ function updateHeightValue(value) {
 
 </script>
 
-
-
-
 {% endblock %}
+
+
+{% if user_is_admin %}
+{%else%}
+{%endif%}

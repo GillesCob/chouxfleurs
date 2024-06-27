@@ -23,6 +23,7 @@ class Project(Document):
     users = ListField()
     pronostic = ListField()
     product = ListField()
+    end_pronostics = BooleanField(default=False)
 
 
 class Pronostic(Document):

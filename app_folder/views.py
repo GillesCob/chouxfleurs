@@ -16,7 +16,7 @@ views = Blueprint("views", __name__)
 
 #FONCTIONS -------------------------------------------------------------------------------------------------------------
 # Fonction utilisée pour créer un nouveau pronostic dans la route menu_2
-def new_pronostic(user, current_project_id, current_project, pronostics_for_current_project):
+def new_pronostic(user, current_project_id, current_project, pronostics_for_current_project, user_is_admin):
     if request.method == 'POST':
         sex = request.form.get('sex')
         name = request.form.get('name')
@@ -56,8 +56,11 @@ def new_pronostic(user, current_project_id, current_project, pronostics_for_curr
                 prono_weight = pronostic_utilisateur.weight
                 prono_height = pronostic_utilisateur.height
                 prono_date = pronostic_utilisateur.date
-                            
-                flash('Pronostic sauvegardé avec succès !')
+                
+                if user_is_admin:
+                   flash("Félicitations pour l'heureux évement !! 🥳 ")    
+                else:       
+                    flash('Pronostic sauvegardé avec succès !')
                 return {
                     'pronostic_done': pronostic_done,
                     'prono_sex': prono_sex,
@@ -225,7 +228,7 @@ def get_gender_choice(current_project):
 
 #ROUTES -------------------------------------------------------------------------------------------------------------
 @views.route('/')
-@views.route('/home_page',methods=['GET'])
+@views.route('/home_page',methods=['GET', 'POST'])
 def home_page():
     if current_user.is_authenticated:
         user_id = current_user.id
@@ -596,7 +599,7 @@ def menu_2():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
 
-    
+    at_least_one_pronostic = False
     # Si le user est déjà dans un projet et que je n'ai rien dans la session (parce que je viens de me connecter), je récupère le premier projet dans lequel le user est afin d'ouvrir une session et ne pas avoir à choisir un projet à chaque fois que je me connecte.
     #Si une session est déjà ouverte, je skip cette étape
     if 'selected_project' not in session:
@@ -614,17 +617,21 @@ def menu_2():
     try:
         current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
         current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
+        end_pronostics = current_project.end_pronostics
+        admin_id = current_project.admin.id
+        user_is_admin = (user_id == admin_id)
+        
         pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
+        
         if pronostics_for_current_project : #J'ai au moins 1 pronostic pour le projet sélectionné
-
+            at_least_one_pronostic = True
             if current_user.pronostic : #Si le user actuel a déjà un pronostic, peut-importe sur quel projet
 
                 for current_user_pronostic in current_user.pronostic:
 
-                    if current_user_pronostic in pronostics_for_current_project: #Si le pronostic du user actuel est déjà lié au projet actuellement sauvegardé dans la session
+                    if current_user_pronostic in pronostics_for_current_project: #Le user a déjà fait son prono pour le projet actuel
                         pronostic_utilisateur = Pronostic.objects(id=current_user_pronostic).first() #J'ai l'objet Pronostic actuellement sauvegardé dans la session
                         
-                        #Je récupère les datas pour les envoyer dans le html et afficher les données déjà saisies
                         prono_sex = pronostic_utilisateur.sex
                         prono_name = pronostic_utilisateur.name
                         prono_weight = pronostic_utilisateur.weight
@@ -632,31 +639,56 @@ def menu_2():
                         prono_date = pronostic_utilisateur.date
                         pronostic_done=True
                         
+                        #Petite astuce ici permettant d'afficher les infos du gagnant en 1er en arrivant sur menu_2
+                        go_to_menu_2 = False
+                        if request.method == 'POST':
+                            go_to_menu_2 = request.form.get('go_to_menu_2')
                         
-                        return render_template('menu_2.html', user=current_user, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base, )
+                        print(f"COUCOU {go_to_menu_2}")
+                        if end_pronostics and go_to_menu_2 == True :
+                            return redirect(url_for('views.pronostic_winner', **elements_for_base))
+                        else:
+                            return render_template('menu_2.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_menu_2=go_to_menu_2, **elements_for_base)
 
-                    else : #Si le pronostic du user actuel n'est pas lié au projet actuellement sauvegardé dans la session, je créé un nouveau pronostic pour ce projet
-                        result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project)
+                    else : #Si le user actuel a déjà fait un prono mais pas pour le projet actuel
+                        result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
                         if result:
-                            return render_template('menu_2.html', user=current_user, **result, **elements_for_base) #** permet de passer les données du dictionnaire result en argument de la fonction render_template
+                            if user_is_admin :
+                                current_project.end_pronostics = True
+                                end_pronostics = current_project.end_pronostics
+                                current_project.save()
+                                
+                            return redirect(url_for('views.menu_2'))
             
-            else : #J'arrive ici pour faire pour la première fois un pronostic pour un projet
-                result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project)
+            else : #J'arrive ici si le user n'a JAMAIS fait de pronostic sur aucun projet ET n'est pas le 1er à pronostiquer pour le projet en cours
+                result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
                 if result:
-                    return render_template('menu_2.html', user=current_user, **result, **elements_for_base)
+                    if user_is_admin :
+                        current_project.end_pronostics = True
+                        end_pronostics = current_project.end_pronostics
+                        current_project.save()
 
-        else : #J'arrive ici pour faire pour la première fois un pronostic pour un projet
-            result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project)
+                    return redirect(url_for('views.menu_2'))
+
+        else : #C'est ici que va s'enregistrer le 1er prono de mon projet
+            result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
             if result:
-                return render_template('menu_2.html', user=current_user, **result, **elements_for_base)
+                if user_is_admin :
+                    current_project.end_pronostics = True
+                    end_pronostics = current_project.end_pronostics
+                    current_project.save()
+
+                return redirect(url_for('views.menu_2'))
             
     except (KeyError, AttributeError):
         flash("Veuillez créer ou rejoindre un projet avant d'accéder aux pronostics", category='error')
+        print(f"Arrivée 6")
         return redirect(url_for('views.my_projects', user=current_user, **elements_for_base))
     
-    return render_template('menu_2.html', user=current_user, **elements_for_base)
+    #J'arrive ici si je n'ai pas encore fait mon prono pour le projet actuel
+    return render_template('menu_2.html', user_is_admin=user_is_admin, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, **elements_for_base)
 
-@views.route('/update_pronostic', methods=['GET', 'POST'])
+@views.route('/update_pronostic', methods=['GET', 'POST']) 
 @login_required
 def update_pronostic():
     user = current_user
@@ -714,13 +746,83 @@ def update_pronostic():
                 
                 
                 flash('Pronostic mis à jour avec succès !')
-                return render_template('menu_2.html', user=current_user, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base)
+                return redirect(url_for('views.menu_2'))
     
     return render_template('update_pronostic.html', user=current_user, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base)
 
 @views.route('/all_pronostics', methods=['GET', 'POST'])
 @login_required
 def all_pronostics():
+    user = current_user
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+    
+    current_project_id = session['selected_project']['id']
+    current_project = Project.objects(id=current_project_id).first()
+    end_pronostics = current_project.end_pronostics
+    
+    pronostic_ids = current_project.pronostic  # Cette liste contient les IDs des pronostics
+    pronostics = Pronostic.objects(id__in=pronostic_ids)
+    
+    user_id = current_user.id
+    
+    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+    gender_choice = get_gender_choice(current_project)
+    
+    
+    number_of_pronostics = len(pronostics)
+    sex_girl = 0
+    weight_values = []
+    height_values = []
+    timestamps = []
+    names = {}
+    for pronostic in pronostics:
+         
+        weight_value = float(pronostic.weight)
+        weight_values.append(weight_value)
+        
+        height_value = float(pronostic.height)
+        height_values.append(height_value)
+        
+        if pronostic.sex == "Fille":
+            sex_girl +=1
+            
+        date_obj = (datetime.strptime(pronostic.date, "%d/%m/%Y"))
+        timestamp = date_obj.timestamp()
+        timestamps.append(timestamp)
+        
+        name = pronostic["name"]
+        if name in names:
+            names[name] += 1
+        else:
+            names[name] = 1
+
+    #Poids moyen
+    average_weight = sum(weight_values) / len(weight_values)
+    average_weight = round(average_weight, 1)
+
+    #Taille moyenne
+    average_height = sum(height_values) / len(height_values)
+    average_height = round(average_height, 1)
+    
+    #Date moyenne
+    average_timestamp = sum(timestamps) / len(timestamps)
+    average_date = datetime.fromtimestamp(average_timestamp)
+    average_date = average_date.strftime('%d-%m-%Y')
+
+    #Pourcentage de filles/gars
+    percentage_girl = int(round((sex_girl*100)/number_of_pronostics,0))
+    percentage_boy = int(round(100 - percentage_girl,0))
+    
+    #Tris des prénoms avec ceux proposés plusieurs fois en premier
+    names = dict(sorted(names.items(), key=lambda item: item[1], reverse=True))
+
+    
+    return render_template('all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice)
+
+@views.route('/pronostic_winner', methods=['GET', 'POST'])
+@login_required
+def pronostic_winner():
     user = current_user
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
@@ -785,8 +887,7 @@ def all_pronostics():
     names = dict(sorted(names.items(), key=lambda item: item[1], reverse=True))
 
     
-    return render_template('all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, **elements_for_base, gender_choice=gender_choice)
-
+    return render_template('pronostic_winner.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, **elements_for_base, gender_choice=gender_choice)
 
 #ROUTES "PHOTOS" -------------------------------------------------------------------------------------------------------------
 @views.route('/menu_3')
