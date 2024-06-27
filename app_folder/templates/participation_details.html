@@ -35,7 +35,7 @@
         {% endif %}
 
         {% if thanks == False %}
-        <a href="mailto:?subject=Participation%20à%20la%20liste%20de%20naissance%20{{project_name}}&body=Bonjour%20{{user_username}}%20et%20merci%20beaucoup%20pour%20ta%20participation%20à%20notre%20liste%20de%20naissance%20!%0A%0AA%20très%20bientôt%20!"class="my_btn">Remercier</a>
+        <a href="mailto:{{ user_email }}?subject=Participation%20à%20la%20liste%20de%20naissance%20{{project_name}}&body=Bonjour%20{{user_username}}%20et%20merci%20beaucoup%20pour%20ta%20participation%20à%20notre%20liste%20de%20naissance%20!%0A%0AA%20très%20bientôt%20!"class="my_btn">Remercier</a>
 
         <form action="{{ url_for('views.participation_details')}}" method="post">
             <input type="hidden" name="thanks_sent" value=True>

@@ -879,6 +879,7 @@ def participation_details():
         
         participation_obj = Participation.objects(id=participation_id).first()
         user_username = participation_obj.user.username
+        user_email = participation_obj.user.email
         type = participation_obj.type
         montant = participation_obj.amount
         date = participation_obj.participation_date
@@ -891,7 +892,7 @@ def participation_details():
         project_obj = participation_obj.project
         project_name = project_obj.name
     
-        return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, thanks=thanks, product_name=product_name, project_name=project_name, participation_id=participation_id)
+        return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, thanks=thanks, product_name=product_name, project_name=project_name, participation_id=participation_id)
     
     return render_template('participation_details.html', **elements_for_base)
 
