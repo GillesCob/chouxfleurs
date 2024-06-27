@@ -22,7 +22,7 @@
                         <th>Utilisateur</th>
                         <th>Produit</th>
                         <th>Participation</th>
-                        <th>Date</th>
+                        <th>Plus d'informations</th>
                     </tr>
                 </thead>
 
@@ -31,9 +31,21 @@
                         {% for participation in participations %}
                             <tr>
                                 <td>{{ username }}</td>
-                                <td>{{ participation[1] }}</td>
                                 <td>{{ participation[2] }}</td>
                                 <td>{{ participation[3] }}</td>
+                                <td>
+                                    {% if participation[5] == False  %}
+                                    <form action="{{ url_for('views.participation_details')}}" method="post">
+                                        <input type="hidden" name="participation_id" value="{{ participation[0]}}">
+                                        <button type="submit" class="btn btn-danger">+</button>
+                                    </form>
+                                    {%else%}
+                                    <form action="{{ url_for('views.participation_details')}}" method="post">
+                                        <input type="hidden" name="participation_id" value="{{ participation[0]}}">
+                                        <button type="submit" class="btn btn-primary">+</button>
+                                    </form>
+                                    {%endif%}
+                                </td>
                             </tr>
                         {% endfor %}
                     {% endfor %}

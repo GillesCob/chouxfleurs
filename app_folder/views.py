@@ -170,13 +170,12 @@ def my_project_participations():
     
     
     for project_product in project_products: #Pour chaque produit de ce projet
-        print(f"Produit : {project_products}")
         product_id = ObjectId(project_product) #Je récupère son id
-        print(f"ID du produit : {product_id}, c'est un {type(product_id)}")
         #J'ai l'id de mon produit, je vais aller chercher les id des participations pour ce produit
         product_participations = Participation.objects(product=product_id)
         
         for product_participation in product_participations:
+            participation_id = product_participation.id
             user = product_participation.user
             user_id = ObjectId(user.id)
             
@@ -193,12 +192,13 @@ def my_project_participations():
                 amount = "Prêt"
             date = product_participation.participation_date
             date = date.strftime('%d-%m-%Y')
+            thanks = product_participation.thanks
 
             # Ajoutez la participation au dictionnaire user_participations
             if participant_username not in user_participations:
                 user_participations[participant_username] = []  # Créez une liste vide pour chaque nouvel utilisateur
             
-            user_participations[participant_username].append((participant_username, product_name, amount, date))
+            user_participations[participant_username].append((participation_id, participant_username, product_name, amount, date, thanks))
             
     return user_participations
 
@@ -301,6 +301,7 @@ def menu_1():
                 products.append({
                     'name': product.name,
                     'description': product.description,
+                    'image_url': product.image_url,
                     'price': product.price,
                     'url_source': product.url_source,
                     'already_paid':product.already_paid,
@@ -347,12 +348,13 @@ def add_product():
         current_project_id = session['selected_project']['id']
         name = request.form.get('product_name')
         description = request.form.get('product_description')
+        image_url = request.form.get('product_image_url')
         price = request.form.get('product_price')
         already_paid = 0
         url_source = request.form.get('product_url_source')
         
         # Création du nouveau produit avec envoi des infos précedemment collectées
-        new_product = Product(project=current_project_id, name=name, description=description, price=price, url_source=url_source, already_paid=already_paid)
+        new_product = Product(project=current_project_id, name=name, description=description, image_url=image_url, price=price, url_source=url_source, already_paid=already_paid)
         new_product.save()
         
         # J'ajoute l'id du nouveau produit dans la liste des produits de mon objet Project
@@ -388,6 +390,7 @@ def update_product(product_id):
     if request.method == 'POST':
         name = request.form.get('product_name')
         description = request.form.get('product_description')
+        image_url = request.form.get('product_image_url')
         price = request.form.get('product_price')
         left_to_pay = request.form.get('product_left_to_pay')
         url_source = request.form.get('product_url_source')
@@ -396,6 +399,8 @@ def update_product(product_id):
             product.name = name
         if description:
             product.description = description
+        if image_url:
+            product.image_url = image_url
         if price:
             product.price = price
         if left_to_pay:
@@ -491,7 +496,7 @@ def confirm_participation_loading(product_id):
         else:
             type = "lending"
             participation = 0
-
+        
         
         new_participation = Participation(user=user_id, type=type, project=project, product=product_id, amount=participation, participation_date=datetime.now())
         new_participation.save()
@@ -850,6 +855,7 @@ def my_projects():
         #Je récupe l'info pour savoir si l'admin veut modifier son projet
         if request.method == 'POST':
             modify_project = request.form.get('modify_project_open')
+            
                 
         return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_rib=admin_rib, modify_project=modify_project)
 
@@ -859,6 +865,40 @@ def my_projects():
         
         
         return render_template('my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project)
+
+@views.route('/participation_details', methods=['GET', 'POST'])
+@login_required
+def participation_details():
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+    
+    
+    if request.method == 'POST':
+        participation_id = request.form.get('participation_id')
+        if request.form.get('thanks_sent'):
+            participation_obj = Participation.objects(id=participation_id).first()
+            participation_obj.thanks = True
+            participation_obj.save()
+            flash('Remerciements envoyés avec succès !')
+            return redirect(url_for('views.my_projects'))
+        
+        participation_obj = Participation.objects(id=participation_id).first()
+        user_username = participation_obj.user.username
+        type = participation_obj.type
+        montant = participation_obj.amount
+        date = participation_obj.participation_date
+        date = date.strftime('%d-%m-%Y')
+        thanks = participation_obj.thanks
+        
+        product_obj = participation_obj.product
+        product_name = product_obj.name
+        
+        project_obj = participation_obj.project
+        project_name = project_obj.name
+    
+        return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, thanks=thanks, product_name=product_name, project_name=project_name, participation_id=participation_id)
+    
+    return render_template('participation_details.html', **elements_for_base)
 
 @views.route('/rib', methods=['GET', 'POST'])
 @login_required

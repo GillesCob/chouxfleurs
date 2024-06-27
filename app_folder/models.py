@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from mongoengine import Document, StringField, ReferenceField, CASCADE, ListField, EmailField, IntField, DateTimeField
+from mongoengine import Document, StringField, ReferenceField, CASCADE, ListField, EmailField, IntField, DateTimeField, BooleanField
 
 
    
@@ -46,6 +46,7 @@ class Product(Document):
     price = IntField()
     already_paid = IntField()
     url_source = StringField(max_length=150)
+    image_url = StringField(max_length=300)
     participation = ListField()
     
 class Participation(Document):
@@ -57,3 +58,4 @@ class Participation(Document):
     product = ReferenceField('Product')
     amount = IntField()
     participation_date = DateTimeField()
+    thanks = BooleanField(default=False)

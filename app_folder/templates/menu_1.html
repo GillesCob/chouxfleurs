@@ -19,24 +19,30 @@
                     {% for product in products %}
                     <a href="{{ url_for('views.product_details', product_id=product.id) }}" class="product-link" style="text-decoration: none;">
                         <div class="product-card">
-                            <!-- Titre du produit -->
-                            <div class="product-title">{{ product.name }}</div>
-                            <!-- Description du produit -->
-                            <div class="product-description">{{ product.description }}</div>
-
-                            {% if product.left_to_pay == 0 %}
-                                <div class="product-price-current">Produit financé, merci beaucoup !</div>
-                            {%else%}
-                                {% if product.price == product.left_to_pay %}
-                                    <!-- Prix de base -->
-                                    <div class="product-price-current">{{ product.price }}€</div>
+                            <!-- Image du produit -->
+                            <div class="product-image">
+                                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-height: 200px;">
+                            </div>
+                            <div class="product-details">
+                                <!-- Titre du produit -->
+                                <div class="product-title">{{ product.name }}</div>
+                                <!-- Description du produit -->
+                                <div class="product-description">{{ product.description }}</div>
+                        
+                                {% if product.left_to_pay == 0 %}
+                                    <div class="product-price-current">Produit financé !</div>
                                 {% else %}
-                                    <!-- Prix initial -->
-                                    <div class="product-price-original">{{ product.price }}€</div>
-                                    <!-- Prix restant -->
-                                    <div class="product-price-current">{{ product.left_to_pay }}€</div>
+                                    {% if product.price == product.left_to_pay %}
+                                        <!-- Prix de base -->
+                                        <div class="product-price-current">{{ product.price }}€</div>
+                                    {% else %}
+                                        <!-- Prix initial -->
+                                        <div class="product-price-original">{{ product.price }}€</div>
+                                        <!-- Prix restant -->
+                                        <div class="product-price-current">{{ product.left_to_pay }}€</div>
+                                    {% endif %}
                                 {% endif %}
-                            {% endif %}
+                            </div>
                         </div>
                     </a>
 

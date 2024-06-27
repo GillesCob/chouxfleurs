@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Product details
+{% endblock %}
+
+
+{% block content %}
+
+<div>
+    <!-- Mise en place d'une flèche pour revenir à my_projects.html -->
+    <a href="{{ url_for('views.my_projects') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+</div>
+
+ <div class="my_container">
+    <div class="product-card" id="product_card">
+
+        <h1>Participant</h1>
+        <div class="product-title">{{user_username}}</div>
+
+        
+        <h1>Produit</h1>
+        <div class="product-title">{{product_name}}</div>
+
+        {% if type == "€" %}
+            <h1>Montant de la participation</h1>
+            <div class="product-description">{{montant}}€</div>
+        {% elif type == "donation" %}
+            <h1>Type de participation</h1>
+            <h1>DON</h1>
+        {%else%}
+            <h1>PRÊT</h1>
+        {% endif %}
+
+        {% if thanks == False %}
+        <a href="mailto:?subject=Participation%20à%20la%20liste%20de%20naissance%20{{project_name}}&body=Bonjour%20{{user_username}}%20et%20merci%20beaucoup%20pour%20ta%20participation%20à%20notre%20liste%20de%20naissance%20!%0A%0AA%20très%20bientôt%20!"class="my_btn">Remercier</a>
+
+        <form action="{{ url_for('views.participation_details')}}" method="post">
+            <input type="hidden" name="thanks_sent" value=True>
+            <input type="hidden" name="participation_id" value="{{participation_id}}">
+            <button type="submit" class="my_btn">Remerciements envoyés ?</button>
+        </form>
+        {% else %}
+        <button type="submit" class="btn">Remerciements envoyés !</button>
+        {% endif %}
+    </div>
+ </div>
+
+{% endblock %}
