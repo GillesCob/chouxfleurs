@@ -12,44 +12,77 @@
         <div class="my_container">
             <div class="two_btn_container">
                 {%if end_pronostics == True%}
-                        <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic_winner'">Le gagnant</button>
+                <form action="{{ url_for('views.pronostic_winner')}}" method="post">
+                    <input type="hidden" name="go_to_menu_2" value=false>
+                    <button type="submit" class="my_btn white_btn">Le gagnant</button>
+                </form>
                         <button type="button" class="my_btn btn_selected">Mes réponses</button>
                 {%else%}
                     <button type="button" id="btn_my_answers" class="my_btn btn_selected">Mes réponses</button>
                     <button type="button" class="my_btn white_btn" onclick="window.location.href='/all_pronostics'">La tendance</button>
                 {%endif%}
             </div>
-
+        </div>
+        <div class="my_container">
             <div class="inert_card">
                 <!-- Le sexe ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="name" >Le sexe</label>
-                    <p class="pronostic_answer">{{ prono_sex }}</p>
+                    <p class="pronostic_answer">{{ prono_sex }}
+
+                    {%if end_pronostics == True%}
+                        : {{ score_prono_user.Sex }}/{{ scores_pronostics['Sex']['good'] }}
+                    {%endif%}
+                    </p>
                 </div>
 
                 <!-- Le nom ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="name" >Le prénom</label>
-                    <p class="pronostic_answer">{{ prono_name }}</p>
+                    <p class="pronostic_answer">{{ prono_name }}
+                    {%if end_pronostics == True%}
+                        : {{ score_prono_user.Name }}/{{ scores_pronostics['Name']['good'] }}
+                    {%endif%}
+                    </p>
                 </div>
 
                 <!-- Le poids ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="weight" >Le poids</label>
-                    <p class="pronostic_answer">{{ prono_weight }} kilogrammes</p>
+                    <p class="pronostic_answer">{{ prono_weight }} kilogrammes
+                    {%if end_pronostics == True%}
+                        : {{ score_prono_user.Weight }}/{{ scores_pronostics['Weight']['good'] }}
+                    {%endif%}
+                    </p>
                 </div>
 
                 <!-- La taille ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="height" >La taille</label>
-                    <p class="pronostic_answer">{{ prono_height }} centimètres</p>
+                    <p class="pronostic_answer">{{ prono_height }} centimètres
+                    {%if end_pronostics == True%}
+                        : {{ score_prono_user.Height }}/{{ scores_pronostics['Height']['good'] }}
+                    {%endif%}
+                    </p>
                 </div>
 
                 <!-- La date ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="date" >La date</label>
-                    <p class="pronostic_answer">{{ prono_date }}</p>
+                    <p class="pronostic_answer">{{ prono_date }}
+                    {%if end_pronostics == True%}
+                        : {{ score_prono_user.Date }}/{{ scores_pronostics['Date']['good'] }}
+                    {%endif%}
+                    </p>
                 </div>
+
+                <!-- Score total ----------------------------------------- -->
+                <div class = "pronostic_title">
+                    {%if end_pronostics == True%}
+                        Score final : {{ score_prono_user.Total }}/{{total_possible}}
+                    {%endif%}
+                </div>
+                
 
                 <!-- Changer de pronostic ----------------------------------------- -->
                 {%if end_pronostics == False%}
@@ -153,6 +186,7 @@
         {%else%}
             <div class="my_container">
                 <h1>Les réponses ont déjà été données, c'est trop tard pour participer 😕</h1>
+                <!-- Ajouter ici la carte avec les réponses de l'admin -->
             </div>
         {%endif%}
 
@@ -163,8 +197,8 @@
 Aucun projet sélectionné.
 {% endif %}
 
-<script>
 
+<script>
 
 // Mettre à jour la valeur du champ de formulaire caché afin d'envoyer la bonne info du sexe une fois le prono validé
 function selectGender(gender) {

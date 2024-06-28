@@ -33,9 +33,15 @@ class Pronostic(Document):
     project = ReferenceField('Project', reverse_delete_rule=CASCADE)
     sex = StringField(max_length=150, required=True)
     name = StringField(max_length=150, required=True)
-    weight = StringField(max_length=150, required=True)
-    height = StringField(max_length=150, required=True)
+    weight = IntField(required=True)
+    height = IntField(required=True)
     date = StringField(max_length=150, required=True)
+    sex_score = IntField()
+    name_score = IntField()
+    weight_score = IntField()
+    height_score = IntField()
+    date_score = IntField()
+    total_score = IntField()
     
     
 class Product(Document):

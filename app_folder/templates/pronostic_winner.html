@@ -11,13 +11,100 @@
     <div class="two_btn_container">
             <button type="button" id="btn_my_answers" class="my_btn btn_selected">Le gagnant</button>
             <form action="{{ url_for('views.menu_2')}}" method="post">
-                <input type="hidden" name="go_to_menu_2" value=True>
+                <input type="hidden" name="go_to_menu_2" value=true>
                 <button type="submit" class="my_btn white_btn">Mes réponses</button>
             </form>
     </div>
 </div>
-BRAVO AU GAGNANT !
+{%for high_score_pronostic in high_score_pronostics %}
+    <div class="my_container">
+        <div class="inert_card">
+            <div class = "pronostic_title">
+                BRAVO {{ high_score_pronostic.username }} !!
+            </div>
+            <!-- Le sexe ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="name" >Le sexe</label>
+                <p class="pronostic_answer">{{ high_score_pronostic.sex }} - {{high_score_pronostic.sex_score}}/{{ scores_pronostics['Sex']['good'] }}</p>
+            </div>
+        
+            <!-- Le nom ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="name" >Le prénom</label>
+                <p class="pronostic_answer">{{ high_score_pronostic.name }} - {{high_score_pronostic.name_score}}/{{ scores_pronostics['Name']['good'] }}</p>
+            </div>
+        
+            <!-- Le poids ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="weight" >Le poids</label>
+                <p class="pronostic_answer">{{ high_score_pronostic.weight }} kilogrammes - {{high_score_pronostic.weight_score}}/{{ scores_pronostics['Weight']['good'] }}</p>
+            </div>
+        
+            <!-- La taille ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="height" >La taille</label>
+                <p class="pronostic_answer">{{ high_score_pronostic.height }} centimètres - {{high_score_pronostic.height_score}}/{{ scores_pronostics['Height']['good'] }}</p>
+            </div>
+        
+            <!-- La date ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="date" >La date</label>
+                <p class="pronostic_answer">{{ high_score_pronostic.date }} - {{high_score_pronostic.date_score}}/{{ scores_pronostics['Date']['good'] }}</p>
+            </div>
 
+            
+            <!-- Score total ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="date" >Score Total</label>
+                <p class="pronostic_answer">{{ high_score_pronostic.total_score }}/{{ scores_pronostics.Total_possible }}</p>
+            </div>
 
+        </div>
+    </div>
 
+{%endfor%}
+
+<script>
+    // Fonction pour lancer les confettis
+    function launchConfetti() {
+        var duration = 5 * 1000;
+        var end = Date.now() + duration;
+    
+        (function frame() {
+            // Générer des confettis à intervalle régulier
+            confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 }
+            });
+            confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 }
+            });
+    
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
+    
+    // Vérifier dans le localStorage si l'animation a déjà été lancée pour cet utilisateur
+    function shouldLaunchConfetti() {
+        const username = "{{ current_user.username }}";
+        const confettiShown = localStorage.getItem(`confettiShown_${username}`);
+    
+        if (!confettiShown) {
+            // Lancer les confettis
+            launchConfetti();
+            // Enregistrer dans le localStorage que les confettis ont été lancés
+            localStorage.setItem(`confettiShown_${username}`, 'true');
+        }
+    }
+    
+    // Appeler la fonction pour vérifier et potentiellement lancer les confettis
+    shouldLaunchConfetti();
+</script>
 {% endblock %}
