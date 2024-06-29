@@ -1430,13 +1430,30 @@ def admin():
     elements_for_base = elements_for_base_template(user_id)
     
     if request.method == 'POST':
-        end_pronostics_value = False
-        
-        # Mettre à jour tous les projets pour définir end_pronostics à False
-        Project.objects.update(set__end_pronostics=end_pronostics_value)
-        
-        flash("Tous les projets ont été mis à jour avec end_pronostics à {}".format(end_pronostics_value))
-        return redirect(url_for('views.menu_2'))
+        pronostics = Pronostic.objects()
+        for pronostic in pronostics:
+            modified = False
+
+            if isinstance(pronostic.weight, str):
+                try:
+                    # Conversion de la valeur en entier
+                    pronostic.weight = int(pronostic.weight)
+                    modified = True
+                except ValueError:
+                    print(f"Erreur de conversion pour le poids du pronostic {pronostic.id} avec la valeur {pronostic.weight}")
+
+            if isinstance(pronostic.height, str):
+                try:
+                    # Conversion de la valeur en entier
+                    pronostic.height = int(pronostic.height)
+                    modified = True
+                except ValueError:
+                    print(f"Erreur de conversion pour la taille du pronostic {pronostic.id} avec la valeur {pronostic.height}")
+
+            if modified:
+                pronostic.save()
+                print(f"Mis à jour le pronostic {pronostic.id}: weight={pronostic.weight}, height={pronostic.height}")
+
 
     # Rendre le template base.html avec les données spécifiques
     return render_template('admin.html', **elements_for_base)
