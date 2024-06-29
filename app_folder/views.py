@@ -111,11 +111,16 @@ def elements_for_base_template(user_id):
     count_projects = count_user_in_project(user_id)
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
+    
+    user_mail = current_user.email
+    if user_mail == "gilles@gilles.com":
+        super_admin = True
         
     return {
         'count_projects' : count_projects,
         'projects_dict' : projects_dict,
-        'project_name_in_session' : project_in_session
+        'project_name_in_session' : project_in_session,
+        'super_admin' : super_admin
             }
 
 #Fonctions appelées par elements_for_base_template()
@@ -1413,3 +1418,20 @@ def other_data():
     
     # Rendre le template base.html avec les données spécifiques
     return render_template('base.html', **elements_for_base)
+
+@views.route('/admin', methods=['GET', 'POST'])
+def admin():
+    user_id = current_user.id #J'ai l'id du user actuellement connecté
+    elements_for_base = elements_for_base_template(user_id)
+    
+    if request.method == 'POST':
+        end_pronostics_value = False
+        
+        # Mettre à jour tous les projets pour définir end_pronostics à False
+        Project.objects.update(set__end_pronostics=end_pronostics_value)
+        
+        flash("Tous les projets ont été mis à jour avec end_pronostics à {}".format(end_pronostics_value))
+        return redirect(url_for('views.menu_2'))
+
+    # Rendre le template base.html avec les données spécifiques
+    return render_template('admin.html', **elements_for_base)
