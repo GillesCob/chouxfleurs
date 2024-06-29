@@ -18,6 +18,17 @@
                 <button type="button" class="my_btn btn_selected" >La tendance</button>
         </div>
 
+        {%if number_of_pronostics == 1%}
+            <div class = "pronostic_title">
+                <label for="pronostics_done" >{{number_of_pronostics}} participant</label>
+            </div>
+        {%else%}
+            <div class = "pronostic_title">
+                <label for="pronostics_done" >{{number_of_pronostics}} participants</label>
+            </div>
+        {%endif%}
+
+        
 
         <div class="inert_card">
             <!-- Le sexe ----------------------------------------- -->
