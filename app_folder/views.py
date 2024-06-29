@@ -683,6 +683,8 @@ def menu_2():
                 for current_user_pronostic in current_user.pronostic:
 
                     if current_user_pronostic in pronostics_for_current_project: #Le user a déjà fait son prono pour le projet actuel
+                        
+
                         pronostic_utilisateur = Pronostic.objects(id=current_user_pronostic).first() #J'ai l'objet Pronostic actuellement sauvegardé dans la session
                         
                         prono_sex = pronostic_utilisateur.sex
@@ -779,16 +781,16 @@ def update_pronostic():
     
             prono_sex = pronostic_utilisateur.sex
             prono_name = pronostic_utilisateur.name
-            prono_weight = pronostic_utilisateur.weight
-            prono_height = pronostic_utilisateur.height
+            prono_weight = pronostic_utilisateur.weight/1000
+            prono_height = pronostic_utilisateur.height/10
             prono_date = pronostic_utilisateur.date
             
                         
             if request.method == 'POST':
                 sex = request.form.get('sex')
                 name = request.form.get('name')
-                weight = request.form.get('weight')
-                height = request.form.get('height')
+                weight = float(request.form.get('weight'))*1000
+                height = float(request.form.get('height'))*10
                 date = request.form.get('date')
                 if date:
                     annee, mois, jour = date.split("-")
@@ -811,8 +813,8 @@ def update_pronostic():
                 pronostic_done = True
                 prono_sex = pronostic_utilisateur.sex
                 prono_name = pronostic_utilisateur.name
-                prono_weight = pronostic_utilisateur.weight
-                prono_height = pronostic_utilisateur.height
+                prono_weight = (pronostic_utilisateur.weight)/1000
+                prono_height = (pronostic_utilisateur.height)/10
                 prono_date = pronostic_utilisateur.date
                 
                 
@@ -830,6 +832,7 @@ def all_pronostics():
     
     current_project_id = session['selected_project']['id']
     current_project = Project.objects(id=current_project_id).first()
+
     end_pronostics = current_project.end_pronostics
     
     pronostic_ids = current_project.pronostic  # Cette liste contient les IDs des pronostics
@@ -847,6 +850,8 @@ def all_pronostics():
     height_values = []
     timestamps = []
     names = {}
+    
+    print(number_of_pronostics)
     
     for pronostic in pronostics:
          
@@ -890,7 +895,7 @@ def all_pronostics():
     names = dict(sorted(names.items(), key=lambda item: item[1], reverse=True))
 
     
-    return render_template('all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice)
+    return render_template('all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, number_of_pronostics=number_of_pronostics, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice)
 
 @views.route('/pronostic_winner', methods=['GET', 'POST'])
 @login_required
