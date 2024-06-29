@@ -876,11 +876,11 @@ def all_pronostics():
 
     #Poids moyen
     average_weight = sum(weight_values) / len(weight_values)
-    average_weight = (round(average_weight, 1))/1000 #Je divise par 1000 pour avoir le poids en kg
+    average_weight = round((average_weight, 1)/1000) #Je divise par 1000 pour avoir le poids en kg
 
     #Taille moyenne
     average_height = sum(height_values) / len(height_values)
-    average_height = (round(average_height, 1))/10 #Je divise par 100 pour avoir la taille en cm
+    average_height = round((average_height, 1)/10) #Je divise par 100 pour avoir la taille en cm
     
     #Date moyenne
     average_timestamp = sum(timestamps) / len(timestamps)
