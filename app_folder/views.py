@@ -10,7 +10,6 @@ from bson import ObjectId
 # import requests
 
 
-
 views = Blueprint("views", __name__)
 
 #VARIABLES INITIALES
@@ -21,25 +20,25 @@ scores_pronostics = {
         'bad': 0
     },
     'Name':{
-        'good': 5,
+        'good': 20,
         'bad': 0
     },
     'Weight':{
-        'good': 5,
+        'good': 10,
         'middle_1': 3,
         'middle_2': 1,
         'bad': 0
     },
     'Height':{
-        'good': 5,
+        'good': 10,
         'middle_1': 3,
         'middle_2': 1,
         'bad': 0
     },
     'Date':{
-        'good': 15,
-        'middle_1': 10,
-        'middle_2': 5,
+        'good': 10,
+        'middle_1': 3,
+        'middle_2': 1,
         'bad': 0
     },
     'Total_possible': 0
@@ -55,11 +54,13 @@ def new_pronostic(user, current_project_id, current_project, pronostics_for_curr
     if request.method == 'POST':
         sex = request.form.get('sex')
         name = request.form.get('name')
-        weight = (request.form.get('weight'))*1000 #Je multiplie par 1000 pour avoir le poids en grammes
-        height = (request.form.get('height'))*10 #Je multiplie par 100 pour avoir la taille en mm
+        weight = float(request.form.get('weight'))*1000 #Je multiplie par 1000 pour avoir le poids en grammes
+        height = float(request.form.get('height'))*10 #Je multiplie par 100 pour avoir la taille en mm
         date = request.form.get('date')
         annee, mois, jour = date.split("-")
         date =  f"{jour}/{mois}/{annee}"
+        
+        name = capitalize_name(name)
                 
         new_pronostic = Pronostic(
             user=user,
@@ -261,6 +262,16 @@ def get_gender_choice(current_project):
         pass
     
     return gender_choice
+
+#Fonction permettant d'avoir les noms, même composés, avec les premies lettres en majuscule
+def capitalize_name(name):
+    # Diviser le prénom par les tirets et les espaces
+    parts = name.replace('-', ' - ').split()
+    # Capitaliser chaque partie du prénom
+    capitalized_parts = [part.capitalize() for part in parts]
+    # Réassembler les parties avec les tirets et les espaces
+    result = ' '.join(capitalized_parts).replace(' - ', '-')
+    return result
 
 #ROUTES -------------------------------------------------------------------------------------------------------------
 @views.route('/')

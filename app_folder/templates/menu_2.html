@@ -29,9 +29,10 @@
                 <div class = "pronostic_title">
                     <label for="name" >Le sexe</label>
                     <p class="pronostic_answer">{{ prono_sex }}
-
-                    {%if end_pronostics == True%}
-                        : {{ score_prono_user.Sex }}/{{ scores_pronostics['Sex']['good'] }}
+                    {% if user_is_admin == False %}
+                        {%if end_pronostics == True%}
+                            : {{ score_prono_user.Sex }}/{{ scores_pronostics['Sex']['good'] }}
+                        {%endif%}
                     {%endif%}
                     </p>
                 </div>
@@ -40,8 +41,10 @@
                 <div class = "pronostic_title">
                     <label for="name" >Le prénom</label>
                     <p class="pronostic_answer">{{ prono_name }}
-                    {%if end_pronostics == True%}
-                        : {{ score_prono_user.Name }}/{{ scores_pronostics['Name']['good'] }}
+                    {% if user_is_admin == False %}
+                        {%if end_pronostics == True%}
+                            : {{ score_prono_user.Name }}/{{ scores_pronostics['Name']['good'] }}
+                        {%endif%}
                     {%endif%}
                     </p>
                 </div>
@@ -50,8 +53,11 @@
                 <div class = "pronostic_title">
                     <label for="weight" >Le poids</label>
                     <p class="pronostic_answer">{{ prono_weight }} kilogrammes
-                    {%if end_pronostics == True%}
-                        : {{ score_prono_user.Weight }}/{{ scores_pronostics['Weight']['good'] }}
+
+                    {% if user_is_admin == False %}
+                        {%if end_pronostics == True%}
+                            : {{ score_prono_user.Weight }}/{{ scores_pronostics['Weight']['good'] }}
+                        {%endif%}
                     {%endif%}
                     </p>
                 </div>
@@ -60,8 +66,11 @@
                 <div class = "pronostic_title">
                     <label for="height" >La taille</label>
                     <p class="pronostic_answer">{{ prono_height }} centimètres
-                    {%if end_pronostics == True%}
-                        : {{ score_prono_user.Height }}/{{ scores_pronostics['Height']['good'] }}
+
+                    {% if user_is_admin == False %}
+                        {%if end_pronostics == True%}
+                            : {{ score_prono_user.Height }}/{{ scores_pronostics['Height']['good'] }}
+                        {%endif%}
                     {%endif%}
                     </p>
                 </div>
@@ -70,17 +79,23 @@
                 <div class = "pronostic_title">
                     <label for="date" >La date</label>
                     <p class="pronostic_answer">{{ prono_date }}
-                    {%if end_pronostics == True%}
-                        : {{ score_prono_user.Date }}/{{ scores_pronostics['Date']['good'] }}
+
+                    {% if user_is_admin == False %}
+                        {%if end_pronostics == True%}
+                            : {{ score_prono_user.Date }}/{{ scores_pronostics['Date']['good'] }}
+                        {%endif%}
                     {%endif%}
                     </p>
                 </div>
 
                 <!-- Score total ----------------------------------------- -->
                 <div class = "pronostic_title">
+                {% if user_is_admin == False %}
                     {%if end_pronostics == True%}
-                        Score final : {{ score_prono_user.Total }}/{{total_possible}}
+                        <label for="date" >Score Total</label>
+                        <p class="pronostic_answer">{{ score_prono_user.Total }}/{{total_possible}}</p>
                     {%endif%}
+                {%endif%}
                 </div>
                 
 
