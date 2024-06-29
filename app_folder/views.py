@@ -112,15 +112,15 @@ def elements_for_base_template(user_id):
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
     
-    user_mail = current_user.email
-    if user_mail == "gilles@gilles.com":
-        super_admin = True
+    # user_mail = current_user.email
+    # if user_mail == "gilles@gilles.com":
+    #     super_admin = True
         
     return {
         'count_projects' : count_projects,
         'projects_dict' : projects_dict,
         'project_name_in_session' : project_in_session,
-        'super_admin' : super_admin
+        # 'super_admin' : super_admin
             }
 
 #Fonctions appelées par elements_for_base_template()
