@@ -170,8 +170,11 @@
                         <div class = "pronostic_title">
                             <label for="date" >La date</label>
                             {% if user_is_admin %}
+
                             {%else%}
-                                <p class="pronostic_answer">Date du terme : 10 novembre</p>
+                                {%if due_date != None %}
+                                <p class="pronostic_answer">Date du terme : {{due_date}}</p>
+                                {%endif%}
                             {%endif%}
                         </div>
                         

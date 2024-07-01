@@ -44,7 +44,7 @@ def login():
                     
                     else:
                         login_user(user, remember=True)
-                        return redirect(url_for('views.home_page', count_projects=count_projects))
+                        return redirect(url_for('views.home_page'))
                 else:
                     return render_template('login.html', error="Mauvais mot de passe !", count_projects=count_projects)
             

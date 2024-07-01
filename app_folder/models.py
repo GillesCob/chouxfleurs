@@ -21,6 +21,7 @@ class Project(Document):
     name = StringField(max_length=150)
     admin = ReferenceField('User', reverse_delete_rule=CASCADE)
     users = ListField()
+    due_date = DateTimeField()
     pronostic = ListField()
     product = ListField()
     end_pronostics = BooleanField(default=False)

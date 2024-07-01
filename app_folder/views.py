@@ -111,6 +111,7 @@ def elements_for_base_template(user_id):
     count_projects = count_user_in_project(user_id)
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
+    print(f"Count projects = {count_projects}")
     
     # user_mail = current_user.email
     # if user_mail == "gilles@gilles.com":
@@ -285,10 +286,34 @@ def home_page():
     if current_user.is_authenticated:
         user_id = current_user.id
         elements_for_base = elements_for_base_template(user_id)
+        
+        if 'selected_project' not in session:
+            user_is_admin_project = Project.objects(admin=user_id).first()
+            user_in_project = Project.objects(users__contains=user_id) #user_id dans la liste users d'un projet ?
+            
+            if user_is_admin_project :
+                print("J'ai un projet ou je suis admin")
+                session['selected_project'] = { #Création de la session
+                    'id': str(user_is_admin_project.id),
+                    'name': user_is_admin_project.name
+                }
+            
+            elif user_in_project:
+                print("Je n'ai pas de projet ou je suis admin")
+                first_project = user_in_project.first() 
+                session['selected_project'] = { #Création de la session
+                    'id': str(first_project.id),
+                    'name': first_project.name
+                }
+                
+            print(session['selected_project']['id'])
+            print("COUCOU BASE")
+            return redirect(url_for('views.home_page'))
+        
+        print("COUCOU relance page 2")
         return render_template('home.html', **elements_for_base)
-    
-    count_projects=0
-    return render_template('home.html', count_projects=count_projects)
+    print("COUCOU relance page")
+    return render_template('home.html', count_projects=0)
 
 #ROUTES "LISTE NAISSANCE" -------------------------------------------------------------------------------------------------------------
 @views.route('/menu_1')
@@ -671,6 +696,16 @@ def menu_2():
         current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
         end_pronostics = current_project.end_pronostics
         admin_id = current_project.admin.id
+        
+        try:
+            due_date = current_project.due_date
+            print(f"Date de therme : {due_date}")
+            due_date = due_date.strftime('%d/%m/%Y')
+
+        except Exception as e:
+            due_date = None
+            print(f"Error: {e}")
+            
         user_is_admin = (user_id == admin_id)
         
         pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
@@ -716,8 +751,7 @@ def menu_2():
                                 }
                                 
                                 total_possible = (scores_pronostics['Total_possible'])
-                                print(f"total_possible : {total_possible}")
-
+                                print("JE SUIS LA")
                                 return render_template('menu_2.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_menu_2=go_to_menu_2, score_prono_user=score_prono_user, scores_pronostics=scores_pronostics, total_possible=total_possible, **elements_for_base)
                         
                         else:
@@ -759,7 +793,8 @@ def menu_2():
         return redirect(url_for('views.my_projects', user=current_user, **elements_for_base))
     
     #J'arrive ici si je n'ai pas encore fait mon prono pour le projet actuel
-    return render_template('menu_2.html', user_is_admin=user_is_admin, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, **elements_for_base)
+    print("HELLO")
+    return render_template('menu_2.html', user_is_admin=user_is_admin, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, due_date=due_date, **elements_for_base)
 
 @views.route('/update_pronostic', methods=['GET', 'POST']) 
 @login_required
@@ -1349,6 +1384,32 @@ def change_email():
         return redirect(url_for('views.my_profil'))
         
     return render_template('change_email.html', user=current_user, user_email=user_email, **elements_for_base)
+
+@views.route('/change_due_date', methods=['GET', 'POST'])
+@login_required
+def change_due_date():
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+    
+    project = Project.objects(admin=user_id).first()
+    try:
+        #Je ne dois pas mettre le current mais le projet pour lequel le user est l'admin
+        due_date = project.due_date
+        due_date = due_date.strftime('%Y-%m-%d')
+        print(due_date)
+    except:
+        due_date = None
+    
+
+    if request.method == 'POST' :
+        due_date = request.form.get('due_date')
+        project.due_date = due_date
+        project.save()
+        
+        flash(f"Date du therme modifiée avec succès !", category='success')
+        return redirect(url_for('views.my_projects'))
+        
+    return render_template('change_due_date.html', due_date=due_date, **elements_for_base)
 
 @views.route('/delete_project', methods=['POST'], )
 @login_required
