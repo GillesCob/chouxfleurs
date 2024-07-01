@@ -49,7 +49,7 @@ class Product(Document):
     meta = {'collection': 'Products_collection'}
     
     project = ReferenceField('Project', reverse_delete_rule=CASCADE)
-    name = StringField(max_length=150)
+    name = StringField(max_length=50)
     description = StringField(max_length=150)
     price = IntField()
     already_paid = IntField()

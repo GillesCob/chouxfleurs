@@ -17,9 +17,9 @@
             <form method="post">
                 <label for="project_name">Mon RIB</label>
                 {% if actual_rib %}
-                    <input type="text" class="form-control text-center" name="rib" placeholder="{{actual_rib}}" required>
+                    <input type="text" class="form-control text-center" name="rib" placeholder="{{actual_rib}}" maxlength="150">
                 {% else %}
-                    <input type="text" class="form-control text-center" name="rib" placeholder="Votre RIB" required>
+                    <input type="text" class="form-control text-center" name="rib" placeholder="Votre RIB" maxlength="150" required>
                 {% endif %}
                 <button type="submit" class="my_btn validate-btn admin_button">Valider</button>
             </form>
