@@ -170,9 +170,9 @@ input[type="date"] {
 
 /* Boutons présents dans le projet ------------------------------------------------------ */
 .my_btn{
-    width: 150px;
+    width: 200px;
     margin: 10px;
-    padding: 10px 10px;
+    padding: 10px 20px;
 
     text-transform: uppercase;
     text-decoration: none;
@@ -187,6 +187,13 @@ input[type="date"] {
 
     display: inline-block; /* Pour s'aligner avec les éléments en ligne */
     position: relative; /* Permet de contrôler la position */
+}
+
+@media (max-width: 768px) {
+    .my_btn {
+        width: 100%; /* Taille adaptative pour les petits écrans */
+        max-width: 200px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
+    }
 }
 
 
@@ -460,5 +467,164 @@ tr:hover {
 .back-button-container {
     position: absolute;
 
+}
+
+/* Footer styles */
+.footer {
+    background-color: rgba(0, 0, 0, 0.881);
+    color: white;
+    padding: 20px 0;
+    width: 100%;
+}
+
+.footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer .footer-section {
+    margin: 0;
+}
+
+.footer .footer-links {
+    display: flex;
+    align-items: center;
+}
+
+.footer .footer-link {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px; /* Ajustement des marges entre les liens */
+}
+
+.footer .footer-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer .footer-links {
+        margin-top: 10px; /* Ajustement de la marge en mode mobile */
+    }
+}
+
+
+/* Wrapper to make the footer sticky */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 91.6vh;
+}
+
+main {
+    flex: 1;
+    padding-bottom: 60px; /* Hauteur du footer pour éviter de le recouvrir */
+}
+
+
+/* Pour la page de garde */
+.home_page_container {
+    margin: 20px;
+    text-align: center;
+    /* background-color: #666; */
+}
+
+/* Text Section */
+.text-section {
+    z-index: 2;
+    color: #333;
+    margin-bottom: 20px; /* Ajout d'une marge en bas pour l'espacement */
+    /* background-color: #6495ED; */
+}
+
+.text-paragraph {
+    margin: 15px 0;
+    max-width: 600px;
+}
+
+/* Logo Section */
+.logo-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px; /* Ajout d'une marge en haut pour l'espacement */
+    /* background-color: #FF69B4; */
+}
+
+.logo {
+    max-width: 100%;
+    height: auto;
+    opacity: 0.5;
+}
+
+/* Styles pour mobile */
+@media (max-width: 768px) {
+    .home_page_container {
+        margin-top: 30px;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .logo-section {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.1;
+    }
+
+    .logo {
+        max-width: 90%;
+        height: auto;
+    }
+}
+
+/* Styles pour ordinateur */
+@media (min-width: 769px) {
+    .home_page_container {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        padding: 10px;
+    }
+
+    .text-section {
+        text-align: left;
+        margin-bottom: 0;
+        max-width: 50%;
+    }
+
+    .logo-section {
+        position: relative;
+        max-width: 50%;
+        display: flex;
+        justify-content: center;
+        max-width: 300px;
+
+    }
+
+    .logo {
+        max-width: 100%;
+        height: auto;
+        opacity: 0.5;
+        transition: max-width 0.5s ease; /* Ajoute une transition douce */
+    }
+}
+
+/* Ajoutez cette nouvelle règle pour les tailles intermédiaires */
+@media (max-width: 1200px) {
+    .logo {
+        max-width: 80%; /* Ajustez le pourcentage selon les besoins */
+    }
+}
+
+@media (max-width: 992px) {
+    .logo {
+        max-width: 70%; /* Ajustez le pourcentage selon les besoins */
+    }
 }
 

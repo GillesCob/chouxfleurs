@@ -8,20 +8,76 @@
 </head>
 <body>
 
-<div class="my_container">
-    <h1>Page d'accueil en cours de création</h1>
-    {{it_works}}
-    <p>En attendant, inscrivez-vous, créez un projet ou rejoignez un projet existant</p>
-    <button type="button" class="my_btn" onclick="window.location.href='/my_projects'">Créer ou rejoindre un projet</button>
-</div>
+    <div class="home_page_container">
+        <div class="text-section text-center">
+            
+            <h2>Découvrez ChouxFleurs, le site dédié aux futurs parents !</h2>
+            
+            <p class="text-paragraph">
+                Invitez votre famille et amis afin de pronostiquer les détails du bébé à la naissance, créez et partagez simplement votre liste de naissance et faites profiter votre entourage de l'évolution de votre bébé à travers votre gallerie personnalisée !
+            </p>
+            <p class="text-paragraph">
+                Tout est fait afin de rendre ce moment unique le plus ludique possible et ainsi profiter pleinement de ce moment unique dans votre vie !
+            </p>
+        </div>
+        <div class="logo-section">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+        </div>
+    </div>
+
+    {% if user_informations.user_identified == True %}
+
+        {% if user_informations.user_is_admin_project == False %}
+            {% if user_informations.user_in_project == False %}
+                <div class="my_container">
+                    <h3>
+                        Créez ou rejoignez un projet pour commencer l'aventure !
+                    </h3>
+                    <a href="/my_projects" class="my_btn">Mes projets</a>
+                </div> 
+            {%else%}
+                <div class="my_container">
+                    {% if user_informations.user_did_pronostic == False %}
+                    <div class="my_container">
+                        <h3>
+                            Vous n'avez jamais fait de pronostic ? Rien de plus simple !
+                        </h3>
+                        <a href="/menu_2" class="my_btn">Faire un pronostic</a>
+                    </div>
+                    {%endif%}
+
+                    {% if user_informations.user_did_participation == False %}
+                    <div class="my_container">
+                        <h3>
+                            Participez, si vous le souhaitez, à une liste de naissance !
+                        </h3> 
+                        <a href="menu_1" class="my_btn">Liste de naissance</a>
+                    </div>
+                    {%endif%}
+
+
+                </div>
+            {%endif%}
+        {%endif%}
+    {%else%}
+        <div class="my_container">
+            <h3>
+                Ne perdez plus de temps pour nous rejoindre !
+            </h3>
+            <div>
+                <a href="/login" class="my_btn">Se connecter</a>
+                <a href="/register" class="my_btn">S'inscrire</a>
+            </div>
+        </div> 
+    {%endif%}
 
 
 <!--Night mode-->
-<style>
+<!-- <style>
     body{
         background-color: #000000;
         color: white;
     }
-</style>
+</style> -->
 
 {% endblock %}

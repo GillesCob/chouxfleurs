@@ -111,12 +111,7 @@ def elements_for_base_template(user_id):
     count_projects = count_user_in_project(user_id)
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
-    print(f"Count projects = {count_projects}")
-    
-    # user_mail = current_user.email
-    # if user_mail == "gilles@gilles.com":
-    #     super_admin = True
-        
+            
     return {
         'count_projects' : count_projects,
         'projects_dict' : projects_dict,
@@ -283,37 +278,63 @@ def capitalize_name(name):
 @views.route('/')
 @views.route('/home_page',methods=['GET', 'POST'])
 def home_page():
+    user_identified = False
+    
     if current_user.is_authenticated:
         user_id = current_user.id
+        user_identified = True
+        
+        user = User.objects(id=user_id).first()
+        
+        user_in_project = Project.objects(users__contains=user_id)
+        if user_in_project:
+            user_in_project = True
+        else:
+            user_in_project = False
+            
+        user_is_admin_project = Project.objects(admin=user_id).first()
+        if user_is_admin_project == None:
+            user_is_admin_project = False
+        user_did_pronostic = bool(user.pronostic)
+        user_did_participation = bool(user.participation)
+        user_informations = {
+            'user_identified': user_identified,
+            'user_in_project': user_in_project,
+            'user_is_admin_project': user_is_admin_project,
+            'user_did_pronostic': user_did_pronostic,
+            'user_did_participation': user_did_participation
+        }
+
         elements_for_base = elements_for_base_template(user_id)
         
         if 'selected_project' not in session:
-            user_is_admin_project = Project.objects(admin=user_id).first()
-            user_in_project = Project.objects(users__contains=user_id) #user_id dans la liste users d'un projet ?
+             #user_id dans la liste users d'un projet ?
             
             if user_is_admin_project :
-                print("J'ai un projet ou je suis admin")
                 session['selected_project'] = { #Création de la session
                     'id': str(user_is_admin_project.id),
                     'name': user_is_admin_project.name
                 }
             
             elif user_in_project:
-                print("Je n'ai pas de projet ou je suis admin")
                 first_project = user_in_project.first() 
                 session['selected_project'] = { #Création de la session
                     'id': str(first_project.id),
                     'name': first_project.name
                 }
+            
+            else:
+                print("Je n'ai pas de projet du tout")
+                return render_template('home.html', user_informations=user_informations, **elements_for_base)
                 
-            print(session['selected_project']['id'])
-            print("COUCOU BASE")
             return redirect(url_for('views.home_page'))
         
-        print("COUCOU relance page 2")
-        return render_template('home.html', **elements_for_base)
-    print("COUCOU relance page")
-    return render_template('home.html', count_projects=0)
+        return render_template('home.html', user_informations=user_informations, **elements_for_base)
+    
+    user_informations = {
+        'user_identified': user_identified,
+    }
+    return render_template('home.html', user_informations=user_informations, count_projects=0)
 
 #ROUTES "LISTE NAISSANCE" -------------------------------------------------------------------------------------------------------------
 @views.route('/menu_1')
@@ -1417,12 +1438,11 @@ def delete_project():
     user_id = current_user.id #J'ai l'id de ce user
     elements_for_base = elements_for_base_template(user_id)
 
-    #Récupération de toutes les participations pour le projet en cours
     project = Project.objects(admin=user_id).first() #Récup du projet
     
     products_in_project = project.product #Récup de la liste des produits du projet
-    products_participations = []
-    
+    products_participations = [] #Je mettrai dans cette listes toutes les participations pour les produits du projet à supprimer
+
     pronostics_in_project = project.pronostic #Récup de la liste des pronostics du projet
     pronostics_participations = []
     
@@ -1430,29 +1450,29 @@ def delete_project():
         product = Product.objects(id=(product_id)).first() #J'ai l'objet produit
         
         participations = product.participation #Je récupère la liste des participations pour ce produit
-        
         for participation in participations:
-            products_participations.append(str(participation)) #J'ajoute toutes les participations dans une liste
-            
-    for pronostic in pronostics_in_project:
-        pronostics_participations.append(str(pronostic))
+            products_participations.append(str(participation)) #J'ajoute toutes les ID des participations dans une liste
+
+    for pronostic_id in pronostics_in_project:
+        pronostics_participations.append(str(pronostic_id))
                  
             
-            
     for user in project.users: #Pour chaque user dans le projet que je souhaite supprimer
-        user_obj = User.objects(id=user).first()
+        user_obj = User.objects(id=user).first() #Je récupe l'objet user
         
-        user_participations = user_obj.participation #Je récupère la liste des participations pour ce user
-        user_pronostics = user_obj.pronostic #Je récupère la liste des pronostics pour ce user
-        for user_participation in user_participations:
-            if user_participation == participation: #Si la participation du user est dans la liste des participations du projet
-                user_participations.remove(user_participation)
+        user_participations = user_obj.participation #Je récupère la liste des participations du user
+        user_pronostics = user_obj.pronostic #Je récupère la liste des pronostics du user
+        
+        for user_participation in user_participations: #Pour chaque participation du user
+            if user_participation in products_participations: #Si la participation du user est dans la liste des participations
+                user_participations.remove(user_participation) #Je retire les participations du user dans le projet à supprimer
                 user_obj.save()
+        
         for user_pronostic in user_pronostics:
-            if user_pronostic == pronostic:
+            if user_pronostic in pronostics_participations:
                 user_pronostics.remove(user_pronostic)
                 user_obj.save()
-                
+          
     project.delete() #Je supprime le projet de la collection des projets
     
     session.clear()
