@@ -18,7 +18,7 @@ class User(Document, UserMixin):
 class Project(Document):
     meta = {'collection': 'projects_collection'}
     
-    name = StringField(max_length=150)
+    name = StringField(max_length=20)
     admin = ReferenceField('User', reverse_delete_rule=CASCADE)
     users = ListField()
     due_date = DateTimeField()

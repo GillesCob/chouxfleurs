@@ -184,9 +184,23 @@
 //Mise en forme du message informant du copier/coller du lien d'affiliation
     function copyTextToClipboard() {
         const textToCopy = "https://bb-site-9cb27accfdde.herokuapp.com//register?project_id={{project_id}}";
+        const buttonRect = event.currentTarget.getBoundingClientRect(); // Récupère les dimensions du bouton
+
+        
         const notification = document.createElement('div');
         notification.classList.add('copy-notification');
         notification.textContent = "Lien copié";
+
+        // Calcule la position verticale pour placer la notification sous le bouton
+        const notificationTop = buttonRect.top;
+
+        //// Calcule la position horizontale pour placer la notification au milieu du bouton
+        const notificationLeft = buttonRect.left;
+
+        // Positionne la notification
+        notification.style.position = 'absolute';
+        notification.style.left = `${notificationLeft}px`; // Place la notification à la même position horizontale que le bouton
+        notification.style.top = `${notificationTop}px`; // Place la notification sous le bouton
 
         document.body.appendChild(notification);
 
@@ -200,17 +214,32 @@
     }
 
 //Mise en forme du message informant du copier/coller du RIB
-    function copyRIBToClipboard(event) {
+function copyRIBToClipboard(event) {
     const textToCopy = event.currentTarget.getAttribute('data-rib');
+    const buttonRect = event.currentTarget.getBoundingClientRect(); // Récupère les dimensions du bouton
+
     const notification = document.createElement('div');
     notification.classList.add('copy-notification');
     notification.textContent = "RIB copié";
 
+    // Calcule la position verticale pour placer la notification sous le bouton
+    const notificationTop = buttonRect.top;
+
+    //// Calcule la position horizontale pour placer la notification au milieu du bouton
+    const notificationLeft = buttonRect.left;
+
+    // Positionne la notification
+    notification.style.position = 'absolute';
+    notification.style.left = `${notificationLeft}px`; // Place la notification à la même position horizontale que le bouton
+    notification.style.top = `${notificationTop}px`; // Place la notification sous le bouton
+
+    // Ajoute la notification au body
     document.body.appendChild(notification);
 
+    // Copie le texte dans le presse-papiers
     navigator.clipboard.writeText(textToCopy).then(function() {
         setTimeout(function() {
-            notification.remove();
+            notification.remove(); // Supprime la notification après 2 secondes
         }, 2000);
     }, function(err) {
         console.error('Erreur lors de la copie du RIB: ', err);

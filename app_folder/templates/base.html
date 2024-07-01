@@ -37,7 +37,7 @@
                     {% if count_projects >1 %} 
                         <a class="nav-link dropdown-toggle navbar-brand" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {{project_name_in_session}}</a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu" style="min-width: 150px;">
                             <li class="nav-item">
                                 {% for project_name, project_details in projects_dict.items() %}
                                     <form action="select_project" method="post">

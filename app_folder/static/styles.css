@@ -203,6 +203,8 @@ input[type="date"] {
 
 @media (max-width: 768px) {
     .my_btn {
+        font-size: 0.9em;
+        padding: 5px 10px;
         width: 100%; /* Taille adaptative pour les petits écrans */
         max-width: 200px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
     }
@@ -244,6 +246,15 @@ input[type="date"] {
     text-decoration: underline;
     text-decoration-thickness: 2px;
     border: 3px solid #000000;
+}
+
+@media (max-width: 768px) {
+    .btn_selected {
+        font-size: 1em;
+        padding: 5px 10px;
+        width: 100%; /* Taille adaptative pour les petits écrans */
+        min-width: 150px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
+    }
 }
 
 .gender_girl {
@@ -434,6 +445,7 @@ input[type="number"]::-moz-spin-buttons {
     position: absolute;
     top: calc(10%); /* Positionné 20px en dessous du bas de .my_container */
     right: calc(70%); /* Positionné 200px à gauche du bord droit de .my_container */
+    min-width: 120px;
     background-color: rgb(185, 145, 108);
     color: #fff;
     padding: 10px 20px;
@@ -586,11 +598,11 @@ main {
         top: 40%;
         left: 50%;
         transform: translate(-50%, -50%);
-        opacity: 0.1;
+        opacity: 0.4;
     }
 
     .logo {
-        max-width: 90%;
+        max-width: 100%;
         height: auto;
     }
 }
@@ -630,13 +642,13 @@ main {
 /* Ajoutez cette nouvelle règle pour les tailles intermédiaires */
 @media (max-width: 1200px) {
     .logo {
-        max-width: 80%; /* Ajustez le pourcentage selon les besoins */
+        max-width: 100%; /* Ajustez le pourcentage selon les besoins */
     }
 }
 
 @media (max-width: 992px) {
     .logo {
-        max-width: 70%; /* Ajustez le pourcentage selon les besoins */
+        max-width: 100%; /* Ajustez le pourcentage selon les besoins */
     }
 }
 

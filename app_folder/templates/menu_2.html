@@ -185,17 +185,13 @@
                         {% if user_is_admin %}
                             <!-- <button type="submit" class="my_btn" id="validate_prono">Donner les réponses</button> -->
                             <div class="my_container">
-                                <button type="submit" class="my_btn" id="validate_prono">Donner les réponses</button>
-                            </div>
-                            {%if at_least_one_pronostic == True %}
-                                <div class="my_container">
-                                    <button type="button" class="my_btn" onclick="window.location.href='/all_pronostics'">Voir la tendance</button>
-                                </div>
-                            {%endif%}
+                                <button type="submit" class="my_btn mb-1" id="validate_prono">Donner les réponses</button>
+                                {%if at_least_one_pronostic == True %}
+                                    <button type="button" class="my_btn mt-1" onclick="window.location.href='/all_pronostics'">Voir la tendance</button>
+                                {%endif%}
 
-                        {%else%}
-                            <button type="submit" class="my_btn" id="validate_prono">Valider info</button>
                         {%endif%}
+
                         
             
                     </form>
