@@ -13,7 +13,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
         <!-- Icône dans l'onglet -->
-        <link rel="icon" href="https://cvws.icloud-content.com/B/AcaiQpTnWAl7xMqUMLMNlW-NqtfhAap-aMVJmqbSCFGlY3s6LaFtdlaz/Logo.png?o=Aqcg3xEKiYHfYbdvzqHhi1bK1jg1sZ24EJN37eZJog2N&v=1&x=3&a=CAogn4E7KhpmXc1sIKeM6tb82Kt1_3e4dCbPeZJd1SlOtH0SaxDM3LL0hjIYzLmO9oYyIgEAUgSNqtfhWgRtdlazaiUPKEaLMbmHcW3yTe9820HKoviNbq0egiZ4B4tB10Hgx2Yu0P19ciWEG56-EgpBxI2dMCMTkIFmALIStA5IAWs70BY06VA5F6XbENls&e=1719845231&fl=&r=85aaf2ef-2f8d-45b8-a812-e68c38450003-1&k=o6dvqdFy-gmpy4GbtRU6XQ&ckc=com.apple.clouddocs&ckz=com.apple.CloudDocs&p=122&s=Eyye36h4w8REqCkdEWKs9GpdUL4&cd=i" type="image/x-icon">
+        <link rel="icon" href="https://www.gillescobigo.com/wp-content/uploads/2024/07/Logo.png" type="image/x-icon">
 
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
@@ -32,22 +32,28 @@
             <!--https://getbootstrap.com/docs/5.3/components/navbar/-->
             <nav class="navbar navbar-expand-lg bg-body-tertiary">
                 <div class="container-fluid">
+                    
                     <img src="https://www.gillescobigo.com/wp-content/uploads/2024/07/Logo.png" alt="Logo" class="logo" width="50px" height="50px">
 
                     <!-- Je fais apparaitre une navbar pour passer d'un projet à un autre -->
                     {% if count_projects >1 %} 
+                    <div class="dropdown ms-2">
                         <a class="nav-link dropdown-toggle navbar-brand" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{project_name_in_session}}</a>
+                            {{project_name_in_session}}
+                        </a>
+
                         <ul class="dropdown-menu" style="min-width: 150px;">
-                            <li class="nav-item">
-                                {% for project_name, project_details in projects_dict.items() %}
+                            {% for project_name, project_details in projects_dict.items() %}
+                                <li class="nav-item">
                                     <form action="select_project" method="post">
                                         <input type="hidden" name="project_id" value="{{project_details.project_id_key}}">
                                         <button type="submit" class="nav-link">{{ project_name }}</button>
                                     </form>
-                                {% endfor %}
-                            </li>
+                                </li>
+                            {% endfor %}
                         </ul>
+                    </div>
+                        
 
                     <!-- Je mets juste le nom du site -->
                     {%elif count_projects == 0 %} 
@@ -127,7 +133,7 @@
                 {% if messages %}
                     {% for category, message in messages %}
                     {% if category == "error" %}
-                    <div class="alert alert-danger alter-dismissible fade show" role="alert"> <!-- Message en rouge car "danger" -->
+                    <div class="alert alert-danger alter-dismissible fade show" role="alert"> 
                         {{message}}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -150,7 +156,7 @@
         <footer class="footer">
             <div class="container">
                 <div class="footer-section">
-                    &copy; 2024 ChouxFleurs. Tous droits réservés.
+                    &copy; 2024 ChouxFleurs
                 </div>
                 <div class="footer-section footer-links">
                     <a href="https://tally.so/r/n0x9oy" class="footer-link" target="_blank">Rapporter un bug</a>
