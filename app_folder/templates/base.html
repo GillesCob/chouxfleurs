@@ -32,6 +32,7 @@
             <!--https://getbootstrap.com/docs/5.3/components/navbar/-->
             <nav class="navbar navbar-expand-lg bg-body-tertiary">
                 <div class="container-fluid">
+                    <img src="https://www.gillescobigo.com/wp-content/uploads/2024/07/Logo.png" alt="Logo" class="logo" width="50px" height="50px">
 
                     <!-- Je fais apparaitre une navbar pour passer d'un projet à un autre -->
                     {% if count_projects >1 %} 
@@ -48,7 +49,7 @@
                             </li>
                         </ul>
 
-                    <!-- Je mets juste un titre neutre car pas de projet encore -->
+                    <!-- Je mets juste le nom du site -->
                     {%elif count_projects == 0 %} 
                         <a class="navbar-brand" href="{{url_for('views.home_page')}}">ChouxFleurs</a>
 
