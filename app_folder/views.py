@@ -1406,7 +1406,7 @@ def change_due_date():
         project.due_date = due_date
         project.save()
         
-        flash(f"Date du therme modifiée avec succès !", category='success')
+        flash(f"Date du terme modifiée avec succès !", category='success')
         return redirect(url_for('views.my_projects'))
         
     return render_template('change_due_date.html', due_date=due_date, **elements_for_base)
