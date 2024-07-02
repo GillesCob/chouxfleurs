@@ -74,6 +74,26 @@ h6{
     margin-top: 30px;
     margin-bottom: 10px;
 }
+
+.caligraphy {
+    font-family: jost; /* Choisissez une police de caractères de style calligraphique */
+    font-size: 1.5em; /* Taille de la police */
+    line-height: 1.5; /* Hauteur de ligne pour l'espacement */
+    letter-spacing: 1px; /* Espacement entre les lettres */
+    text-align: justify; /* Justification du texte pour un aspect plus fluide */
+    padding: 10px; /* Espacement intérieur autour du texte */
+    text-align: center;
+
+  }
+  
+.title_caligraphy {
+    font-size: 2em; /* Taille de la police */
+}
+
+.sub_caligraphy {
+    font-size: 1em; /* Taille de la police */
+    margin-top: -25px;
+}
     
     
 /* Styles pour les cartes ------------------------------------------------------ */
@@ -619,14 +639,10 @@ main {
 .text-section {
     z-index: 2;
     color: #333;
-    margin-bottom: 20px; /* Ajout d'une marge en bas pour l'espacement */
     /* background-color: #6495ED; */
 }
 
-.text-paragraph {
-    margin: 15px 0;
-    max-width: 600px;
-}
+
 
 /* Logo Section */
 .logo-section {
