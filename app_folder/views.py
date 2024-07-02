@@ -1328,7 +1328,7 @@ def create_project():
             }
         
         flash(f'Projet "{new_project.name}" créé avec succès !', category='success')
-        return redirect(url_for('views.menu_2', **elements_for_base))
+        return redirect(url_for('views.my_projects', **elements_for_base))
         
     return render_template('create_project.html', user=current_user, **elements_for_base)
 
