@@ -9,82 +9,84 @@
 <body>
     <div class="my_container">
         <h1 class="title_caligraphy caligraphy">Bienvenue sur ChouxFleurs, le site dédié aux futurs parents !</h1>
-    </div>
+        
 
-    <div class="home_page_container">
-        <div class="text-section text-center">
-            
-            <h4 class="caligraphy">A vos marques</h4>
-            <p class="caligraphy sub_caligraphy">
-                Invitez votre famille et vos amis à faire leurs pronostics sur la naissance de votre bébé !
-            </p>
+        <div class="home_page_container">
+            <div class="text-section text-center">
+                
+                <h4 class="caligraphy">A vos marques</h4>
+                <p class="caligraphy sub_caligraphy">
+                    Invitez votre famille et vos amis à faire leurs pronostics sur la naissance de votre bébé !
+                </p>
 
-            <h2 class="caligraphy">Prêts</h2>
-            <p class="caligraphy sub_caligraphy">
-                Partagez votre liste de naissance en quelques clics !             </p>
+                <h2 class="caligraphy">Prêts</h2>
+                <p class="caligraphy sub_caligraphy">
+                    Partagez votre liste de naissance en quelques clics !             </p>
 
-            <h2 class="caligraphy">Partez</h2>
-            <p class="caligraphy sub_caligraphy">
-                Et parce que vos proches ne sont pas toujours à vos cotés pour voir bébé grandir, diffusez vos photos sur votre galerie personnalisée afin de leur faire partager vos plus beaux moments.
-            </p>
+                <h2 class="caligraphy">Partez</h2>
+                <p class="caligraphy sub_caligraphy">
+                    Et parce que vos proches ne sont pas toujours à vos cotés pour voir bébé grandir, diffusez vos photos sur votre galerie personnalisée afin de leur partager vos plus beaux moments.
+                </p>
 
-        </div>
-        <div class="logo-section">
-            <img src="https://www.gillescobigo.com/wp-content/uploads/2024/07/Logo.png" alt="Logo" class="logo">
-        </div>
-    </div>
-
-    {% if user_informations.user_identified == True %}
-
-        {% if user_informations.user_is_admin_project == False %}
-            {% if user_informations.user_in_project == False %}
-                <div class="my_container">
-                    <h3>Créez ou rejoignez un projet pour commencer l'aventure !</h3>
-                </div> 
-                <div class="btn_container">
-                    <a href="/my_projects" class="my_btn">Mes projets</a>
-                </div>
-            {%else%}
-                <div class="my_container">
-                    {% if user_informations.user_did_pronostic == False %}
-                    <div class="my_container">
-                        <h3>
-                            Vous n'avez jamais fait de pronostic ? Rien de plus simple !
-                        </h3>
-                        <div class="btn_container">
-                            <a href="/menu_2" class="my_btn">Faire un pronostic</a>
-                        </div>
-                    </div>
-                    {%endif%}
-
-                    {% if user_informations.user_did_participation == False %}
-                    <div class="my_container">
-                        <h3>
-                            Participez, si vous le souhaitez, à une liste de naissance !
-                        </h3> 
-                        <div class="btn_container">
-                            <a href="menu_1" class="my_btn">Liste de naissance</a>
-                        </div>
-                    </div>
-                    {%endif%}
-
-
-                </div>
-            {%endif%}
-        {%endif%}
-    {%else%}
-        <div class="my_container">
-            <h3>
-                Ne perdez plus de temps pour nous rejoindre !
-            </h3>
-            <div class="two_btn_container">
-                <a href="/login" class="my_btn">Se connecter</a>
-                <a href="/register" class="my_btn">S'inscrire</a>
             </div>
-        </div> 
-    {%endif%}
+            <div class="logo-section">
+                <img src="https://www.gillescobigo.com/wp-content/uploads/2024/07/Logo.png" alt="Logo" class="logo">
+            </div>
+        </div>
+
+        {% if user_informations.user_identified == True %}
+
+            {% if user_informations.user_is_admin_project == False %}
+                {% if user_informations.user_in_project == False %}
+                    <div class="my_container">
+                        <h3>Créez ou rejoignez un projet pour commencer l'aventure !</h3>
+                    </div> 
+                    <div class="btn_container">
+                        <a href="/my_projects" class="my_btn">Mes projets</a>
+                    </div>
+                {%else%}
+                    <div class="my_container">
+                        {% if user_informations.user_did_pronostic == False %}
+                        <div class="my_container">
+                            <h3>
+                                Vous n'avez jamais fait de pronostic ? Rien de plus simple !
+                            </h3>
+                            <div class="btn_container">
+                                <a href="/menu_2" class="my_btn">Faire un pronostic</a>
+                            </div>
+                        </div>
+                        {%endif%}
+
+                        {% if user_informations.user_did_participation == False %}
+                        <div class="my_container">
+                            <h3>
+                                Participez, si vous le souhaitez, à une liste de naissance !
+                            </h3> 
+                            <div class="btn_container">
+                                <a href="menu_1" class="my_btn">Liste de naissance</a>
+                            </div>
+                        </div>
+                        {%endif%}
 
 
+                    </div>
+                {%endif%}
+            {%endif%}
+        {%else%}
+            <div class="my_container">
+                <h3>
+                    Ne perdez plus de temps pour nous rejoindre !
+                </h3>
+                <div class="two_btn_container">
+                    <button onclick="window.location.href='/login'" class="my_btn">Se connecter</button>
+                    <button onclick="window.location.href='/register'" class="my_btn">S'inscrire</button>
+                </div>
+            </div> 
+        {%endif%}
+    </div>
+    
+
+</body>
 <!--Night mode-->
 <!-- <style>
     body{
