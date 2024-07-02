@@ -1336,6 +1336,7 @@ def select_project():
             
             project_name = Project.objects(id=project_id).first().name
             session['selected_project'] = {'id': project_id, 'name': project_name}
+            
             flash(f'Vous êtes maintenant connecté à "{project_name}" !')
             return redirect(url_for('views.home_page', **elements_for_base))
             

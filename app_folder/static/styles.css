@@ -195,6 +195,8 @@ input[type="date"] {
     border-radius: 10px;
     cursor: pointer;
 
+    min-height: 40px;
+
     /* transition: background-color 1s ease; */
 
     display: inline-block; /* Pour s'aligner avec les éléments en ligne */
@@ -207,6 +209,7 @@ input[type="date"] {
         padding: 5px 10px;
         width: 100%; /* Taille adaptative pour les petits écrans */
         max-width: 200px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
+        
     }
 }
 
@@ -541,7 +544,7 @@ tr:hover {
 .wrapper {
     display: flex;
     flex-direction: column;
-    min-height: 91.6vh;
+    min-height: 100vh;
 }
 
 main {
@@ -652,3 +655,33 @@ main {
     }
 }
 
+
+
+.flash-message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    
+}
+
+.flash-success {
+    text-align: center;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    animation: fadeOut 2s forwards 2s;
+}
+
+.flash-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
