@@ -6,12 +6,22 @@
 
 
 {% block content %}
+    <div>
+        <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
+        <a href="{{ url_for('views.my_projects') }}">
+            <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+        </a>
+    </div>
+
     <div class="my_container">
         <div class="inert_card">
             <h1>Créer un projet</h1>
             <form method="post">
-                <input type="text" class="form-control text-center" name="project_name" placeholder="Nom du projet" required>                
-                <button type="submit" class="my_btn">Créer</button>
+                <input type="text" class="form-control text-center" name="project_name" placeholder="Nom du projet" maxlength="20" required>
+                <div class="my_container">
+                    <button type="submit" class="my_btn">Créer</button>
+                </div>
+                
             </form>
             {% if error %}
             <div class="alert alert-danger">{{ error }}</div>

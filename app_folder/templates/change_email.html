@@ -6,12 +6,19 @@
 
 
 {% block content %}
+    <div>
+        <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
+        <a href="{{ url_for('views.my_profil') }}">
+            <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+        </a>
+    </div>
+
     <div class="my_container">
         <div class="inert_card">
             <h1>Changer d'email</h1>
             <form method="post">
                 <label for="email">Adresse mail</label>
-                <input type="email" class="form-control text-center" name="new_email" placeholder="{{user_email}}" required>                
+                <input type="email" class="form-control text-center" name="new_email" value="{{user_email}}" required>                
                 <button type="submit" class="my_btn">Changer</button>
             </form>
             {% if error %}

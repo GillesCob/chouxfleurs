@@ -6,6 +6,11 @@
 
 
 {% block content %}
+    <!-- Mise en place d'une flèche pour revenir à l'environnement précédent -->
+    <a href="{{ url_for('views.my_projects') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+
     <div class="my_container">
         <div class="inert_card">
             <h1>Rejoindre un projet</h1>

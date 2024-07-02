@@ -3,28 +3,29 @@
     --my_btn_color: rgb(185, 145, 108); /* Par exemple, une couleur orange */
 }
 
+
+
 /* Mon contenair principal ------------------------------------------------------ */
 .my_container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    width: 100%; /* Largeur maximale de 100% */
+    max-width: 1500px; /* Limite la largeur maximale du container */
+    padding: 20px;
+    background-color: aqua;
+    margin: 0 auto; /* Centre horizontalement le conteneur */
     text-align: center;
-
     font-size: 0.9em;
-    font-family: jost;
-
-    margin: 25px ;
-
-    /* background-color: aqua; */
+    font-family: 'Jost', sans-serif;
 }
+
 
 /* Styles pour le textes / titres / ... ------------------------------------------------------ */
 
 h1{
-    font-size: 1.8em;
+    font-size: 1.7em;
     font-weight: bold;
-    margin-top: 30px;
-    margin-bottom: 10px;
+    margin: 15px 10px 10px 10px;
+    text-align: center;
+    font-family: jost;
 }
 
 h2{
@@ -104,7 +105,8 @@ h6{
 
 
 .product-card {
-    width: 300px;
+    width: 100%; /* Utiliser 100% de la largeur disponible */
+    max-width: 300px; /* Largeur maximale pour les grands écrans */
     min-height: 385px;
     background-color: #fff;
     border-radius: 10px;
@@ -112,8 +114,24 @@ h6{
     padding: 20px;
     text-align: center;
     transition: transform 0.3s ease;
-    margin-bottom: 10px;
+    margin: 10px auto; /* Centrer la carte et ajouter une marge en bas */
 }
+
+/* Media query pour les petits écrans */
+@media (max-width: 600px) {
+    .product-card {
+        width: 90%; /* Réduire la largeur pour les petits écrans */
+    }
+}
+
+/* Media query pour les très petits écrans (comme les téléphones) */
+@media (max-width: 400px) {
+    .product-card {
+        width: 95%; /* Réduire encore plus la largeur */
+        padding: 15px; /* Ajuster le padding pour s'adapter à la taille de l'écran */
+    }
+}
+
 
 .product-card:hover {
     transform: translateY(-5px);
@@ -129,12 +147,19 @@ h6{
     padding: 20px;
     text-align: center;
     transition: transform 0.3s ease;
-    margin-bottom: 10px;
+    margin: 10px auto; /* Centre horizontalement l'élément */
 }
 
+.my_projects_cards:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
+    cursor: pointer;
+}
 
+/* Cartes login, register, cartes pronos,   */
 .inert_card {
-    width: 300px;
+    width: 100%; /* Largeur de la carte en pourcentage de la largeur de l'écran */
+    max-width: 400px; /* Largeur maximale pour limiter l'expansion sur les grands écrans */
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
@@ -142,6 +167,8 @@ h6{
     text-align: center;
     transition: transform 0.3s ease;
     margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 
@@ -181,10 +208,15 @@ input[type="date"] {
 
 
 /* Boutons présents dans le projet ------------------------------------------------------ */
+
+/* Eléments de base des boutons */
 .my_btn{
     width: 200px;
     margin: 10px;
     padding: 10px 20px;
+    font-size: 1.2em;
+    align-items: center;
+    justify-content: center;
 
     text-transform: uppercase;
     text-decoration: none;
@@ -194,25 +226,10 @@ input[type="date"] {
     border: 2px solid #000000;
     border-radius: 10px;
     cursor: pointer;
+    min-width: 200px;
+    min-height: 50px;
 
-    min-height: 40px;
-
-    /* transition: background-color 1s ease; */
-
-    display: inline-block; /* Pour s'aligner avec les éléments en ligne */
-    position: relative; /* Permet de contrôler la position */
 }
-
-@media (max-width: 768px) {
-    .my_btn {
-        font-size: 0.9em;
-        padding: 5px 10px;
-        width: 100%; /* Taille adaptative pour les petits écrans */
-        max-width: 200px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
-        
-    }
-}
-
 
 .my_small_btn{
     width: 150px;
@@ -234,30 +251,12 @@ input[type="date"] {
     position: relative; /* Permet de contrôler la position */
 }
 
-
-.my_btn:hover {
-    filter: brightness(1.2); /* Légèrement plus lumineux au survol */
-}
-
-.my_small_btn:hover {
-    filter: brightness(1.2); /* Légèrement plus lumineux au survol */
-}
-
 .btn_selected {
-    font-size: 1.1em;
+    font-size: 1.2em;
     font-weight: bold;
     text-decoration: underline;
     text-decoration-thickness: 2px;
     border: 3px solid #000000;
-}
-
-@media (max-width: 768px) {
-    .btn_selected {
-        font-size: 1em;
-        padding: 5px 10px;
-        width: 100%; /* Taille adaptative pour les petits écrans */
-        min-width: 150px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
-    }
 }
 
 .gender_girl {
@@ -280,16 +279,72 @@ input[type="date"] {
     background-color: rgb(255, 0, 0);
 }
 
+/* Parametres modifiés sur petit écran */
+
+@media (max-width: 768px) {
+    .my_btn {
+        font-size: 1.2em;
+        padding: 5px 10px;
+        width: 100%; /* Taille adaptative pour les petits écrans */
+        max-width: 200px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
+        min-height: 50px;
+    }
+}
+
+@media (max-width: 768px) {
+    .btn_selected {
+        font-size: 1.4em;
+        padding: 5px 10px;
+        width: 100%; /* Taille adaptative pour les petits écrans */
+        min-width: 150px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
+    }
+}
+
+/* Parametres modifiés au survol */
+
+.my_btn:hover {
+    filter: brightness(1.3); /* Légèrement plus lumineux au survol */
+}
+
+.my_small_btn:hover {
+    filter: brightness(1.2); /* Légèrement plus lumineux au survol */
+}
+
+
+
+
+
+
+
 /* Permet de passer de son prono à la tendance */
 .two_btn_container {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 20px; /* Espace constant entre les boutons */
+    justify-content: center;
+    gap: 20px; /* Espace constant entre les boutons */;
+}
+
+.btn_container {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .two_btn_container {
+        gap:0px;
+    }
+}
+
+.multiple_btn_container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
 }
 
 .white_btn {
-    display: flex;
-    justify-content: center;
     background-color: rgb(247, 247, 247);
     color: black;
 }
@@ -670,13 +725,32 @@ main {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
-    animation: fadeOut 2s forwards 2s;
+    animation: fadeOut 4s forwards 1s;
+    min-width: 300px;
+    max-width: 500px;
+    margin: 0 auto;
+    position: fixed;
+    top: 20px; /* Ajuste selon tes besoins */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999; /* Assure que le message soit au-dessus des autres éléments */
 }
 
+
 .flash-error {
+    text-align: center;
     background-color: #f8d7da;
     color: #721c24;
-    border: 1px solid #f5c6cb;
+    border: 1px solid #c3e6cb;
+    animation: fadeOut 2s forwards 2s;
+    min-width: 300px;
+    max-width: 500px;
+    margin: 0 auto;
+    position: fixed;
+    top: 20px; /* Ajuste selon tes besoins */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999; /* Assure que le message soit au-dessus des autres éléments */
 }
 
 @keyframes fadeOut {
@@ -685,3 +759,7 @@ main {
         visibility: hidden;
     }
 }
+
+
+
+

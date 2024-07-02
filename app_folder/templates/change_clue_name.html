@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Name clue
+{% endblock %}
+
+
+{% block content %}
+<!-- Mise en place d'une flèche pour revenir à l'environnement précédent -->
+<a href="{{ url_for('views.modify_my_projects') }}">
+    <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+</a>
+
+<div class="my_container">
+    <div class="inert_card">
+        <h3>Indiquez, si vous le souhaitez, un indice concernant le prénom</h3>
+
+        {% if clue_name %}
+        <form method="post" action="{{ url_for('views.change_clue_name') }}">
+            <input type="text" class="form-control text-center" name="clue_name" value="{{ clue_name }}" maxlength="50" required>
+            <button type="submit" class="my_btn">Modifier</button>
+        </form>
+        <form method="post" action="{{ url_for('views.delete_clue_name') }}" style="margin-top: 10px;">
+            <button type="submit" class="my_btn">Supprimer l'indice</button>
+        </form>
+        {% else %}
+        <form method="post" action="{{ url_for('views.change_clue_name') }}">
+            <input type="text" class="form-control text-center" name="clue_name" placeholder="Indice" required>
+            <button type="submit" class="my_btn">Valider</button>
+        </form>
+        {% endif %}
+
+
+
+
+        {% if error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

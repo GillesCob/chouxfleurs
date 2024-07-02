@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Due date
+{% endblock %}
+
+
+{% block content %}    
+    <!-- Mise en place d'une flèche pour revenir à l'environnement précédent -->
+    <a href="{{ url_for('views.modify_my_projects') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+
+    <div class="my_container">
+        <div class="inert_card">
+            <h3>Indiquez la date du therme</h3>
+            <form method="post">
+                {%if due_date %}
+                    <input type="date" class="form-control text-center" name="due_date" value="{{due_date}}" required>
+                    <form method="post" action="{{ url_for('views.delete_clue_due_date') }}" style="margin-top: 10px;">
+                        <button type="submit" class="my_btn">Supprimer la date du terme</button>
+                    </form>
+                    <button type="submit" class="my_btn" >Modifier</button>
+                {%else%}
+                    <input type="date" class="form-control text-center" name="due_date" value="{{ '' }}" required>
+                    <button type="submit" class="my_btn" >Valider</button>
+                {%endif%}
+                
+            </form>
+
+
+
+            {% if error %}
+                <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

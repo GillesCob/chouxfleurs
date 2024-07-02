@@ -6,7 +6,7 @@ from mongoengine import Document, StringField, ReferenceField, CASCADE, ListFiel
 class User(Document, UserMixin):
     meta = {'collection': 'users_collection'}
 
-    username = StringField(max_length=150, required=True)
+    username = StringField(max_length=20, required=True)
     email = EmailField(max_length=150, unique=True, required=True)
     password = StringField(max_length=150, required=True)
     roles = StringField(max_length=50, default='guest')
@@ -25,6 +25,7 @@ class Project(Document):
     pronostic = ListField()
     product = ListField()
     end_pronostics = BooleanField(default=False)
+    clue_name = StringField(max_length=150)
 
 
 class Pronostic(Document):
@@ -67,3 +68,4 @@ class Participation(Document):
     amount = IntField()
     participation_date = DateTimeField()
     thanks = BooleanField(default=False)
+    status = StringField(max_length=150)

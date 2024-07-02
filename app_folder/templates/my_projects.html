@@ -11,9 +11,7 @@
 <div class="my_container">
 
     {% if user_is_admin %}
-
-        <h1>Mon projet {{project_name}}</h1>
-        
+        <!-- Tableau avec les participations à sa liste de naissance -->
         {% if user_participations %}
         <h2>Participations à ma liste de naissance</h2>
             <table>
@@ -52,64 +50,37 @@
                 </tbody>
 
             </table>
-
         {%else%}
         <!-- Je ne mets rien -->
         {%endif%}
 
-        <button class="my_btn" onclick="copyTextToClipboard()">Copier mon lien d'affiliation</button>
-
-        {% if modify_project == false %}
-            <form id="modify_projectForm" method="post">
-                <input type="hidden" id="modify_project" name="modify_project" value="true">
-                <button type="submit" class="my_btn" id="btn_modify_project">Modifier le projet {{project_name}}</button>
-            </form>
-        {%else%}
-        <div class="d-flex flex-row justify-content-around" style="width: 100%;">
-            <!-- Bouton concernant le RIB -->
-            {%if admin_rib %}
-            <button onclick="window.location.href='/rib'" class="my_small_btn">Modifier mon RIB</button>
-            {%else%}
-                <button onclick="window.location.href='/rib'" class="my_small_btn">Ajouter mon RIB</button>
-            {%endif%}
-
-            <!-- Bouton concernant le renommage du projet -->
-            <button onclick="window.location.href='/rename_project'" class="my_small_btn">Renommer le projet</button>
-
-            <!-- Bouton concernant la date du therme -->
-            <button onclick="window.location.href='/change_due_date'" class="my_small_btn">Date du therme</button>
-
-            <!-- Bouton concernant la suppression du projet -->
-            <button onclick="openModal_delete_project()" class="my_small_btn">Supprimer le projet</button>
+        <div class="two_btn_container">
+            <button onclick="window.location.href='/modify_my_projects'" class="my_btn" style="margin-right: 10px;" >Modifier le projet "{{project_name}}"</button>
+            <button class="my_btn" onclick="copyTextToClipboard()">Copier mon lien d'affiliation</button>
         </div>
-
-        {%endif%}
-
+        
 
     {%else%}
-
         <button onclick="window.location.href='/create_project'" class="my_btn">Créer un projet</button>
-
     {%endif%}
 
     
     {%if projects_dict_special %}
     <h1>Les projets dont je fais partie</h1>
+       
         {% for project_name, project_details in projects_dict_special.items() %}
+
             {% if project_details.admin_rib_key %}
-                <div class="my_container">
                     <div class="my_projects_cards" id="my_projects_cards" data-rib="{{ project_details.admin_rib_key }}" onclick="copyRIBToClipboard(event)">
                         <div class="product-title">{{ project_name }}</div>
                         <div class="product-description">Cliquez pour obtenir le RIB</div>
                     </div>
-                </div>
             {%else%}
-                <div class="my_container">
                     <div class="my_projects_cards" id="my_projects_cards">
                         <div class="product-title">{{ project_name }}</div>
                     </div>
-                </div>
             {%endif%}
+            
         {% endfor %}
 
 
@@ -118,6 +89,7 @@
     {%endif%}
 
     {% if user_participations_side_project %}
+    <!-- Tableau avec mes participations aux listes de naissance -->
         <h1 class="page_title mt-4">Ma participation aux listes de naissance</h1>
             <table>
                 <thead>
@@ -145,7 +117,8 @@
     {%else%}
     <!-- Je ne mets rien -->
     {%endif%}
-        <a href="/join_project" class="my_btn">Rejoindre un projet</a>
+    
+    <button onclick="window.location.href='/join_project'" class="my_btn">Rejoindre un projet</button>
 </div>
 
 

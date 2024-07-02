@@ -283,23 +283,24 @@ def home_page():
     if current_user.is_authenticated:
         user_id = current_user.id
         user_identified = True
-        
         user = User.objects(id=user_id).first()
         
         user_in_project = Project.objects(users__contains=user_id)
         if user_in_project:
-            user_in_project = True
+            user_in_project_bool = True
         else:
-            user_in_project = False
+            user_in_project_bool = False
             
         user_is_admin_project = Project.objects(admin=user_id).first()
+
         if user_is_admin_project == None:
             user_is_admin_project = False
+            
         user_did_pronostic = bool(user.pronostic)
         user_did_participation = bool(user.participation)
         user_informations = {
             'user_identified': user_identified,
-            'user_in_project': user_in_project,
+            'user_in_project': user_in_project_bool,
             'user_is_admin_project': user_is_admin_project,
             'user_did_pronostic': user_did_pronostic,
             'user_did_participation': user_did_participation
@@ -316,7 +317,7 @@ def home_page():
                     'name': user_is_admin_project.name
                 }
             
-            elif user_in_project:
+            elif user_in_project_bool:
                 first_project = user_in_project.first() 
                 session['selected_project'] = { #Création de la session
                     'id': str(first_project.id),
@@ -727,6 +728,14 @@ def menu_2():
             due_date = None
             print(f"Error: {e}")
             
+        try:
+            clue_name = current_project.clue_name
+            print(f"Indice prénom: {clue_name}")
+
+        except Exception as e:
+            clue_name = None
+            print(f"Error: {e}")
+            
         user_is_admin = (user_id == admin_id)
         
         pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
@@ -772,7 +781,7 @@ def menu_2():
                                 }
                                 
                                 total_possible = (scores_pronostics['Total_possible'])
-                                print("JE SUIS LA")
+                                
                                 return render_template('menu_2.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_menu_2=go_to_menu_2, score_prono_user=score_prono_user, scores_pronostics=scores_pronostics, total_possible=total_possible, **elements_for_base)
                         
                         else:
@@ -815,7 +824,7 @@ def menu_2():
     
     #J'arrive ici si je n'ai pas encore fait mon prono pour le projet actuel
     print("HELLO")
-    return render_template('menu_2.html', user_is_admin=user_is_admin, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, due_date=due_date, **elements_for_base)
+    return render_template('menu_2.html', user_is_admin=user_is_admin, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, due_date=due_date, clue_name=clue_name, **elements_for_base)
 
 @views.route('/update_pronostic', methods=['GET', 'POST']) 
 @login_required
@@ -984,6 +993,8 @@ def pronostic_winner():
             break
        
     #Je récupere ensuite les infos des users
+    number_of_winners = 0
+    
     for pronostic_id in pronostics_for_current_project:                                        
         pronostic_user = Pronostic.objects(id=pronostic_id).first()
         
@@ -1105,9 +1116,44 @@ def pronostic_winner():
             'date_score' : high_pronostic.date_score,
             'total_score' : high_pronostic.total_score,
         }
+        number_of_winners += 1
         high_score_pronostics.append(high_score_pronostic)
+        
+    print(f"Nombre de gagnants : {number_of_winners}")
 
-    return render_template('pronostic_winner.html', scores_pronostics=scores_pronostics, high_score_pronostics=high_score_pronostics, **elements_for_base)
+    return render_template('pronostic_winner.html', scores_pronostics=scores_pronostics, number_of_winners=number_of_winners, high_score_pronostics=high_score_pronostics, **elements_for_base)
+
+@views.route('/pronostic_answers', methods=['GET', 'POST'])
+@login_required
+def pronostic_answers():
+    #A -----------------
+    user_id = current_user.id
+    #B -----------------
+    elements_for_base = elements_for_base_template(user_id)
+    
+    #Récupération des éléments afin de pouvoir récupérer les infos
+    current_project_id = session['selected_project']['id']
+    current_project = Project.objects(id=current_project_id).first()
+    pronostics_for_current_project = current_project.pronostic
+    
+    project_admin = current_project.admin
+    project_admin_id = project_admin.id
+    
+    admin_results = {}
+    for pronostic_id in pronostics_for_current_project:
+        pronostic_admin = Pronostic.objects(id=pronostic_id).first()
+        
+        if pronostic_admin.user.id == project_admin_id :
+            pronostic_admin = Pronostic.objects(id=pronostic_id).first()
+            admin_results['prono_sex'] = pronostic_admin.sex
+            admin_results['prono_name'] = pronostic_admin.name
+            admin_results['prono_weight'] = pronostic_admin.weight/1000
+            admin_results['prono_height'] = pronostic_admin.height/10
+            admin_results['prono_date'] = pronostic_admin.date
+    
+
+    return render_template('pronostic_answers.html', admin_results=admin_results, **elements_for_base)
+
 
 #ROUTES "PHOTOS" -------------------------------------------------------------------------------------------------------------
 @views.route('/menu_3')
@@ -1182,6 +1228,20 @@ def my_projects():
         
         return render_template('my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project)
 
+@views.route('/modify_my_projects')
+@login_required
+def modify_my_projects():
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+    
+    admin_project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
+    
+    if admin_project: #Si le user actuel est l'admin d'un projet
+        
+        admin_rib = User.objects(id=user_id).first().rib
+
+    return render_template('modify_my_projects.html', admin_rib=admin_rib, **elements_for_base)
+
 @views.route('/participation_details', methods=['GET', 'POST'])
 @login_required
 def participation_details():
@@ -1235,7 +1295,7 @@ def rib():
         user.save()
         
         flash('RIB enregistré avec succès !')
-        return redirect(url_for('views.my_projects', **elements_for_base))
+        return redirect(url_for('views.modify_my_projects', **elements_for_base))
     
     
     return render_template('rib.html', user=current_user, **elements_for_base, project_name=project_name, actual_rib=user.rib)
@@ -1407,9 +1467,9 @@ def change_email():
         
     return render_template('change_email.html', user=current_user, user_email=user_email, **elements_for_base)
 
-@views.route('/change_due_date', methods=['GET', 'POST'])
+@views.route('/change_clue_due_date', methods=['GET', 'POST'])
 @login_required
-def change_due_date():
+def change_clue_due_date():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
     
@@ -1428,10 +1488,58 @@ def change_due_date():
         project.due_date = due_date
         project.save()
         
-        flash(f"Date du terme modifiée avec succès !", category='success')
-        return redirect(url_for('views.my_projects'))
+        flash(f"Date du terme ajoutée avec succès !", category='success')
+        return redirect(url_for('views.change_clue_due_date'))
         
-    return render_template('change_due_date.html', due_date=due_date, **elements_for_base)
+    return render_template('change_clue_due_date.html', due_date=due_date, **elements_for_base)
+
+@views.route('/delete_clue_due_date', methods=['POST'])
+@login_required
+def delete_clue_due_date():
+    user_id = current_user.id
+    project = Project.objects(admin=user_id).first()
+    
+    # Supprimer la date du terme
+    project.due_date = None
+    project.save()
+    print("coucou")
+    flash("Date du terme supprimée avec succès !", category='success')
+    return redirect(url_for('views.change_clue_due_date'))
+
+@views.route('/change_clue_name', methods=['GET', 'POST'])
+@login_required
+def change_clue_name():
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+    
+    project = Project.objects(admin=user_id).first()
+    try:
+        clue_name = project.clue_name if project.clue_name else ""
+    except AttributeError:
+        clue_name = ""
+    
+    if request.method == 'POST':
+        clue_name = request.form.get('clue_name')
+        project.clue_name = clue_name
+        project.save()
+        
+        flash("Indice concernant le prénom modifié avec succès !", category='success')
+        return redirect(url_for('views.change_clue_name'))
+        
+    return render_template('change_clue_name.html', clue_name=clue_name, **elements_for_base)
+
+@views.route('/delete_clue_name', methods=['POST'])
+@login_required
+def delete_clue_name():
+    user_id = current_user.id
+    project = Project.objects(admin=user_id).first()
+    
+    project.clue_name = None
+    project.save()
+    
+    flash("Indice concernant le prénom supprimé avec succès !", category='success')
+    return redirect(url_for('views.change_clue_name'))
+
 
 @views.route('/delete_project', methods=['POST'], )
 @login_required
@@ -1491,10 +1599,10 @@ def delete_project():
             'name': first_project.name
             }
     else:
-        flash("Veuillez créer ou rejoindre un projet avant d'accéder aux pronostics", category='error')
+        flash('Projet supprimé avec succès !')
         return redirect(url_for('views.my_projects', user=current_user, **elements_for_base))
     
-    flash('Projet supprimé avec succès !', category='success')
+    flash('Projet supprimé avec succès !')
     return redirect(url_for('views.home_page', **elements_for_base))
 
 @views.route('/other_data')

@@ -6,12 +6,17 @@
 
 
 {% block content %}
+    <!-- Mise en place d'une flèche pour revenir à l'environnement précédent -->
+    <a href="{{ url_for('views.modify_my_projects') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+
     <div class="my_container">
-        <div class="card">
+        <div class="inert_card">
             <h1>Renommer votre projet</h1>
             <form method="post">
                 <label for="project_name">Nom du projet</label>
-                <input type="text" class="form-control" name="new_project_name" placeholder="{{actual_name}}" required>
+                <input type="text" class="form-control text-center" name="new_project_name" value="{{actual_name}}" maxlength="50" required>
                 <button type="submit" class="my_btn">Renommer</button>
             </form>
             {% if error %}

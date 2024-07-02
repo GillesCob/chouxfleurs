@@ -6,8 +6,8 @@
 
 
 {% block content %}
+<h1>Mise à jour de votre pronostic</h1>
 <div class="my_container">
-    <h1>Mise à jour de votre pronostic</h1>
     <div class="inert_card">
 
         <form method="post">
@@ -18,7 +18,7 @@
             </div>
             
             <input type="hidden" id="selectedGender" name="sex" value="{{ prono_sex }}">
-            <div class="two_btn_container">
+            <div class="multiple_btn_container">
                 <button type="button" id="btn_girl" class="my_btn" onclick="selectGender('Fille')">Fille</button>
                 <button type="button" id="btn_boy" class="my_btn" onclick="selectGender('Garçon')">Garçon</button>
             </div>
@@ -27,7 +27,7 @@
             <!-- Le nom ----------------------------------------- -->
             <div class = "pronostic_title">
                 <label for="name" >Le nom</label>
-                <input type="text" class="form-control text-center" name="name" placeholder="{{prono_name}}">
+                <input type="text" class="form-control text-center" name="name" value="{{prono_name}}">
             </div>
             
             
@@ -57,7 +57,9 @@
             <input type="date" class="form-control text-center" name="date" placeholder="actuellement : {{prono_date}}">
             
             <!-- Validation du pronostic ----------------------------------------- -->
-            <button type="submit" class="my_btn" id="update_prono">Changer de pronostic</button>
+             <div class="my_container">
+                <button type="submit" class="my_btn" id="update_prono">Changer de pronostic</button>
+            </div>
         
         </form>
     </div>

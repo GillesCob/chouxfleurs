@@ -87,18 +87,20 @@ def register():
                 project_name = project.name
                 new_user_id = new_user.id
                 project.update(push__users=new_user_id)
-                # flash(f'Compte créé et projet {project_name} rejoint avec succès !', category='success')
-                
-                return render_template('login.html', message=f"Connectez-vous pour rejoindre le projet {project_name}", count_projects=count_projects)
+                flash(f'Compte créé ! Connectez-vous pour rejoindre "{project_name}"')
+                return redirect(url_for('auth.login'))
             
                 # return redirect(url_for('auth.login'))
             
             flash(f'Compte créé avec succès !', category='success')
+            print(f"COUCOU3")  
             return redirect(url_for('auth.login'))
         
         else:
+            print(f"COUCOU2")  
             return render_template('register.html', error='Les mots de passe ne correspondent pas', count_projects=count_projects)
         
+    print(f"COUCOU1")   
     return render_template('register.html', count_projects=count_projects)
 
 @auth.route('/change_password', methods=['GET', 'POST'])
