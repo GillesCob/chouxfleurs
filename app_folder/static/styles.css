@@ -105,10 +105,8 @@ h6{
 
 
 .product-card {
-    width: 100%; /* Utiliser 100% de la largeur disponible */
-    max-width: 300px; /* Largeur maximale pour les grands écrans */
-    
-    min-width: 120px;
+    width: 300px; /* Utiliser 100% de la largeur disponible */
+    min-width: 300px;
     min-height: 385px;
     background-color: #fff;
     border-radius: 10px;
