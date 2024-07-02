@@ -10,7 +10,7 @@
     width: 100%; /* Largeur maximale de 100% */
     max-width: 1500px; /* Limite la largeur maximale du container */
     padding: 20px;
-    background-color: aqua;
+    /* background-color: aqua; */
     margin: 0 auto; /* Centre horizontalement le conteneur */
     text-align: center;
     font-size: 0.9em;
