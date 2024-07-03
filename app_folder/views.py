@@ -5,9 +5,9 @@ from .models import Pronostic, User, Project, Product, Participation
 from datetime import datetime
 
 from bson import ObjectId
+import bson.errors
 
-# from bs4 import BeautifulSoup
-# import requests
+
 
 
 views = Blueprint("views", __name__)
@@ -1422,7 +1422,7 @@ def join_project():
                 flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
                 return redirect(url_for('views.join_project', **elements_for_base))
             
-        except (IndexError, ValueError):
+        except (IndexError, ValueError, bson.errors.InvalidId):
             flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
             return redirect(url_for('views.join_project', **elements_for_base))
         
