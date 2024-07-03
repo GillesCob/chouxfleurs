@@ -6,245 +6,247 @@
 
 
 {% block content %}
- <!-- Récupération du prono concernant le sexe afin de mettre en forme les boutons en conséquence -->
- <div id="gender_choice" data-gender="{{ session['gender_choice'] }}"></div>
- <!-- Récupération de l'info pour savoir si l'utilisateur est admin -->
- <div id="user_is_admin" data-user="{{ session['user_is_admin'] }}"></div>
+    <!-- Récupération du prono concernant le sexe afin de mettre en forme les boutons en conséquence -->
+    <div id="gender_choice" data-gender="{{ session['gender_choice'] }}"></div>
+    <!-- Récupération de l'info pour savoir si l'utilisateur est admin -->
+    <div id="user_is_admin" data-user="{{ session['user_is_admin'] }}"></div>
 
-<div>
-    <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
-    <a href="{{ url_for('views.menu_1') }}">
-        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
-    </a>
-</div>
+    <div>
+        <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
+        <a href="{{ url_for('views.menu_1') }}">
+            <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+        </a>
+    </div>
 
-<div class="my_container">
-    <a href="{{ product.url_source }}" class="product-link" style="text-decoration: none;" target="_blank" >
-        <div class="product-card" id="product_card">
-            <!-- Image du produit -->
-            <div class="product-image">
-                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-width: 100%;">
+    <div class="my_container">
+            <div class="product-card" id="product_card">
+                <!-- Image du produit -->
+                <div class="product-image">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-width: 100%; max-height: 300px;">
+                </div>
+                <!-- Titre du produit -->
+                <div class="product-title">{{ product.name }}</div>
+                <!-- Description du produit -->
+                <div class="product-description">{{ product.description }}</div>
+                {% if product.price == left_to_pay %}
+                    <!-- Prix de base -->
+                    <div class="product-price-current">{{ product.price }}€</div>
+                {% else %}
+                    <!-- Prix initial -->
+                    <div class="product-price-original">{{ product.price }}€</div>
+                    <!-- Prix restant -->
+                    <div class="product-price-current">{{ left_to_pay }}€</div>
+                {% endif %}
+
+                <div class="btn_container">
+                    <button class="my_btn" onclick="window.open('{{ product.url_source }}', '_blank')">Voir le produit</button>
+                </div>
             </div>
-            <!-- Titre du produit -->
-            <div class="product-title">{{ product.name }}</div>
-            <!-- Description du produit -->
-            <div class="product-description">{{ product.description }}</div>
-            {% if product.price == left_to_pay %}
-                <!-- Prix de base -->
-                <div class="product-price-current">{{ product.price }}€</div>
-            {% else %}
-                <!-- Prix initial -->
-                <div class="product-price-original">{{ product.price }}€</div>
-                <!-- Prix restant -->
-                <div class="product-price-current">{{ left_to_pay }}€</div>
-            {% endif %}
 
-            <a href="{{ product.url_source }}" class="product_btn my_btn" target="_blank">Voir le produit</a>
-        </div>
-    </a>
-
-    {% if session['user_is_admin'] %}
-        {% if left_to_pay != product.price %}
-        <div class="card_button gap-2">
-            <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
-            
-            <form action="{{ url_for('views.delete_product', product_id=product.id) }}" method="post">
-                <input type="hidden" name="product_id" value="product.id">
-                <button type="submit" class="btn btn-danger" disabled>Supprimer</button>
-            </form>
-        </div>
-        {% else %}
-        <div class="card_button gap-2">
-            <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
-            
-            <form action="{{ url_for('views.delete_product', product_id=product.id) }}" method="post">
-                <input type="hidden" name="product_id" value="product.id">
-                <button type="submit" class="btn btn-danger">Supprimer</button>
-            </form>
-        </div>
-
-        {% endif %}
-
-    {%else%}
-        {% if participation == false %}
-            {% if left_to_pay != 0 %}
-                <!-- Participation financiere -->
-                <form id="participationForm" method="post">
-                    <input type="hidden" id="participation" name="participation" value="true">
-                    <button type="submit" class="my_btn" id="btn_participation">Participer (€)</button>
+        {% if session['user_is_admin'] %}
+            {% if left_to_pay != product.price %}
+            <div class="card_button gap-2">
+                <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
+                
+                <form action="{{ url_for('views.delete_product', product_id=product.id) }}" method="post">
+                    <input type="hidden" name="product_id" value="product.id">
+                    <button type="submit" class="btn btn-danger" disabled>Supprimer</button>
                 </form>
+            </div>
             {% else %}
-                <p>Le produit est déjà financé !
-                </br>
-                Cependant si vous le possédez et souhaitez nous le prêter/donner, il n'est peut-être pas encore trop tard !</p>
+            <div class="card_button gap-2">
+                <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
+                
+                <form action="{{ url_for('views.delete_product', product_id=product.id) }}" method="post">
+                    <input type="hidden" name="product_id" value="product.id">
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+            </div>
+
             {% endif %}
 
-            <!-- Don -->
-            <form id="donationForm" method="post">
-                <input type="hidden" id="donation" name="donation" value="true">
-                <button type="submit" class="my_btn" id="btn_donation">Don</button>
-            </form>
-            <!-- Prêt -->
-            <form id="lendingForm" method="post">
-                <button type="submit" class="my_btn" id="btn_lending" name="lending" value="true">Prêt</button>
-            </form>
+        {%else%}
+            {% if participation == false %}
+                {% if left_to_pay != 0 %}
+                    <!-- Participation financiere -->
+                    <form id="participationForm" method="post">
+                        <input type="hidden" id="participation" name="participation" value="true">
+                        <button type="submit" class="my_btn" id="btn_participation">Participer (€)</button>
+                    </form>
+                {% else %}
+                    <p>Le produit est déjà financé !
+                    </br>
+                    Cependant si vous le possédez et souhaitez nous le prêter/donner, il n'est peut-être pas encore trop tard !</p>
+                {% endif %}
+
+                <!-- Don -->
+                <form id="donationForm" method="post">
+                    <input type="hidden" id="donation" name="donation" value="true">
+                    <button type="submit" class="my_btn" id="btn_donation">Don</button>
+                </form>
+                <!-- Prêt -->
+                <form id="lendingForm" method="post">
+                    <button type="submit" class="my_btn" id="btn_lending" name="lending" value="true">Prêt</button>
+                </form>
+                
+
+            {% elif participation == "payment" %}
             
-
-        {% elif participation == "payment" %}
+                <p>La confirmation de votre participation est à titre indicatif, nous nous chargerons d'acheter les produits une fois ceux-ci financés.</p>
+                <div class="range_container">
+                    <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
+                        <input type="range" class="form-range" id="participation_range" name="participation_range" min="1" max="{{left_to_pay}}" step="1" value="0" oninput="updatePriceFromRange(this.value)">
+                        <input type="number" id="price_input" min="1" max="1000" step="1" value="1" class="text-center" oninput="updateRangeFromInput(this.value)">
+                        <span>€</span>
         
-            <p>La confirmation de votre participation est à titre indicatif, nous nous chargerons d'acheter les produits une fois ceux-ci financés.</p>
+                        <div>
+                            <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="€">Participer</button>
+                        </div>
+                    </form>
+                </div>
+                
 
+            {% elif participation == "donation" %}
+            Souhaitez-vous vraiment faire un don ?
             <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
-                <input type="range" class="form-range" id="participation_range" name="participation_range" min="1" max="{{left_to_pay}}" step="1" value="0" oninput="updatePriceFromRange(this.value)">
-                <input type="number" id="price_input" min="1" max="1000" step="1" value="1" class="text-center" oninput="updateRangeFromInput(this.value)">
-                <span>€</span>
-
                 <div>
-                    <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="€">Participer</button>
+                    <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="donation">Donner ce produit</button>
                 </div>
             </form>
 
-        {% elif participation == "donation" %}
-        Souhaitez-vous vraiment faire un don ?
-        <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
-            <div>
-                <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="donation">Donner ce produit</button>
-            </div>
-        </form>
+            {% elif participation == "lending" %}
+            Souhaitez-vous vraiment nous prêter ce produit ?
+            <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
+                <div>
+                    <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="lending">Prêter ce produit</button>
+                </div>
+            </form>
 
-        {% elif participation == "lending" %}
-        Souhaitez-vous vraiment nous prêter ce produit ?
-        <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
-            <div>
-                <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="lending">Prêter ce produit</button>
-            </div>
-        </form>
+            {% elif participation == "confirmed" %}
+            {% endif %}
 
-        {% elif participation == "confirmed" %}
         {% endif %}
 
-    {% endif %}
 
-
-    
-
-    
-
-    
-</div>
-
-
-
-
-<script>
-
-    //Ci-dessous tous les éléments qui seront chargé APRES le chargement de la page html
-    document.addEventListener('DOMContentLoaded', function() {
         
 
-        // Sélection des éléments par leur ID et ajout du gestionnaire d'événements
-        document.getElementById("product_card").addEventListener("click", checkUrl);
-
-        // Fonction pour vérifier l'URL
-        function checkUrl(event) {
-            var url = "{{ product.url_source }}"; // Récupère l'URL depuis le code HTML
-
-            if (!isValidUrl(url)) {
-                event.preventDefault(); // Empêche l'ouverture du lien s'il est invalide
-                showCustomAlert("L'URL est actuellement indisponible. Merci de réessayer ultérieurement.");
-            }
-        }
-
-        // Fonction pour afficher une boîte de dialogue personnalisée
-        function showCustomAlert(message) {
-            const alertBox = document.createElement('div');
-            alertBox.classList.add('custom-alert');
-            alertBox.textContent = message;
-            document.body.appendChild(alertBox);
-
-            // Supprimer la boîte de dialogue après quelques secondes
-            setTimeout(function() {
-                alertBox.remove();
-            }, 3000);
-        }
-
-        // Fonction pour vérifier si l'URL est valide
-        function isValidUrl(url) {
-            // Expression régulière pour vérifier si l'URL est valide
-            var pattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
-            return pattern.test(url);
-        }
-
-        // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
-        var button = document.getElementById('my_button');
-        var button2 = document.getElementById('btn_participation');
-        var button3 = document.getElementById('btn_donation');
-        var button4 = document.getElementById('btn_lending');
-
-        var genderChoiceElement = document.getElementById('gender_choice');
-        var genderChoice = genderChoiceElement.dataset.gender;
         
-        if (genderChoice === "Fille") {
-            if (button) button.classList.add("gender_girl");
-            if (button2) button2.classList.add("gender_girl");
-            if (button3) button3.classList.add("gender_girl");
-            if (button4) button4.classList.add("gender_girl");
-        } else if (genderChoice === "Garçon") {
-            if (button) button.classList.add("gender_boy");
-            if (button2) button2.classList.add("gender_boy");
-            if (button3) button3.classList.add("gender_boy");
-            if (button4) button4.classList.add("gender_boy");
 
-        } else {
-            if (button) button.classList.add("no_gender");
-            if (button2) button2.classList.add("no_gender");
-            if (button3) button3.classList.add("no_gender");
-            if (button4) button4.classList.add("no_gender");
-        }
+        
+    </div>
 
-        // Écouteur d'événement pour le bouton de participation
-        var btnParticipation = document.getElementById('btn_participation');
-        if (btnParticipation) {
-            btnParticipation.addEventListener('click', function() {
-                document.getElementById('participation').value = 'true';
-                document.getElementById('participationForm').submit();
-            });
-        }
 
-        // Mise à jour du range et de l'input pour le montant de la participation
-        const range = document.getElementById('participation_range');
-        const input = document.getElementById('price_input');
-        if (range && input) {
-            input.value = range.value;
 
-            window.updatePriceFromRange = function(value) {
-                input.value = value;
+
+    <script>
+
+        //Ci-dessous tous les éléments qui seront chargé APRES le chargement de la page html
+        document.addEventListener('DOMContentLoaded', function() {
+            
+
+            // Sélection des éléments par leur ID et ajout du gestionnaire d'événements
+            document.getElementById("product_card").addEventListener("click", checkUrl);
+
+            // Fonction pour vérifier l'URL
+            function checkUrl(event) {
+                var url = "{{ product.url_source }}"; // Récupère l'URL depuis le code HTML
+
+                if (!isValidUrl(url)) {
+                    event.preventDefault(); // Empêche l'ouverture du lien s'il est invalide
+                    showCustomAlert("L'URL est actuellement indisponible. Merci de réessayer ultérieurement.");
+                }
             }
 
-            window.updateRangeFromInput = function(value) {
-                range.value = value;
+            // Fonction pour afficher une boîte de dialogue personnalisée
+            function showCustomAlert(message) {
+                const alertBox = document.createElement('div');
+                alertBox.classList.add('custom-alert');
+                alertBox.textContent = message;
+                document.body.appendChild(alertBox);
+
+                // Supprimer la boîte de dialogue après quelques secondes
+                setTimeout(function() {
+                    alertBox.remove();
+                }, 3000);
             }
+
+            // Fonction pour vérifier si l'URL est valide
+            function isValidUrl(url) {
+                // Expression régulière pour vérifier si l'URL est valide
+                var pattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
+                return pattern.test(url);
+            }
+
+            // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
+            var button = document.getElementById('my_button');
+            var button2 = document.getElementById('btn_participation');
+            var button3 = document.getElementById('btn_donation');
+            var button4 = document.getElementById('btn_lending');
+
+            var genderChoiceElement = document.getElementById('gender_choice');
+            var genderChoice = genderChoiceElement.dataset.gender;
+            
+            if (genderChoice === "Fille") {
+                if (button) button.classList.add("gender_girl");
+                if (button2) button2.classList.add("gender_girl");
+                if (button3) button3.classList.add("gender_girl");
+                if (button4) button4.classList.add("gender_girl");
+            } else if (genderChoice === "Garçon") {
+                if (button) button.classList.add("gender_boy");
+                if (button2) button2.classList.add("gender_boy");
+                if (button3) button3.classList.add("gender_boy");
+                if (button4) button4.classList.add("gender_boy");
+
+            } else {
+                if (button) button.classList.add("no_gender");
+                if (button2) button2.classList.add("no_gender");
+                if (button3) button3.classList.add("no_gender");
+                if (button4) button4.classList.add("no_gender");
+            }
+
+            // Écouteur d'événement pour le bouton de participation
+            var btnParticipation = document.getElementById('btn_participation');
+            if (btnParticipation) {
+                btnParticipation.addEventListener('click', function() {
+                    document.getElementById('participation').value = 'true';
+                    document.getElementById('participationForm').submit();
+                });
+            }
+
+            // Mise à jour du range et de l'input pour le montant de la participation
+            const range = document.getElementById('participation_range');
+            const input = document.getElementById('price_input');
+            if (range && input) {
+                input.value = range.value;
+
+                window.updatePriceFromRange = function(value) {
+                    input.value = value;
+                }
+
+                window.updateRangeFromInput = function(value) {
+                    range.value = value;
+                }
+            }
+
+        });
+
+
+        document.getElementById("bouton").addEventListener("mouseover", function() {
+            document.getElementById("message").style.display = "block";
+        });
+
+        document.getElementById("bouton").addEventListener("mouseout", function() {
+            document.getElementById("message").style.display = "none";
+        });
+
+
+
+    </script>
+
+    <style>
+        .hidden {
+            display: none;
         }
-
-    });
-
-
-    document.getElementById("bouton").addEventListener("mouseover", function() {
-        document.getElementById("message").style.display = "block";
-    });
-
-    document.getElementById("bouton").addEventListener("mouseout", function() {
-        document.getElementById("message").style.display = "none";
-    });
-
-
-
-</script>
-
-<style>
-    .hidden {
-        display: none;
-    }
-</style>
+    </style>
 
 {% endblock %}

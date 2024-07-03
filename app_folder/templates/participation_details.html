@@ -15,36 +15,42 @@
 </div>
 
  <div class="my_container">
-    <div class="product-card" id="product_card">
+    <div class="inert_card" id="product_card">
 
-        <h1>Participant</h1>
-        <div class="product-title">{{user_username}}</div>
+        <h1 class="product_detail_title">Participant</h1>
+        <div class="product_detail_info">{{user_username}}</div>
 
-        
-        <h1>Produit</h1>
-        <div class="product-title">{{product_name}}</div>
+        <h1 class="product_detail_title">Produit</h1>
+        <div class="product_detail_info">{{product_name}}</div>
 
         {% if type == "€" %}
-            <h1>Montant de la participation</h1>
-            <div class="product-description">{{montant}}€</div>
+            <h1 class="product_detail_title">Participation</h1>
+            <div class="product_detail_info">{{montant}}€</div>
         {% elif type == "donation" %}
-            <h1>Type de participation</h1>
-            <h1>DON</h1>
+            <h1 class="product_detail_title">Participation</h1>
+            <h1 class="product_detail_info">DON</h1>
         {%else%}
-            <h1>PRÊT</h1>
+            <h1 class="product_detail_title">Participation</h1>
+            <h1 class="product_detail_info">PRÊT</h1>
         {% endif %}
 
-        {% if thanks == False %}
-        <a href="mailto:{{ user_email }}?subject=Participation%20à%20la%20liste%20de%20naissance%20{{project_name}}&body=Bonjour%20{{user_username}}%20et%20merci%20beaucoup%20pour%20ta%20participation%20à%20notre%20liste%20de%20naissance%20!%0A%0AA%20très%20bientôt%20!"class="my_btn">Remercier</a>
+        <h1 class="product_detail_title">Statut</h1>
+        <div class="product_detail_info">{{status}}</div>
+            {% if status == "Promesse" %}
+                <form action="{{ url_for('views.participation_details')}}" method="post">
+                    <input type="hidden" name="participation_received" value=True>
+                    <input type="hidden" name="participation_id" value="{{participation_id}}">
+                    <button type="submit" class="my_btn">Participation reçu</button>
+                </form>
+            {% endif %}
 
-        <form action="{{ url_for('views.participation_details')}}" method="post">
-            <input type="hidden" name="thanks_sent" value=True>
-            <input type="hidden" name="participation_id" value="{{participation_id}}">
-            <button type="submit" class="my_btn">Remerciements envoyés ?</button>
-        </form>
-        {% else %}
-        <button type="submit" class="btn">Remerciements envoyés !</button>
-        {% endif %}
+            {% if thanks == False %}
+                <form action="{{ url_for('views.participation_details')}}" method="post">
+                    <input type="hidden" name="thanks_sent" value=True>
+                    <input type="hidden" name="participation_id" value="{{participation_id}}">
+                    <button type="submit" class="my_btn">Remerciements envoyés</button>
+                </form>
+            {% endif %}
     </div>
  </div>
 

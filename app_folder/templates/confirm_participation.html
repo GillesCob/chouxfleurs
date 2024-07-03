@@ -34,7 +34,7 @@
             <div class="product-description">{{ admin_rib }}</div>
         </div>
         {% else %}
-            <div class="inert_card" id="product_card">
+            <div class="inert_card">
                 <!-- Titre du produit -->
                 <h2>Votre participation de {{participation}}€ a bien été prise en compte, merci beaucoup !</h2>
                 <!-- Description du produit -->
@@ -48,7 +48,7 @@
     
 
     <a href="{{ url_for('views.my_projects') }}" class="product-link" style="text-decoration: none;" >
-        <div class="product-card" id="product_card">
+        <div class="inert_card">
             <!-- Titre du produit -->
             <div class="page_title">Retrouvez ici toutes vos participations</div>
 

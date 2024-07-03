@@ -58,6 +58,7 @@ class Product(Document):
     image_url = StringField(max_length=300)
     participation = ListField()
     
+    
 class Participation(Document):
     meta = {'collection': 'Participation_collection'}
 

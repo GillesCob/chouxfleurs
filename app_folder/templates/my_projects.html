@@ -14,41 +14,28 @@
         <!-- Tableau avec les participations à sa liste de naissance -->
         {% if user_participations %}
         <h2>Participations à ma liste de naissance</h2>
+        <p>Cliquez sur la ligne pour obtenir plus d'informations</p>
             <table>
                 <thead>
                     <tr>
+                        <th>Statut</th>
                         <th>Utilisateur</th>
-                        <th>Produit</th>
-                        <th>Participation</th>
-                        <th>Plus d'informations</th>
+                        <th>Produit (participation)</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     {% for username, participations in user_participations.items() %}
                         {% for participation in participations %}
-                            <tr>
+                        <tr class="clickable-row" data-href="{{ url_for('views.participation_details') }}?participation_id={{ participation[0] }}">
+                            <!-- <tr class="clickable-row" data-href="{{ url_for('views.participation_details') }}?participation_id={{ participation[0] }}"></tr> -->
+                                <td>{{ participation[6] }}</td>
                                 <td>{{ username }}</td>
-                                <td>{{ participation[2] }}</td>
-                                <td>{{ participation[3] }}</td>
-                                <td>
-                                    {% if participation[5] == False  %}
-                                    <form action="{{ url_for('views.participation_details')}}" method="post">
-                                        <input type="hidden" name="participation_id" value="{{ participation[0]}}">
-                                        <button type="submit" class="btn btn-danger">+</button>
-                                    </form>
-                                    {%else%}
-                                    <form action="{{ url_for('views.participation_details')}}" method="post">
-                                        <input type="hidden" name="participation_id" value="{{ participation[0]}}">
-                                        <button type="submit" class="btn btn-primary">+</button>
-                                    </form>
-                                    {%endif%}
-                                </td>
+                                <td>{{ participation[2] }} ({{ participation[3] }})</td>
                             </tr>
                         {% endfor %}
                     {% endfor %}
                 </tbody>
-
             </table>
         {%else%}
         <!-- Je ne mets rien -->
@@ -142,6 +129,17 @@
 
 
 <script>
+//LIgne du tableau cliquable
+document.addEventListener("DOMContentLoaded", function() {
+    const rows = document.querySelectorAll(".clickable-row");
+    rows.forEach(row => {
+        row.addEventListener("click", function() {
+            window.location.href = this.dataset.href;
+        });
+    });
+});
+
+
 // Afficher et masquer la fenêtre modale
     function openModal_delete_project() {
             document.getElementById('myModal_delete_project').style.display = 'block';

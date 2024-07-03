@@ -231,12 +231,14 @@ def my_project_participations():
             date = product_participation.participation_date
             date = date.strftime('%d-%m-%Y')
             thanks = product_participation.thanks
+            status = product_participation.status
+            print(f"Status: {thanks}")
 
             # Ajoutez la participation au dictionnaire user_participations
             if participant_username not in user_participations:
                 user_participations[participant_username] = []  # Créez une liste vide pour chaque nouvel utilisateur
             
-            user_participations[participant_username].append((participation_id, participant_username, product_name, amount, date, thanks))
+            user_participations[participant_username].append((participation_id, participant_username, product_name, amount, date, thanks, status))
             
     return user_participations
 
@@ -587,15 +589,18 @@ def confirm_participation_loading(product_id):
         if type_of_participation == "€":
             type = "€"
             participation = request.form.get('participation_range')
+            status = "Promesse"
         elif type_of_participation == "donation":
             type = "donation"
             participation = 0
+            status = "Promesse"
         else:
             type = "lending"
             participation = 0
+            status = "Promesse"
         
         
-        new_participation = Participation(user=user_id, type=type, project=project, product=product_id, amount=participation, participation_date=datetime.now())
+        new_participation = Participation(user=user_id, type=type, project=project, product=product_id, amount=participation, participation_date=datetime.now(), status=status)
         new_participation.save()
         
         #J'ajoute l'id de la participation dans mon objet Product
@@ -690,6 +695,7 @@ def delete_product(product_id):
     flash('Produit supprimé avec succès !', category='success')
 
     return redirect(url_for('views.menu_1'))
+
 
 #ROUTES "PRONOS" -------------------------------------------------------------------------------------------------------------
 @views.route('/menu_2', methods=['GET', 'POST'])
@@ -1248,34 +1254,57 @@ def participation_details():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
     
+    # Récupération de l'id depuis l'url ou bien depuis le formulaire (utile quand je change le statut d'une participation) par ex
+    participation_id = request.args.get('participation_id')
     
-    if request.method == 'POST':
+    if not participation_id:
         participation_id = request.form.get('participation_id')
+    
+    if not participation_id:
+        flash('ID de participation manquant.')
+        return redirect(url_for('views.my_projects'))
+    
+    participation_obj = Participation.objects(id=participation_id).first()
+    participation_obj_user_id = participation_obj.user.id
+    user_participant = User.objects(id=participation_obj_user_id).first()
+    user_participant_username = user_participant.username
+    
+    if not participation_obj:
+        flash('Participation non trouvée.')
+        return redirect(url_for('views.my_projects'))
+
+    if request.method == 'POST':
         if request.form.get('thanks_sent'):
-            participation_obj = Participation.objects(id=participation_id).first()
             participation_obj.thanks = True
             participation_obj.save()
-            flash('Remerciements envoyés avec succès !')
-            return redirect(url_for('views.my_projects'))
+            flash(f'Vous avez confirmé avoir remercié {user_participant_username}')
+            return redirect(url_for('views.participation_details', participation_id=participation_id))
         
-        participation_obj = Participation.objects(id=participation_id).first()
-        user_username = participation_obj.user.username
-        user_email = participation_obj.user.email
-        type = participation_obj.type
-        montant = participation_obj.amount
-        date = participation_obj.participation_date
-        date = date.strftime('%d-%m-%Y')
-        thanks = participation_obj.thanks
-        
-        product_obj = participation_obj.product
-        product_name = product_obj.name
-        
-        project_obj = participation_obj.project
-        project_name = project_obj.name
+        if request.form.get('participation_received'):
+            participation_obj.status = "Reçu"
+            participation_obj.save()
+            flash('Statut du produit modifié !')
+            return redirect(url_for('views.participation_details', participation_id=participation_id))
     
-        return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, thanks=thanks, product_name=product_name, project_name=project_name, participation_id=participation_id)
+    print(participation_id)
     
-    return render_template('participation_details.html', **elements_for_base)
+    user_username = participation_obj.user.username
+    user_email = participation_obj.user.email
+    type = participation_obj.type
+    montant = participation_obj.amount
+    date = participation_obj.participation_date
+    date = date.strftime('%d-%m-%Y')
+    thanks = participation_obj.thanks
+    status = participation_obj.status
+    
+    product_obj = participation_obj.product
+    product_name = product_obj.name
+    
+    project_obj = participation_obj.project
+    project_name = project_obj.name
+
+    return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, thanks=thanks, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id)
+
 
 @views.route('/rib', methods=['GET', 'POST'])
 @login_required
@@ -1539,7 +1568,6 @@ def delete_clue_name():
     
     flash("Indice concernant le prénom supprimé avec succès !", category='success')
     return redirect(url_for('views.change_clue_name'))
-
 
 @views.route('/delete_project', methods=['POST'], )
 @login_required
