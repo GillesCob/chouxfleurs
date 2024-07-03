@@ -279,32 +279,40 @@ def capitalize_name(name):
 @views.route('/')
 @views.route('/home_page',methods=['GET', 'POST'])
 def home_page():
-    user_identified = False
+    user_identified_bool = False
+    user_in_project_bool = False
+    user_is_admin_project_bool = False
+    user_did_pronostic_bool = False
+    user_did_participation_bool = False
+    affiliation_link_used_bool = False
     
     if current_user.is_authenticated:
+        user_identified_bool = True
+        
         user_id = current_user.id
-        user_identified = True
         user = User.objects(id=user_id).first()
         
         user_in_project = Project.objects(users__contains=user_id)
-        if user_in_project:
+        if user_in_project: #le user est dans au moins un projet
             user_in_project_bool = True
-        else:
-            user_in_project_bool = False
+            user_is_admin_project = Project.objects(admin=user_id).first()
             
-        user_is_admin_project = Project.objects(admin=user_id).first()
+            if user_is_admin_project:
+                user_is_admin_project_bool = True
+                user_project_has_users = user_is_admin_project.users.count()
+                if user_project_has_users > 2:
+                    affiliation_link_used_bool = True
 
-        if user_is_admin_project == None:
-            user_is_admin_project = False
             
-        user_did_pronostic = bool(user.pronostic)
-        user_did_participation = bool(user.participation)
+        user_did_pronostic_bool = bool(user.pronostic)
+        user_did_participation_bool = bool(user.participation)
         user_informations = {
-            'user_identified': user_identified,
+            'user_identified': user_identified_bool,
             'user_in_project': user_in_project_bool,
-            'user_is_admin_project': user_is_admin_project,
-            'user_did_pronostic': user_did_pronostic,
-            'user_did_participation': user_did_participation
+            'user_is_admin_project': user_is_admin_project_bool,
+            'user_did_pronostic': user_did_pronostic_bool,
+            'user_did_participation': user_did_participation_bool,
+            'affiliation_link_used': affiliation_link_used_bool
         }
 
         elements_for_base = elements_for_base_template(user_id)
@@ -334,7 +342,7 @@ def home_page():
         return render_template('home.html', user_informations=user_informations, **elements_for_base)
     
     user_informations = {
-        'user_identified': user_identified,
+        'user_identified': user_identified_bool,
     }
     return render_template('home.html', user_informations=user_informations, count_projects=0)
 
