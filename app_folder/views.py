@@ -508,7 +508,7 @@ def update_product(product_id):
         if price:
             product.price = price
         if left_to_pay:
-            already_paid = product.price - int(left_to_pay)
+            already_paid = int(product.price) - int(left_to_pay)
             product.already_paid = already_paid
         if url_source:
             product.url_source = url_source
