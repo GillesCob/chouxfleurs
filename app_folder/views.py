@@ -1548,7 +1548,6 @@ def delete_clue_due_date():
     
     # Supprimer la date du terme
     project.update(unset__due_date=True)
-    
     flash("Date du terme supprimée avec succès !", category='success')
     return redirect(url_for('views.change_clue_due_date'))
 

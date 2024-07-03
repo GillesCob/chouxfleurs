@@ -16,8 +16,6 @@
             <h3>Indiquez la date du therme</h3>
             <form method="post">
                 {%if due_date %}
-                    <input type="date" class="form-control text-center" name="due_date" value="{{due_date}}" required>
-
                     <form method="post" action="{{ url_for('views.delete_clue_due_date') }}" style="margin-top: 10px;">
                         <button type="submit" class="my_btn">Supprimer la date du terme</button>
                     </form>
