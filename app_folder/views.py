@@ -1420,7 +1420,7 @@ def join_project():
 
             else:
                 flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
-                return redirect(url_for('views.my_account'))
+                return redirect(url_for('views.join_project'))
             
         except (IndexError):
             flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
