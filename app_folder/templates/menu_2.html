@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="my_container">
-            <div class="inert_card">
+            <div class="pronostic_card">
                 <!-- Le sexe ----------------------------------------- -->
                 <div class = "pronostic_title">
                     <label for="name" >Le sexe</label>
@@ -127,7 +127,7 @@
                     {%else%}
                     <h1>A vos pronostics !</h1>
                     {%endif%}
-                    <div class="inert_card">
+                    <div class="pronostic_card">
                         <form method="post">
                             <input type="hidden" name="project_id" value="{{ session.selected_project.id }}">
     
@@ -136,14 +136,13 @@
                                 <label for="name" >Le sexe</label>
                             </div>
                             
-                            <div class="my_container mt-0">
+                            <div class="two_btn_container">
                                 <input type="hidden" id="selectedGender" name="sex">
                                 <button type="button" class="my_btn gender_girl" id="btn_girl" onclick="selectGender('Fille')">Fille</button>
                                 <button type="button" class="my_btn gender_boy" id="btn_boy" onclick="selectGender('Garçon')">Garçon</button>
                             </div>
                             
                             
-                
                             <!-- Le nom ----------------------------------------- -->
                             <div class = "pronostic_title">
                                 <label for="name">Le prénom</label>

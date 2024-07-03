@@ -135,6 +135,21 @@ h6{
     justify-content: space-around;
 }
 
+.pronostic_card{
+    width: 100%; /* Largeur de la carte en pourcentage de la largeur de l'écran */
+    max-width: 600px; /* Largeur maximale pour limiter l'expansion sur les grands écrans */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+
+}
+
 
 .product-card {
     width: 300px; /* Utiliser 100% de la largeur disponible */
@@ -405,7 +420,14 @@ input[type="date"] {
 .multiple_btn_container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-evenly;
+    justify-content: center;
+    gap: 30px; /* Espace constant entre les boutons */
+}
+
+@media (max-width: 768px) {
+    .multiple_btn_container {
+        gap:0px;
+    }
 }
 
 .white_btn {
