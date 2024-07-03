@@ -427,7 +427,7 @@ def menu_1():
             return render_template('menu_1.html', user_is_admin=user_is_admin, **elements_for_base)
     
     except (KeyError, AttributeError):
-        flash("Veuillez créer ou rejoindre un projet avant d'accéder à la liste de naissance", category='error')
+        flash("Veuillez créer ou rejoindre un projet avant d'accéder à une liste de naissance", category='error')
         return redirect(url_for('views.my_projects', **elements_for_base))
     
 @views.route('/add_product', methods=['GET', 'POST'])
