@@ -1422,7 +1422,7 @@ def join_project():
                 flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
                 return redirect(url_for('views.join_project', **elements_for_base))
             
-        except (IndexError):
+        except (IndexError, ValueError):
             flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
             return redirect(url_for('views.join_project', **elements_for_base))
         
