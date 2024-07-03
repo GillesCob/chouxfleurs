@@ -1321,7 +1321,6 @@ def participation_details():
 
     return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id, user_is_admin=user_is_admin)
 
-
 @views.route('/rib', methods=['GET', 'POST'])
 @login_required
 def rib():
@@ -1373,7 +1372,7 @@ def create_project():
             }
         
         flash(f'Projet "{new_project.name}" créé avec succès !', category='success')
-        return redirect(url_for('views.my_projects', **elements_for_base))
+        return redirect(url_for('views.modify_my_projects', **elements_for_base))
         
     return render_template('create_project.html', user=current_user, **elements_for_base)
 
