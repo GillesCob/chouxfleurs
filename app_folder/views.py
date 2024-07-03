@@ -5,7 +5,6 @@ from .models import Pronostic, User, Project, Product, Participation
 from datetime import datetime
 
 from bson import ObjectId
-import bson.errors
 
 
 
@@ -1422,7 +1421,7 @@ def join_project():
                 flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
                 return redirect(url_for('views.join_project', **elements_for_base))
             
-        except (IndexError, ValueError, bson.errors.InvalidId):
+        except (IndexError, ValueError):
             flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
             return redirect(url_for('views.join_project', **elements_for_base))
         
@@ -1545,14 +1544,13 @@ def change_clue_due_date():
 
 @views.route('/delete_clue_due_date', methods=['POST'])
 @login_required
-def delete_clue_due_date():
+def delete_clue_clue_date():
     user_id = current_user.id
     project = Project.objects(admin=user_id).first()
     
     # Supprimer la date du terme
     project.due_date = None
     project.save()
-    print("coucou")
     flash("Date du terme supprimée avec succès !", category='success')
     return redirect(url_for('views.change_clue_due_date'))
 
@@ -1584,6 +1582,7 @@ def delete_clue_name():
     user_id = current_user.id
     project = Project.objects(admin=user_id).first()
     
+    # Supprimer l'indice concernant le nom
     project.clue_name = None
     project.save()
     

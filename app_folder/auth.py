@@ -126,7 +126,7 @@ def change_password():
             user.save()
         
             flash(f"Mot de passe modifié avec succès !", category='success')
-        return redirect(url_for('views.my_account', **elements_for_base))
+        return redirect(url_for('views.my_profil', **elements_for_base))
         
     return render_template('change_password.html', user=current_user, **elements_for_base)
 
