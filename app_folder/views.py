@@ -1531,16 +1531,16 @@ def change_clue_due_date():
     
 
     if request.method == 'POST' :
-        due_date = request.form.get('new_due_date')
+        due_date = request.form.get('due_date')
         project.due_date = due_date
         project.save()
         
-        flash(f"Date du terme ajoutée avec succès !", category='success')
+        flash(f"Date du terme mise à jour !", category='success')
         return redirect(url_for('views.change_clue_due_date'))
         
     return render_template('change_clue_due_date.html', due_date=due_date, **elements_for_base)
 
-@views.route('/delete_clue_due_date', methods=['POST'])
+@views.route('/delete_clue_due_date', methods=['GET', 'POST'])
 @login_required
 def delete_clue_due_date():
     user_id = current_user.id
