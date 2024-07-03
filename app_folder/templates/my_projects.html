@@ -58,7 +58,7 @@
         {% for project_name, project_details in projects_dict_special.items() %}
 
             {% if project_details.admin_rib_key %}
-                    <div class="my_projects_cards" id="my_projects_cards" data-rib="{{ project_details.admin_rib_key }}" onclick="copyRIBToClipboard(event)">
+                    <div class="inert_card" id="my_projects_cards" data-rib="{{ project_details.admin_rib_key }}" onclick="copyRIBToClipboard(event)">
                         <div class="product-title">{{ project_name }}</div>
                         <div class="product-description">Cliquez pour obtenir le RIB</div>
                     </div>
