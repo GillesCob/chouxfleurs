@@ -1531,7 +1531,7 @@ def change_clue_due_date():
     
 
     if request.method == 'POST' :
-        due_date = request.form.get('due_date')
+        due_date = request.form.get('new_due_date')
         project.due_date = due_date
         project.save()
         
