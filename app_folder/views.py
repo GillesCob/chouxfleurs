@@ -320,7 +320,7 @@ def home_page():
         if 'selected_project' not in session:
              #user_id dans la liste users d'un projet ?
             
-            if user_is_admin_project :
+            if user_is_admin_project_bool :
                 session['selected_project'] = { #Création de la session
                     'id': str(user_is_admin_project.id),
                     'name': user_is_admin_project.name
@@ -334,7 +334,6 @@ def home_page():
                 }
             
             else:
-                print("Je n'ai pas de projet du tout")
                 return render_template('home.html', user_informations=user_informations, **elements_for_base)
                 
             return redirect(url_for('views.home_page'))
