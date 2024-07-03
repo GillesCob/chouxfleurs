@@ -460,11 +460,11 @@ def add_product():
         
         caract_url_source = len(url_source)
         caract_url_image = len(image_url)
-        if caract_url_source > 400 :
+        if caract_url_source == 400 :
             flash('Le lien du produit est trop long', category='error')
             return redirect(url_for('views.add_product'))
         
-        if caract_url_image > 400 :
+        if caract_url_image == 400 :
             flash('Le lien de l\'image est trop long', category='error')
             return redirect(url_for('views.add_product'))
         
@@ -526,11 +526,11 @@ def update_product(product_id):
             
         caract_url_source = len(url_source)
         caract_url_image = len(image_url)
-        if caract_url_source > 400 :
+        if caract_url_source == 400 :
             flash('Le lien du produit est trop long', category='error')
             return redirect(url_for('views.update_product', product_id=product_id))
         
-        if caract_url_image > 400 :
+        if caract_url_image == 400 :
             flash('Le lien de l\'image est trop long', category='error')
             return redirect(url_for('views.update_product', product_id=product_id))
         
