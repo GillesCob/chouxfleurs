@@ -299,7 +299,7 @@ def home_page():
             
             if user_is_admin_project:
                 user_is_admin_project_bool = True
-                user_project_has_users = user_is_admin_project.users.count()
+                user_project_has_users = len(user_is_admin_project.users)
                 if user_project_has_users > 2:
                     affiliation_link_used_bool = True
 
