@@ -34,10 +34,10 @@
             </div>
         </div>
 
-        {% if user_informations.user_identified_bool == True %}
+        {% if user_informations.user_identified == True %}
 
-            {% if user_informations.user_is_admin_project_bool == False %}
-                {% if user_informations.user_in_project_bool == False %}
+            {% if user_informations.user_is_admin_project == False %}
+                {% if user_informations.user_in_project == False %}
                     <div class="my_container">
                         <h3>Créez ou rejoignez un projet pour commencer l'aventure !</h3>
                     </div> 
@@ -72,7 +72,7 @@
                     </div>
                 {%endif%}
             {%else%}
-                {% if user_informations.affiliation_link_used_bool == False %}
+                {% if user_informations.affiliation_link_used == False %}
                     <div class="my_container">
                         <h3>Invitez votre famille et amis à l'aide du lien d'affiliation</h3>
                         <div class="btn_container">
