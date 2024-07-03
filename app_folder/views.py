@@ -1524,10 +1524,8 @@ def change_clue_due_date():
     
     project = Project.objects(admin=user_id).first()
     try:
-        #Je ne dois pas mettre le current mais le projet pour lequel le user est l'admin
         due_date = project.due_date
         due_date = due_date.strftime('%Y-%m-%d')
-        print(due_date)
     except:
         due_date = None
     
@@ -1544,7 +1542,7 @@ def change_clue_due_date():
 
 @views.route('/delete_clue_due_date', methods=['POST'])
 @login_required
-def delete_clue_clue_date():
+def delete_clue_due_date():
     user_id = current_user.id
     project = Project.objects(admin=user_id).first()
     
