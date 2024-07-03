@@ -218,6 +218,38 @@ h6{
     color: inherit; /* Assure que la couleur du texte reste la même que celle de son conteneur parent */
 }
 
+.project_card{
+    width: 70%; /* Largeur de la carte en pourcentage de la largeur de l'écran */
+    max-width: 250px; /* Largeur maximale pour limiter l'expansion sur les grands écrans */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.project_card_inert{
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.363);
+}
+
+.project_card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
+    cursor: pointer;
+}
+
+.project_card_inert:hover {
+    transform: none;
+    cursor: default;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.363);
+}
+
+
+
 
 
 

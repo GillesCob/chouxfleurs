@@ -36,21 +36,34 @@
 
         <h1 class="product_detail_title">Statut</h1>
         <div class="product_detail_info">{{status}}</div>
-            {% if status == "Promesse" %}
-                <form action="{{ url_for('views.participation_details')}}" method="post">
-                    <input type="hidden" name="participation_received" value=True>
-                    <input type="hidden" name="participation_id" value="{{participation_id}}">
-                    <button type="submit" class="my_btn">Participation reçu</button>
-                </form>
-            {% endif %}
 
-            {% if thanks == False %}
+        {% if status != "Terminé" %}
+            {%if user_is_admin == True %}
+                {%if status != "Reçu"%}
+                    <form action="{{ url_for('views.participation_details')}}" method="post">
+                        <input type="hidden" name="participation_received" value=True>
+                        <input type="hidden" name="participation_id" value="{{participation_id}}">
+                        <button type="submit" class="my_btn">Participation reçu</button>
+                    </form>
+                {%else%}
+                    {% if status == "Reçu" %}
+                        <form action="{{ url_for('views.participation_details')}}" method="post">
+                            <input type="hidden" name="thanks_sent" value=True>
+                            <input type="hidden" name="participation_id" value="{{participation_id}}">
+                            <button type="submit" class="my_btn">Remerciements envoyés</button>
+                        </form>
+                    {% endif %}
+                {%endif%}
+            {%else%}
+                {%if status == "Promesse"%}
                 <form action="{{ url_for('views.participation_details')}}" method="post">
-                    <input type="hidden" name="thanks_sent" value=True>
+                    <input type="hidden" name="participation_send" value=True>
                     <input type="hidden" name="participation_id" value="{{participation_id}}">
-                    <button type="submit" class="my_btn">Remerciements envoyés</button>
+                    <button type="submit" class="my_btn">Participation envoyée</button>
                 </form>
-            {% endif %}
+                {%endif%}
+            {%endif%}
+        {%endif%}
     </div>
  </div>
 

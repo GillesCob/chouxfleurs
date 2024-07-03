@@ -148,7 +148,7 @@ def project_name_in_session():
         return current_project_name
 
 
-#Fonction pour récupérer SA participation aux projets autres que le siens
+#Fonction pour récupérer SA participation aux projets
 def user_participations_side_project_func():
     user_participations_side_project = {}
     
@@ -177,15 +177,16 @@ def user_participations_side_project_func():
                 participation_amount = "Don"
             else:
                 participation_amount = "Prêt"
-            participation_date = participation_obj.participation_date #Je récupère la date de la participation
-            participation_date = participation_date.strftime('%d-%m-%Y')
+
+            
+            status = participation_obj.status
             
             
             # Ajoutez la participation au dictionnaire user_participations
             if project_name not in user_participations_side_project:
                 user_participations_side_project[project_name] = []  # Créez une liste vide pour chaque nouvel utilisateur
             
-            user_participations_side_project[project_name].append((product_name, participation_amount, participation_date))
+            user_participations_side_project[project_name].append((participation_id, product_name, participation_amount, status))
     else:
         user_participations_side_project = None
             
@@ -230,15 +231,13 @@ def my_project_participations():
                 amount = "Prêt"
             date = product_participation.participation_date
             date = date.strftime('%d-%m-%Y')
-            thanks = product_participation.thanks
             status = product_participation.status
-            print(f"Status: {thanks}")
 
             # Ajoutez la participation au dictionnaire user_participations
             if participant_username not in user_participations:
                 user_participations[participant_username] = []  # Créez une liste vide pour chaque nouvel utilisateur
             
-            user_participations[participant_username].append((participation_id, participant_username, product_name, amount, date, thanks, status))
+            user_participations[participant_username].append((participation_id, participant_username, product_name, amount, date, status))
             
     return user_participations
 
@@ -1254,6 +1253,8 @@ def participation_details():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
     
+
+    
     # Récupération de l'id depuis l'url ou bien depuis le formulaire (utile quand je change le statut d'une participation) par ex
     participation_id = request.args.get('participation_id')
     
@@ -1268,6 +1269,16 @@ def participation_details():
     participation_obj_user_id = participation_obj.user.id
     user_participant = User.objects(id=participation_obj_user_id).first()
     user_participant_username = user_participant.username
+    participation_project = participation_obj.project
+    project_obj = Project.objects(id=participation_project.id).first()
+    
+    admin_id = project_obj.admin.id
+    
+    if user_id == admin_id:
+        user_is_admin = True
+    else:
+        user_is_admin = False
+        
     
     if not participation_obj:
         flash('Participation non trouvée.')
@@ -1275,7 +1286,7 @@ def participation_details():
 
     if request.method == 'POST':
         if request.form.get('thanks_sent'):
-            participation_obj.thanks = True
+            participation_obj.status = "Terminé"
             participation_obj.save()
             flash(f'Vous avez confirmé avoir remercié {user_participant_username}')
             return redirect(url_for('views.participation_details', participation_id=participation_id))
@@ -1283,7 +1294,13 @@ def participation_details():
         if request.form.get('participation_received'):
             participation_obj.status = "Reçu"
             participation_obj.save()
-            flash('Statut du produit modifié !')
+            flash(f'Vous avez confirmé avoir reçu la participation de {user_participant_username}!')
+            return redirect(url_for('views.participation_details', participation_id=participation_id))
+        
+        if request.form.get('participation_send'):
+            participation_obj.status = "Envoyé"
+            participation_obj.save()
+            flash('Vous avez confirmé avoir envoyé votre participation')
             return redirect(url_for('views.participation_details', participation_id=participation_id))
     
     print(participation_id)
@@ -1294,7 +1311,6 @@ def participation_details():
     montant = participation_obj.amount
     date = participation_obj.participation_date
     date = date.strftime('%d-%m-%Y')
-    thanks = participation_obj.thanks
     status = participation_obj.status
     
     product_obj = participation_obj.product
@@ -1303,7 +1319,7 @@ def participation_details():
     project_obj = participation_obj.project
     project_name = project_obj.name
 
-    return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, thanks=thanks, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id)
+    return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id, user_is_admin=user_is_admin)
 
 
 @views.route('/rib', methods=['GET', 'POST'])

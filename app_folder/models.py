@@ -68,5 +68,4 @@ class Participation(Document):
     product = ReferenceField('Product')
     amount = IntField()
     participation_date = DateTimeField()
-    thanks = BooleanField(default=False)
     status = StringField(max_length=150)
