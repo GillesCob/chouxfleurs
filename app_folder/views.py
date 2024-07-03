@@ -456,17 +456,6 @@ def add_product():
         already_paid = 0
         url_source = request.form.get('product_url_source')
         image_url = request.form.get('product_image_url')
-
-        
-        caract_url_source = len(url_source)
-        caract_url_image = len(image_url)
-        if caract_url_source == 400 :
-            flash('Le lien du produit est trop long', category='error')
-            return redirect(url_for('views.add_product'))
-        
-        if caract_url_image == 400 :
-            flash('Le lien de l\'image est trop long', category='error')
-            return redirect(url_for('views.add_product'))
         
         # Création du nouveau produit avec envoi des infos précedemment collectées
         new_product = Product(project=current_project_id, name=name, description=description, image_url=image_url, price=price, url_source=url_source, already_paid=already_paid)
@@ -523,16 +512,6 @@ def update_product(product_id):
             product.url_source = url_source
         if image_url:
             product.image_url = image_url
-            
-        caract_url_source = len(url_source)
-        caract_url_image = len(image_url)
-        if caract_url_source == 400 :
-            flash('Le lien du produit est trop long', category='error')
-            return redirect(url_for('views.update_product', product_id=product_id))
-        
-        if caract_url_image == 400 :
-            flash('Le lien de l\'image est trop long', category='error')
-            return redirect(url_for('views.update_product', product_id=product_id))
         
         product.save()
         

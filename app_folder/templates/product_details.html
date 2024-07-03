@@ -39,7 +39,7 @@
                 {% endif %}
 
                 <div class="btn_container">
-                    <a href="{{ product.url_source }}" target="_blank" class="my_btn my_link" style="color:#ffffff;">Voir le produit</a>
+                    <a href="{{ product.url_source }}" target="_blank" class="my_btn my_link" style="color:#ffffff;" onclick="checkUrl(event)">Voir le produit</a>
                 </div>
             </div>
 
@@ -165,12 +165,7 @@
                 }, 3000);
             }
 
-            // Fonction pour vérifier si l'URL est valide
-            function isValidUrl(url) {
-                // Expression régulière pour vérifier si l'URL est valide
-                var pattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
-                return pattern.test(url);
-            }
+
 
             // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
             var button = document.getElementById('my_button');
