@@ -39,7 +39,7 @@
                 {% endif %}
 
                 <div class="btn_container">
-                    <button class="my_btn" onclick="window.open('{{ product.url_source }}', '_blank')">Voir le produit</button>
+                    <a href="{{ product.url_source }}" target="_blank" class="my_btn my_link">Voir le produit</a>
                 </div>
             </div>
 
