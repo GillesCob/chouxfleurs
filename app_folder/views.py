@@ -1392,7 +1392,6 @@ def join_project():
     
     if request.method == 'POST':
         project_to_join_link = request.form.get('project_to_join')
-        print("coucou")
         
         try: #je gère les erreurs notamment si je n'ai pas de "=" dans le lien
             project_to_join_id = project_to_join_link.split('=')[1].strip()[:24] #je récupère les 24 premiers caractères après le "="
@@ -1425,7 +1424,7 @@ def join_project():
             
         except (IndexError):
             flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
-            return redirect(url_for('views.my_account', **elements_for_base))
+            return redirect(url_for('views.my_projects', **elements_for_base))
         
     else:
         return render_template('join_project.html', user=current_user, **elements_for_base)
