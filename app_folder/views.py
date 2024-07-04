@@ -501,8 +501,7 @@ def update_product(product_id):
         
         if name:
             product.name = name
-        if description:
-            product.description = description
+        product.description = description
         if price:
             product.price = price
         if left_to_pay:
