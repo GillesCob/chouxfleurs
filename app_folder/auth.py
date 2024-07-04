@@ -4,11 +4,29 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app_folder.views import elements_for_base_template
 
-
 from .models import User, Project, Pronostic
+
+# from flask_mail import Message
 
 auth = Blueprint("auth", __name__)
 
+
+# Fonctions concernant la validation du compte par mail
+# def send_confirmation_email(user_email):
+#     token = URLSafeTimedSerializer(app.config['SECRET_KEY']).dumps(user_email, salt='email-confirm')
+#     confirm_url = url_for('auth.confirm_email', token=token, _external=True)
+#     html = render_template('activate.html', confirm_url=confirm_url)
+#     subject = "Veuillez confirmer votre email"
+#     send_email(user_email, subject, html)
+
+# def send_email(to, subject, template):
+#     msg = Message(
+#         subject,
+#         recipients=[to],
+#         html=template,
+#         sender=app.config['MAIL_DEFAULT_SENDER']
+#     )
+#     mail.send(msg)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -80,6 +98,9 @@ def register():
                     
             new_user.save()
             
+            # send_confirmation_email(new_user.email)
+            # flash('Un email de confirmation a été envoyé. Veuillez vérifier votre boîte de réception.', category='info')
+            
             project_id = request.args.get('project_id')
             
             if project_id : 
@@ -89,18 +110,13 @@ def register():
                 project.update(push__users=new_user_id)
                 flash(f'Compte créé ! Connectez-vous pour rejoindre "{project_name}"')
                 return redirect(url_for('auth.login'))
-            
-                # return redirect(url_for('auth.login'))
-            
+                        
             flash(f'Compte créé avec succès !', category='success')
-            print(f"COUCOU3")  
             return redirect(url_for('auth.login'))
         
         else:
-            print(f"COUCOU2")  
             return render_template('register.html', error='Les mots de passe ne correspondent pas', count_projects=count_projects)
         
-    print(f"COUCOU1")   
     return render_template('register.html', count_projects=count_projects)
 
 @auth.route('/change_password', methods=['GET', 'POST'])

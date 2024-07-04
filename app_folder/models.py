@@ -13,6 +13,8 @@ class User(Document, UserMixin):
     pronostic = ListField()
     participation = ListField()
     rib = StringField(max_length=150)
+    validationCode = StringField(max_length=150)
+    is_validated = BooleanField(default=False)
 
 
 class Project(Document):

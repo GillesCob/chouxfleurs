@@ -1,52 +1,62 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_login import LoginManager
 from flask_mongoengine import MongoEngine
-
 from pymongo import MongoClient
 from hashlib import sha256
-
 import os
-
 from dotenv import load_dotenv, find_dotenv
+# from flask_mail import Mail
+from .views import views
+from .auth import auth
 
+
+#CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
 load_dotenv(find_dotenv())
+
 
 #Récupération des variables d'environnement
 MONGODB_USERNAME = os.environ.get("MONGODB_USERNAME")
 MONGODB_PASSWORD = os.environ.get("MONGODB_PASSWORD")
 MONGODB_URL = os.environ.get("MONGODB_URL")
 MONGODB_MODE = os.environ.get("MONGODB_MODE")
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+MAIL_SERVER = os.getenv("MAIL_SERVER")
+MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
 
-db = MongoEngine() #Je créé une instance de MongoEngine
+#CREATION INSTANCES
+db = MongoEngine()
+# mail = Mail()
+
 
 def create_app():
     from .models import User
     
     app = Flask(__name__)
-    SECRET_KEY = os.environ.get("SECRET_KEY")
-    app.config['SECRET_KEY'] = SECRET_KEY
     
-
+    #MAIL
+    app.config['MAIL_SERVER'] = MAIL_SERVER
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USERNAME'] = MAIL_USERNAME
+    app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
     
-    
-    #Import des routes depuis views.py-----------------------------------------------
-    from .views import views
-    app.register_blueprint(views, url_prefix="/")
-    
-    #Import des routes depuis auth.py-----------------------------------------------
-    from .auth import auth
+    #ROUTES
+    app.register_blueprint(views, url_prefix="/")    
     app.register_blueprint(auth, url_prefix="/")
     
-    
+    #MONGODB
     app.config['MONGODB_HOST'] = f'mongodb+srv://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_URL}/{MONGODB_MODE}'
     app.config['MESSAGE_FLASHING_OPTIONS'] = {'duration': 5}
-    
+    app.config['SECRET_KEY'] = SECRET_KEY
 
     db.init_app(app)
     
 
-
+    #FLASK-LOGIN
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login' #Page de redirection quand tentative d'accès à une page protégée
     login_manager.init_app(app) #Initialisation du gestionnaire de connexion
