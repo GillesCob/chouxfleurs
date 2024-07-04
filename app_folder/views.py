@@ -613,11 +613,18 @@ def confirm_participation_loading(product_id):
         if type == "€":
             product.already_paid += int(participation)
             product.participation.append(new_participation.id)
-        elif type == "donation" or type == "lending":
+            product.type = "€"
+        else:
             previous_participation = product.already_paid
             value_donation = product.price - previous_participation
             product.already_paid += value_donation
             product.participation.append(new_participation.id)
+            
+        if type == "donation":
+            product.type = "donation"
+        elif type == "lending":
+            product.type = "lending"
+            
             
         product.save()
         

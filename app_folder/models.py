@@ -59,6 +59,7 @@ class Product(Document):
     url_source = StringField(max_length=150)
     image_url = StringField(max_length=150)
     participation = ListField()
+    type = StringField(max_length=150)
     
     
 class Participation(Document):
