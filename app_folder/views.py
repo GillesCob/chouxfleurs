@@ -353,6 +353,10 @@ def menu_1():
     user_id = current_user.id
     # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    
+    #Variables initiales
+    total_money_needed = 0
+    total_money_participations = 0
 
     # Pas de projet dans la session, je récupe le premier dans lequel le user est afin d'en créer une
     if 'selected_project' not in session:
@@ -384,8 +388,7 @@ def menu_1():
         if products_for_current_project:
             
             products = []
-            total_money_needed = 0
-            total_money_participations = 0
+            
 
             for product_id in products_for_current_project:
                 product = Product.objects(id=product_id).first()
@@ -423,10 +426,10 @@ def menu_1():
             if user_is_admin :
                 return render_template('menu_1.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
             else:
-                return render_template('menu_1.html', **elements_for_base, products=products)
+                return render_template('menu_1.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
             
         else:
-            return render_template('menu_1.html', user_is_admin=user_is_admin, **elements_for_base)
+            return render_template('menu_1.html', user_is_admin=user_is_admin, total_money_needed=total_money_needed, total_money_participations=total_money_participations, **elements_for_base)
     
     except (KeyError, AttributeError):
         flash("Veuillez créer ou rejoindre un projet avant d'accéder à une liste de naissance", category='error')
