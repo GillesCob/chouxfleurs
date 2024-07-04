@@ -51,21 +51,26 @@
                                 <div class="product_title">{{ product.name }}</div>
                                 <!-- Description du produit -->
                                 <div class="product_description">{{ product.description[:40] }}</div>
-                                {% if product.left_to_pay != 0 %}
-                                    <div class="product_price_original">{{ product.price }}€</div>
+                                
+                                <!-- Si le produit n'est pas entiement financé -->
+                                {% if product.already_paid > 0 %}
+                                    {% if product.left_to_pay == 0 %}
+                                    {%else%}
+                                        <div class="product_price_crossed">{{ product.price }}€</div>
+                                    {% endif %}
                                 {% endif %}
                             </div>
 
                             <div>
                                 {% if product.left_to_pay == 0 %}
-                                <div class="product_price_current">Produit financé !</div>
+                                    <div class="product_price">Produit financé !</div>
                                 {% else %}
                                     {% if product.price == product.left_to_pay %}
                                         <!-- Prix de base -->
-                                        <div class="product_price_current">{{ product.price }}€</div>
+                                        <div class="product_price">{{ product.price }}€</div>
                                     {% else %}
                                         <!-- Prix restant -->
-                                        <div class="product_price_current">Reste {{ product.left_to_pay }}€</div>
+                                        <div class="left_to_pay">Reste {{ product.left_to_pay }}€</div>
                                     {% endif %}
                                 {% endif %}
                             </div>
