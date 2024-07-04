@@ -44,11 +44,7 @@
             </div>
 
         {% if session['user_is_admin'] %}
-            {% if left_to_pay != product.price %}
-            <div class="card_button gap-2">
-                <p>Impossible de modifier ou supprimer un produit pour lequel une participation a déjà été faite.</p>
-            </div>
-            {% else %}
+
             <div class="card_button gap-2">
                 <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
                 
@@ -58,7 +54,6 @@
                 </form>
             </div>
 
-            {% endif %}
 
         {%else%}
             {% if participation == false %}
