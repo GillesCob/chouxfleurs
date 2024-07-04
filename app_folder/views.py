@@ -1595,15 +1595,14 @@ def delete_clue_name():
 @views.route('/delete_project', methods=['POST'], )
 @login_required
 def delete_project():
-    user_id = current_user.id #J'ai l'id de ce user
+    user_id = current_user.id #J'ai l'id du user actuelelment connecté
     elements_for_base = elements_for_base_template(user_id)
 
-    project = Project.objects(admin=user_id).first() #Récup du projet
+    project = Project.objects(admin=user_id).first()
+    products_in_project = project.product
+    pronostics_in_project = project.pronostic
     
-    products_in_project = project.product #Récup de la liste des produits du projet
-    products_participations = [] #Je mettrai dans cette listes toutes les participations pour les produits du projet à supprimer
-
-    pronostics_in_project = project.pronostic #Récup de la liste des pronostics du projet
+    products_participations = []
     pronostics_participations = []
     
     for product_id in products_in_project:
@@ -1611,7 +1610,7 @@ def delete_project():
         
         participations = product.participation #Je récupère la liste des participations pour ce produit
         for participation in participations:
-            products_participations.append(str(participation)) #J'ajoute toutes les ID des participations dans une liste
+            products_participations.append(str(participation)) #J'ajoute tous les ID des participations dans une liste
 
     for pronostic_id in pronostics_in_project:
         pronostics_participations.append(str(pronostic_id))
@@ -1624,13 +1623,14 @@ def delete_project():
         user_pronostics = user_obj.pronostic #Je récupère la liste des pronostics du user
         
         for user_participation in user_participations: #Pour chaque participation du user
-            if user_participation in products_participations: #Si la participation du user est dans la liste des participations
-                user_participations.remove(user_participation) #Je retire les participations du user dans le projet à supprimer
+            if str(user_participation) in products_participations: #Si la participation du user est dans la liste des participations
+                user_obj.update(pull__participation=user_participation) #Je retire les participations du user dans le projet à supprimer
                 user_obj.save()
         
         for user_pronostic in user_pronostics:
-            if user_pronostic in pronostics_participations:
-                user_pronostics.remove(user_pronostic)
+            if str(user_pronostic) in pronostics_participations:
+                user_obj.update(pull__pronostic=user_pronostic)
+                # user_pronostics.remove(user_pronostic)
                 user_obj.save()
           
     project.delete() #Je supprime le projet de la collection des projets
