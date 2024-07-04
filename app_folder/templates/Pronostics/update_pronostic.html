@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Update pronostics
+{% endblock %}
+
+
+{% block content %}
+<h1>Mise à jour de votre pronostic</h1>
+<div class="my_container">
+    <div class="pronostic_card">
+
+        <form method="post">
+
+            <!-- Le sexe ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="name" >Le sexe</label>
+            </div>
+            
+            <input type="hidden" id="selectedGender" name="sex" value="{{ prono_sex }}">
+            <div class="multiple_btn_container">
+                <button type="button" id="btn_girl" class="my_btn" onclick="selectGender('Fille')">Fille</button>
+                <button type="button" id="btn_boy" class="my_btn" onclick="selectGender('Garçon')">Garçon</button>
+            </div>
+
+            
+            <!-- Le nom ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="name" >Le nom</label>
+                <input type="text" class="form-control text-center" name="name" value="{{prono_name}}">
+            </div>
+            
+            
+            <!-- Le poids ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="weight" >Le poids</label>
+            </div>
+
+            <input type="range" class="form-range" id="weight" name="weight" min="2.5" max="4.5" step="0.01" oninput="updateWeightValue(this.value)">
+            <span id="weightValue">{{prono_weight}}</span> kilos
+            
+            
+            <!-- La taille ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="height" >La taille</label>
+            </div>
+
+            <input type="range" class="form-range" id="height" name="height" min="30" max="60" step="0.1" oninput="updateHeightValue(this.value)">
+            <span id="heightValue">{{prono_height}}</span> Centimètres
+
+            
+            <!-- La date ----------------------------------------- -->
+            <div class = "pronostic_title">
+                <label for="date" >La date</label>
+            </div>
+
+            <input type="date" class="form-control text-center" name="date" placeholder="actuellement : {{prono_date}}">
+            
+            <!-- Validation du pronostic ----------------------------------------- -->
+             <div class="my_container">
+                <button type="submit" class="my_btn" id="update_prono">Changer de pronostic</button>
+            </div>
+        
+        </form>
+    </div>
+
+</div>
+
+
+
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script>
+
+    //Eléments lancés à la fin du chargement du html
+        document.addEventListener('DOMContentLoaded', function() {
+            //Je récupe les éléments qui m'intéressent
+            var btn_girl = document.getElementById('btn_girl');
+            var btn_boy = document.getElementById('btn_boy');
+            var update_prono = document.getElementById('update_prono');
+            var gender_choice = "{{prono_sex}}" ;
+        
+            // Fonction pour mettre à jour les classes de base au chargement
+            function setInitialClasses() {
+                btn_girl.classList.remove('gender_girl', 'white_btn');
+                btn_boy.classList.remove('gender_boy', 'white_btn');
+                update_prono.classList.remove('gender_girl', 'gender_boy', 'white_btn');
+        
+                if (gender_choice === "Fille") {
+                    btn_girl.classList.add('gender_girl', 'btn_selected');
+                    btn_boy.classList.add("white_btn");
+                    update_prono.classList.add("gender_girl");
+                } else if (gender_choice === "Garçon") {
+                    btn_girl.classList.add("white_btn");
+                    btn_boy.classList.add("gender_boy", 'btn_selected');
+                    update_prono.classList.add("gender_boy");
+                } else {
+                    btn_girl.classList.add("white_btn");
+                    btn_boy.classList.add("white_btn");
+                    update_prono.classList.add("white_btn");
+                }
+            }
+
+            // J'appelle la fonction pour définir les classes de base
+            setInitialClasses();
+
+            // J'ajoute des écouteurs d'événements pour les clics sur les boutons
+            document.getElementById('btn_girl').addEventListener('click', function() {
+            document.getElementById('btn_girl').dataset.clicked = 'true';
+            document.getElementById('btn_boy').dataset.clicked = 'false';
+            updateButtonClass();
+            });
+
+            document.getElementById('btn_boy').addEventListener('click', function() {
+            document.getElementById('btn_boy').dataset.clicked = 'true';
+            document.getElementById('btn_girl').dataset.clicked = 'false';
+            updateButtonClass();
+            });
+
+            function updateButtonClass() {
+                var btn_girlClicked = document.getElementById('btn_girl').dataset.clicked === 'true';
+                var btn_boyClicked = document.getElementById('btn_boy').dataset.clicked === 'true';
+                var update_prono = document.getElementById('update_prono');
+
+                // On supprime les classes précédentes pour repartir à chaque fois sur de bonnes bases
+                update_prono.classList.remove('gender_girl', 'gender_boy', 'no_gender');
+                document.getElementById('btn_girl').classList.remove('btn_selected', 'gender_girl', 'white_btn');
+                document.getElementById('btn_boy').classList.remove('btn_selected', 'gender_boy', 'white_btn');
+
+                if (btn_girlClicked) {
+                    btn_girl.classList.add('btn_selected', 'gender_girl');
+                    btn_boy.classList.add('white_btn');
+                    update_prono.classList.add('gender_girl');
+                } else if (btn_boyClicked) {
+                    btn_boy.classList.add('btn_selected', 'gender_boy');
+                    btn_girl.classList.add('white_btn');
+                    update_prono.classList.add('gender_boy');
+                } else {
+                    update_prono.classList.add('white_btn');
+                }
+            }
+
+            // Fonction pour mettre à jour la valeur du poids
+            function updateWeightValue(value) {
+                document.getElementById("weightValue").textContent = value;
+            }
+            // Fonction pour mettre à jour la valeur de la taille
+            function updateHeightValue(value) {
+                document.getElementById("heightValue").textContent = value;
+            }
+
+            // Mettre à jour la valeur de départ du curseur pour le poids
+            var Initialweight = "{{prono_weight}}";
+            document.getElementById("weight").value = Initialweight;
+            updateWeightValue(Initialweight);
+        
+            // Mettre à jour la valeur de départ du curseur pour la taille
+            var Initialheight = "{{prono_height}}";
+            document.getElementById("height").value = Initialheight;
+            updateHeightValue(Initialheight);
+
+        });
+
+
+    //Eléments avec lesquels j'ai une interaction une fois le html chargé
+
+        function selectGender(gender) {
+        document.getElementById('selectedGender').value = gender;
+        }
+
+        // Fonction pour mettre à jour la valeur du poids
+        function updateWeightValue(value) {
+            document.getElementById("weightValue").textContent = value;
+        }
+        // Fonction pour mettre à jour la valeur de la taille
+        function updateHeightValue(value) {
+            document.getElementById("heightValue").textContent = value;
+        }
+
+        // Mettre à jour la valeur de départ du curseur pour le poids
+        var Initialweight = "{{prono_weight}}";
+        document.getElementById("weight").value = Initialweight;
+        updateWeightValue(Initialweight);
+
+        // Mettre à jour la valeur de départ du curseur pour la taille
+        var Initialheight = "{{prono_height}}";
+        document.getElementById("height").value = Initialheight;
+        updateHeightValue(Initialheight);
+
+    </script>
+    
+
+
+{% endblock %}

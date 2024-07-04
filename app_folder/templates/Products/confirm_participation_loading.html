@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Product participation
+{% endblock %}
+
+
+{% block content %}
+<!-- <div> -->
+    <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
+    <!-- <a href="{{ url_for('views.menu_1') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+</div> -->
+
+<!-- Loader -->
+
+
+<div class="my_container">
+    <p class="text-center">Merci pour votre participation</p>
+    <p id="redirectMessage">Vous allez être redirigé dans quelques instants...</p>
+</div>
+<div id="loader" class="loader"></div>
+
+
+
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script>
+        // Fonction pour le décompte du temps
+        function countdown() {
+            var seconds = 5; // Nombre de secondes avant la redirection
+
+            var timer = setInterval(function() {
+                seconds--;
+
+                if (seconds <= 0) {
+                    clearInterval(timer); // Arrête le timer une fois le délai écoulé
+                    window.location.href = "{{ url_for('views.confirm_participation', participation=participation) }}"; // Redirige vers la nouvelle page
+                }
+            }, 1000); // Mise à jour toutes les 1 seconde
+        }
+
+        // Appel de la fonction au chargement de la page
+        window.onload = function() {
+            countdown();
+        };
+
+    
+    </script>
+
+{% endblock %}

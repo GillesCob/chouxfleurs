@@ -56,26 +56,29 @@
     </a>
 </div>
 
-<script>
 
-//Mise en forme du message informant du copier/coller
-    function copyTextToClipboard() {
-        const textToCopy = "{{ admin_rib }}";
-        const notification = document.createElement('div');
-        notification.classList.add('copy-notification');
-        notification.textContent = "RIB copié";
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script>
+    //Mise en forme du message informant du copier/coller
+        function copyTextToClipboard() {
+            const textToCopy = "{{ admin_rib }}";
+            const notification = document.createElement('div');
+            notification.classList.add('copy-notification');
+            notification.textContent = "RIB copié";
 
-        document.body.appendChild(notification);
+            document.body.appendChild(notification);
 
-        navigator.clipboard.writeText(textToCopy).then(function() {
-            setTimeout(function() {
-                notification.remove();
-            }, 2000);
-        }, function(err) {
-            console.error('Erreur lors de la copie du texte: ', err);
-        });
-    }
-</script>
+            navigator.clipboard.writeText(textToCopy).then(function() {
+                setTimeout(function() {
+                    notification.remove();
+                }, 2000);
+            }, function(err) {
+                console.error('Erreur lors de la copie du texte: ', err);
+            });
+        }
+    </script>
 
 
 

@@ -333,16 +333,16 @@ def home_page():
                 }
             
             else:
-                return render_template('home.html', user_informations=user_informations, **elements_for_base)
+                return render_template('Home page/home.html', user_informations=user_informations, **elements_for_base)
                 
             return redirect(url_for('views.home_page'))
         
-        return render_template('home.html', user_informations=user_informations, **elements_for_base)
+        return render_template('Home page/home.html', user_informations=user_informations, **elements_for_base)
     
     user_informations = {
         'user_identified': user_identified_bool,
     }
-    return render_template('home.html', user_informations=user_informations, count_projects=0)
+    return render_template('Home page/home.html', user_informations=user_informations, count_projects=0)
 
 #ROUTES "LISTE NAISSANCE" -------------------------------------------------------------------------------------------------------------
 @views.route('/menu_1')
@@ -403,8 +403,6 @@ def menu_1():
                     'left_to_pay': product.price-product.already_paid
                 })
                 
-                
-                
                 if product.type == "€" :
                     total_money_needed += product.price
                     
@@ -414,22 +412,18 @@ def menu_1():
                         participation_status = participation.status
                         if participation_status == "Terminé" or participation_status == "Reçu":
                             total_money_participations += participation.amount
-                    
-                    
 
-                
-        
             # -----------------
             products = sorted(products, key=lambda x: x['left_to_pay'], reverse=True)
             
             # -----------------
             if user_is_admin :
-                return render_template('menu_1.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
+                return render_template('Products/menu_1.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
             else:
-                return render_template('menu_1.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
+                return render_template('Products/menu_1.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
             
         else:
-            return render_template('menu_1.html', user_is_admin=user_is_admin, total_money_needed=total_money_needed, total_money_participations=total_money_participations, **elements_for_base)
+            return render_template('Products/menu_1.html', user_is_admin=user_is_admin, total_money_needed=total_money_needed, total_money_participations=total_money_participations, **elements_for_base)
     
     except (KeyError, AttributeError):
         flash("Veuillez créer ou rejoindre un projet avant d'accéder à une liste de naissance", category='error')
@@ -479,7 +473,7 @@ def add_product():
         
         return redirect(url_for('views.menu_1'))
                 
-    return render_template('add_product.html',  **elements_for_base)
+    return render_template('Products/add_product.html',  **elements_for_base)
 
 @views.route('/update_product/<product_id>', methods=['GET', 'POST'])
 @login_required
@@ -524,7 +518,7 @@ def update_product(product_id):
         flash('Produit mis à jour avec succès !')
         return redirect(url_for('views.product_details', product_id=product_id))
     
-    return render_template('update_product.html', user=current_user, **elements_for_base, product=product)
+    return render_template('Products/update_product.html', user=current_user, **elements_for_base, product=product)
   
 @views.route('/product_details/<product_id>', methods=['GET','POST'])
 @login_required
@@ -556,18 +550,18 @@ def product_details(product_id):
         if request.method=='POST':
             if 'participation' in request.form:
                 participation = "payment"
-                return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+                return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
             elif 'donation' in request.form:
                 participation = "donation"
-                return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+                return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
             else:
                 participation = "lending"
-                return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+                return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
         
-        return render_template('product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+        return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
     else:
         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
-        return render_template('menu_1.html', **elements_for_base), 404
+        return render_template('Products/menu_1.html', **elements_for_base), 404
 
 @views.route('/confirm_participation_loading/<product_id>', methods=['GET','POST'])
 @login_required
@@ -640,13 +634,13 @@ def confirm_participation_loading(product_id):
         user.save()
 
                 
-        return render_template('confirm_participation_loading.html', product=product, **elements_for_base, participation=participation)
+        return render_template('Products/confirm_participation_loading.html', product=product, **elements_for_base, participation=participation)
     
     if product:
-        return render_template('product_participation.html', product=product, **elements_for_base)
+        return render_template('Products/product_participation.html', product=product, **elements_for_base)
     else:
         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
-        return render_template('menu_1.html', **elements_for_base), 404
+        return render_template('Products/menu_1.html', **elements_for_base), 404
 
 @views.route('/confirm_participation/<participation>', methods=['GET','POST'])
 @login_required
@@ -671,7 +665,7 @@ def confirm_participation(participation):
     #Récupération du nom du user
     username = current_user.username
 
-    return render_template('confirm_participation.html', **elements_for_base, admin_rib=admin_rib, participation=participation, username=username)
+    return render_template('Products/confirm_participation.html', **elements_for_base, admin_rib=admin_rib, participation=participation, username=username)
 
 @views.route('/delete_product/<product_id>', methods=['GET','POST'])
 @login_required
@@ -806,10 +800,10 @@ def menu_2():
                                 
                                 total_possible = (scores_pronostics['Total_possible'])
                                 
-                                return render_template('menu_2.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_menu_2=go_to_menu_2, score_prono_user=score_prono_user, scores_pronostics=scores_pronostics, total_possible=total_possible, **elements_for_base)
+                                return render_template('Pronostics/menu_2.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_menu_2=go_to_menu_2, score_prono_user=score_prono_user, scores_pronostics=scores_pronostics, total_possible=total_possible, **elements_for_base)
                         
                         else:
-                            return render_template('menu_2.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_menu_2=go_to_menu_2, **elements_for_base)
+                            return render_template('Pronostics/menu_2.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_menu_2=go_to_menu_2, **elements_for_base)
 
                     else : #Si le user actuel a déjà fait un prono mais pas pour le projet actuel
                         result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
@@ -828,7 +822,6 @@ def menu_2():
                         current_project.end_pronostics = True
                         end_pronostics = current_project.end_pronostics
                         current_project.save()
-
                     return redirect(url_for('views.menu_2'))
 
         else : #C'est ici que va s'enregistrer le 1er prono de mon projet
@@ -843,12 +836,10 @@ def menu_2():
             
     except (KeyError, AttributeError):
         flash("Veuillez créer ou rejoindre un projet avant d'accéder aux pronostics", category='error')
-        print(f"Arrivée 6")
         return redirect(url_for('views.my_projects', user=current_user, **elements_for_base))
     
     #J'arrive ici si je n'ai pas encore fait mon prono pour le projet actuel
-    print("HELLO")
-    return render_template('menu_2.html', user_is_admin=user_is_admin, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, due_date=due_date, clue_name=clue_name, **elements_for_base)
+    return render_template('Pronostics/menu_2.html', user_is_admin=user_is_admin, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, due_date=due_date, clue_name=clue_name, **elements_for_base)
 
 @views.route('/update_pronostic', methods=['GET', 'POST']) 
 @login_required
@@ -863,7 +854,6 @@ def update_pronostic():
     current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
     pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
     
-
     for pronostic in user.pronostic:
         if pronostic in pronostics_for_current_project:
             pronostic_utilisateur = Pronostic.objects(id=pronostic).first()
@@ -910,7 +900,7 @@ def update_pronostic():
                 flash('Pronostic mis à jour avec succès !')
                 return redirect(url_for('views.menu_2'))
     
-    return render_template('update_pronostic.html', user=current_user, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base)
+    return render_template('Pronostics/update_pronostic.html', user=current_user, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base)
 
 @views.route('/all_pronostics', methods=['GET', 'POST'])
 @login_required
@@ -984,7 +974,7 @@ def all_pronostics():
     names = dict(sorted(names.items(), key=lambda item: item[1], reverse=True))
 
     
-    return render_template('all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, number_of_pronostics=number_of_pronostics, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice)
+    return render_template('Pronostics/all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, number_of_pronostics=number_of_pronostics, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice)
 
 @views.route('/pronostic_winner', methods=['GET', 'POST'])
 @login_required
@@ -1145,7 +1135,7 @@ def pronostic_winner():
         
     print(f"Nombre de gagnants : {number_of_winners}")
 
-    return render_template('pronostic_winner.html', scores_pronostics=scores_pronostics, number_of_winners=number_of_winners, high_score_pronostics=high_score_pronostics, **elements_for_base)
+    return render_template('Pronostics/pronostic_winner.html', scores_pronostics=scores_pronostics, number_of_winners=number_of_winners, high_score_pronostics=high_score_pronostics, **elements_for_base)
 
 @views.route('/pronostic_answers', methods=['GET', 'POST'])
 @login_required
@@ -1176,7 +1166,7 @@ def pronostic_answers():
             admin_results['prono_date'] = pronostic_admin.date
     
 
-    return render_template('pronostic_answers.html', admin_results=admin_results, **elements_for_base)
+    return render_template('Pronostics/pronostic_answers.html', admin_results=admin_results, **elements_for_base)
 
 
 #ROUTES "PHOTOS" -------------------------------------------------------------------------------------------------------------
@@ -1192,15 +1182,15 @@ def menu_3():
         project_name = project.name
         
         user_is_admin = True
-        return render_template('menu_3.html', user=current_user, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base)
+        return render_template('Photos/menu_3.html', user=current_user, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
-        return render_template('menu_3.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base)
+        return render_template('Photos/menu_3.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base)
 
 
 #ROUTES "MON COMPTE" -------------------------------------------------------------------------------------------------------------
-@views.route('/my_profil')
+@views.route('/my_profil') #Redirection ok
 @login_required
 def my_profil():
     user_id = current_user.id
@@ -1208,9 +1198,9 @@ def my_profil():
 
     user_email = current_user.email
 
-    return render_template('my_profil.html', user=current_user, **elements_for_base, user_email=user_email)
+    return render_template('My profil/my_profil.html', user=current_user, **elements_for_base, user_email=user_email)
 
-@views.route('/my_projects', methods=['GET', 'POST'])
+@views.route('/my_projects', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def my_projects():
     user_id = current_user.id
@@ -1243,16 +1233,16 @@ def my_projects():
             modify_project = request.form.get('modify_project_open')
             
                 
-        return render_template('my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_rib=admin_rib, modify_project=modify_project)
+        return render_template('My projects/my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_rib=admin_rib, modify_project=modify_project)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
         projects_dict_special = elements_for_base['projects_dict']
         
         
-        return render_template('my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project)
+        return render_template('My projects/my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project)
 
-@views.route('/modify_my_projects')
+@views.route('/modify_my_projects') #Redirection ok
 @login_required
 def modify_my_projects():
     user_id = current_user.id
@@ -1264,9 +1254,9 @@ def modify_my_projects():
         
         admin_rib = User.objects(id=user_id).first().rib
 
-    return render_template('modify_my_projects.html', admin_rib=admin_rib, **elements_for_base)
+    return render_template('My projects/modify_my_projects.html', admin_rib=admin_rib, **elements_for_base)
 
-@views.route('/participation_details', methods=['GET', 'POST'])
+@views.route('/participation_details', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def participation_details():
     user_id = current_user.id
@@ -1321,9 +1311,7 @@ def participation_details():
             participation_obj.save()
             flash('Vous avez confirmé avoir envoyé votre participation')
             return redirect(url_for('views.participation_details', participation_id=participation_id))
-    
-    print(participation_id)
-    
+        
     user_username = participation_obj.user.username
     user_email = participation_obj.user.email
     type = participation_obj.type
@@ -1338,9 +1326,9 @@ def participation_details():
     project_obj = participation_obj.project
     project_name = project_obj.name
 
-    return render_template('participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id, user_is_admin=user_is_admin)
+    return render_template('My projects/participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id, user_is_admin=user_is_admin)
 
-@views.route('/rib', methods=['GET', 'POST'])
+@views.route('/rib', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def rib():
     user_id = current_user.id
@@ -1361,9 +1349,9 @@ def rib():
         return redirect(url_for('views.modify_my_projects', **elements_for_base))
     
     
-    return render_template('rib.html', user=current_user, **elements_for_base, project_name=project_name, actual_rib=user.rib)
+    return render_template('My projects/rib.html', user=current_user, **elements_for_base, project_name=project_name, actual_rib=user.rib)
    
-@views.route('/create_project', methods=['GET', 'POST'])
+@views.route('/create_project', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def create_project():
     user_id = current_user.id
@@ -1393,9 +1381,9 @@ def create_project():
         flash(f'Projet "{new_project.name}" créé avec succès !', category='success')
         return redirect(url_for('views.modify_my_projects', **elements_for_base))
         
-    return render_template('create_project.html', user=current_user, **elements_for_base)
+    return render_template('My projects/create_project.html', user=current_user, **elements_for_base)
 
-@views.route('/join_project', methods=['GET', 'POST'])
+@views.route('/join_project', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def join_project():
     user_id = current_user.id
@@ -1439,32 +1427,9 @@ def join_project():
             return redirect(url_for('views.join_project', **elements_for_base))
         
     else:
-        return render_template('join_project.html', user=current_user, **elements_for_base)
+        return render_template('My projects/join_project.html', user=current_user, **elements_for_base)
 
-@views.route('/select_project', methods=['GET', 'POST'])
-@login_required
-def select_project():
-    user_id = current_user.id
-    elements_for_base = elements_for_base_template(user_id)
-    
-    
-    projects = Project.objects(users__contains=current_user.id)
-    
-    projects_dict = {}  
-    for project in projects:
-        projects_dict[project.name] = str(project.id)
-        if request.method == 'POST':
-            project_id = request.form.get('project_id')
-            
-            project_name = Project.objects(id=project_id).first().name
-            session['selected_project'] = {'id': project_id, 'name': project_name}
-            
-            flash(f'Vous êtes maintenant connecté à "{project_name}" !')
-            return redirect(url_for('views.home_page', **elements_for_base))
-            
-    return render_template('select_project.html', user=current_user, **elements_for_base)
-
-@views.route('/rename_project', methods=['GET', 'POST'])
+@views.route('/rename_project', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def rename_project():
     user_id = current_user.id
@@ -1487,9 +1452,9 @@ def rename_project():
         flash(f'Nom du projet modifié avec succès !', category='success')
         return redirect(url_for('views.my_projects', **elements_for_base))
         
-    return render_template('rename_project.html', user=current_user, actual_name=actual_name, **elements_for_base)
+    return render_template('My projects/rename_project.html', user=current_user, actual_name=actual_name, **elements_for_base)
 
-@views.route('/change_username', methods=['GET', 'POST'])
+@views.route('/change_username', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def change_username():
     user_id = current_user.id
@@ -1507,9 +1472,9 @@ def change_username():
         flash(f"Nom d'utilisateur modifié avec succès !", category='success')
         return redirect(url_for('views.my_profil'))
         
-    return render_template('change_username.html', user=current_user, user_username=user_username, **elements_for_base)
+    return render_template('My projects/change_username.html', user=current_user, user_username=user_username, **elements_for_base)
 
-@views.route('/change_email', methods=['GET', 'POST'])
+@views.route('/change_email', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def change_email():
     user_id = current_user.id
@@ -1527,9 +1492,9 @@ def change_email():
         flash(f"Adresse mail modifiée avec succès !", category='success')
         return redirect(url_for('views.my_profil'))
         
-    return render_template('change_email.html', user=current_user, user_email=user_email, **elements_for_base)
+    return render_template('My projects/change_email.html', user=current_user, user_email=user_email, **elements_for_base)
 
-@views.route('/change_clue_due_date', methods=['GET', 'POST'])
+@views.route('/change_clue_due_date', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def change_clue_due_date():
     user_id = current_user.id
@@ -1551,9 +1516,9 @@ def change_clue_due_date():
         flash(f"Date du terme mise à jour !", category='success')
         return redirect(url_for('views.change_clue_due_date'))
         
-    return render_template('change_clue_due_date.html', due_date=due_date, **elements_for_base)
+    return render_template('My projects/change_clue_due_date.html', due_date=due_date, **elements_for_base)
 
-@views.route('/delete_clue_due_date', methods=['GET', 'POST'])
+@views.route('/delete_clue_due_date', methods=['GET', 'POST']) #Pas de redirection
 @login_required
 def delete_clue_due_date():
     user_id = current_user.id
@@ -1564,7 +1529,7 @@ def delete_clue_due_date():
     flash("Date du terme supprimée avec succès !", category='success')
     return redirect(url_for('views.change_clue_due_date'))
 
-@views.route('/change_clue_name', methods=['GET', 'POST'])
+@views.route('/change_clue_name', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def change_clue_name():
     user_id = current_user.id
@@ -1584,9 +1549,9 @@ def change_clue_name():
         flash("Indice concernant le prénom modifié avec succès !", category='success')
         return redirect(url_for('views.change_clue_name'))
         
-    return render_template('change_clue_name.html', clue_name=clue_name, **elements_for_base)
+    return render_template('My projects/change_clue_name.html', clue_name=clue_name, **elements_for_base)
 
-@views.route('/delete_clue_name', methods=['POST'])
+@views.route('/delete_clue_name', methods=['POST']) #Pas de redirection
 @login_required
 def delete_clue_name():
     user_id = current_user.id
@@ -1599,7 +1564,7 @@ def delete_clue_name():
     flash("Indice concernant le prénom supprimé avec succès !", category='success')
     return redirect(url_for('views.change_clue_name'))
 
-@views.route('/delete_project', methods=['POST'], )
+@views.route('/delete_project', methods=['POST']) #Pas de redirection
 @login_required
 def delete_project():
     user_id = current_user.id #J'ai l'id du user actuelelment connecté
@@ -1662,6 +1627,31 @@ def delete_project():
     
     flash('Projet supprimé avec succès !')
     return redirect(url_for('views.home_page', **elements_for_base))
+
+
+#ROUTES AUTRES -------------------------------------------------------------------------------------------------------------
+@views.route('/select_project', methods=['GET', 'POST'])
+@login_required
+def select_project():
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+    
+    
+    projects = Project.objects(users__contains=current_user.id)
+    
+    projects_dict = {}  
+    for project in projects:
+        projects_dict[project.name] = str(project.id)
+        if request.method == 'POST':
+            project_id = request.form.get('project_id')
+            
+            project_name = Project.objects(id=project_id).first().name
+            session['selected_project'] = {'id': project_id, 'name': project_name}
+            
+            flash(f'Vous êtes maintenant connecté à "{project_name}" !')
+            return redirect(url_for('views.home_page', **elements_for_base))
+            
+    return render_template('select_project.html', user=current_user, **elements_for_base)
 
 @views.route('/other_data')
 def other_data():

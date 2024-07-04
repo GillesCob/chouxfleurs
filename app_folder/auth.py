@@ -6,27 +6,7 @@ from app_folder.views import elements_for_base_template
 
 from .models import User, Project, Pronostic
 
-# from flask_mail import Message
-
 auth = Blueprint("auth", __name__)
-
-
-# Fonctions concernant la validation du compte par mail
-# def send_confirmation_email(user_email):
-#     token = URLSafeTimedSerializer(app.config['SECRET_KEY']).dumps(user_email, salt='email-confirm')
-#     confirm_url = url_for('auth.confirm_email', token=token, _external=True)
-#     html = render_template('activate.html', confirm_url=confirm_url)
-#     subject = "Veuillez confirmer votre email"
-#     send_email(user_email, subject, html)
-
-# def send_email(to, subject, template):
-#     msg = Message(
-#         subject,
-#         recipients=[to],
-#         html=template,
-#         sender=app.config['MAIL_DEFAULT_SENDER']
-#     )
-#     mail.send(msg)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -34,7 +14,7 @@ def login():
     count_projects = 0
     
     if current_user.is_authenticated:
-        return render_template('home.html', user=current_user, count_projects=count_projects)
+        return render_template('Home page/home.html', user=current_user, count_projects=count_projects)
     else:
         if request.method == 'POST':
             email = request.form.get('email')
@@ -64,11 +44,11 @@ def login():
                         login_user(user, remember=True)
                         return redirect(url_for('views.home_page'))
                 else:
-                    return render_template('login.html', error="Mauvais mot de passe !", count_projects=count_projects)
+                    return render_template('Auth/login.html', error="Mauvais mot de passe !", count_projects=count_projects)
             
             else:
-                return render_template('login.html', error="Nom d'utilisateur incorrect", count_projects=count_projects)
-    return render_template('login.html', count_projects=count_projects)
+                return render_template('Auth/login.html', error="Nom d'utilisateur incorrect", count_projects=count_projects)
+    return render_template('Auth/login.html', count_projects=count_projects)
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
@@ -84,13 +64,13 @@ def register():
         user = User.objects(email=email).first()
         
         if user:
-            return render_template('register.html', error='Cet utilisateur existe déjà', count_projects=count_projects)
+            return render_template('Auth/register.html', error='Cet utilisateur existe déjà', count_projects=count_projects)
         
         if len(email) < 4:
-            return render_template('register.html', error='Le nom d\'utilisateur doit contenir au moins 4 caractères', count_projects=count_projects)
+            return render_template('Auth/register.html', error='Le nom d\'utilisateur doit contenir au moins 4 caractères', count_projects=count_projects)
         
         if len(password) < 4:
-            return render_template('register.html', error='Le mot de passe doit contenir au moins 4 caractères', count_projects=count_projects)
+            return render_template('Auth/register.html', error='Le mot de passe doit contenir au moins 4 caractères', count_projects=count_projects)
         
         if password == confirm_password:
             hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
@@ -115,9 +95,9 @@ def register():
             return redirect(url_for('auth.login'))
         
         else:
-            return render_template('register.html', error='Les mots de passe ne correspondent pas', count_projects=count_projects)
+            return render_template('Auth/register.html', error='Les mots de passe ne correspondent pas', count_projects=count_projects)
         
-    return render_template('register.html', count_projects=count_projects)
+    return render_template('Auth/register.html', count_projects=count_projects)
 
 @auth.route('/change_password', methods=['GET', 'POST'])
 @login_required
@@ -133,7 +113,7 @@ def change_password():
         confirm_password = request.form.get('confirm_password')
         
         if len(new_password) < 4:
-            return render_template('register.html', error='Le mot de passe doit contenir au moins 4 caractères')
+            return render_template('Auth/register.html', error='Le mot de passe doit contenir au moins 4 caractères')
         
         if new_password == confirm_password:
             hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
@@ -144,7 +124,7 @@ def change_password():
             flash(f"Mot de passe modifié avec succès !", category='success')
         return redirect(url_for('views.my_profil', **elements_for_base))
         
-    return render_template('change_password.html', user=current_user, **elements_for_base)
+    return render_template('Auth/change_password.html', user=current_user, **elements_for_base)
 
 @auth.route('/logout')
 @login_required

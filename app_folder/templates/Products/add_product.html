@@ -52,41 +52,42 @@
     </div>
 
 
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script>
+        const range = document.getElementById('product_price');
+        const input = document.getElementById('price_input');
 
-<script>
+        // Initial sync
+        input.value = range.value;
 
-    const range = document.getElementById('product_price');
-    const input = document.getElementById('price_input');
+        function updatePriceFromRange(value) {
+            input.value = value;
+        }
 
-    // Initial sync
-    input.value = range.value;
+        function updateRangeFromInput(value) {
+            range.value = value;
+        }
 
-    function updatePriceFromRange(value) {
-        input.value = value;
-    }
+    // Mise en forme boutons en fonction su sexe
+        // Récupération du prono
+        var genderChoiceElement = document.getElementById('gender_choice');
+        var genderChoice = genderChoiceElement.dataset.gender;
 
-    function updateRangeFromInput(value) {
-        range.value = value;
-    }
+        // Récupération de l'id du bouton
+        var button = document.getElementById('my_button');
 
-// Mise en forme boutons en fonction su sexe
-    // Récupération du prono
-    var genderChoiceElement = document.getElementById('gender_choice');
-    var genderChoice = genderChoiceElement.dataset.gender;
+        // Définir la classe en fonction de la valeur de gender_choice
+        if (genderChoice === "Fille") {
+            button.classList.add("gender_girl");
+        } else if (genderChoice === "Garçon") {
+            button.classList.add("gender_boy");
+        } else {
+            button.classList.add("no_gender");
+        }
 
-    // Récupération de l'id du bouton
-    var button = document.getElementById('my_button');
-
-    // Définir la classe en fonction de la valeur de gender_choice
-    if (genderChoice === "Fille") {
-        button.classList.add("gender_girl");
-    } else if (genderChoice === "Garçon") {
-        button.classList.add("gender_boy");
-    } else {
-        button.classList.add("no_gender");
-    }
-
-</script>
+    </script>
 
 
 

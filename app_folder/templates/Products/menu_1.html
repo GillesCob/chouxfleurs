@@ -36,35 +36,40 @@
             {% endif %}
 
             {% if products %}
-                <div class="custom-card-container">
+                <div class="custom_card_container">
 
                     {% for product in products %}
                     <a href="{{ url_for('views.product_details', product_id=product.id) }}" class="product-link" style="text-decoration: none;">
-                        <div class="product-card">
+                        <div class="product_card">
                             <!-- Image du produit -->
-                            <div class="product-image">
+                            <div class="product_image">
                                 <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-height: 200px; max-width: 250px;">
                             </div>
-                            <div class="product-details">
+
+                            <div class="product_informations">
                                 <!-- Titre du produit -->
-                                <div class="product-title">{{ product.name }}</div>
+                                <div class="product_title">{{ product.name }}</div>
                                 <!-- Description du produit -->
-                                <div class="product-description">{{ product.description[:40] }}</div>
-                        
+                                <div class="product_description">{{ product.description[:40] }}</div>
+                                {% if product.left_to_pay != 0 %}
+                                    <div class="product_price_original">{{ product.price }}€</div>
+                                {% endif %}
+                            </div>
+
+                            <div>
                                 {% if product.left_to_pay == 0 %}
-                                    <div class="product-price-current">Produit financé !</div>
+                                <div class="product_price_current">Produit financé !</div>
                                 {% else %}
                                     {% if product.price == product.left_to_pay %}
                                         <!-- Prix de base -->
-                                        <div class="product-price-current">{{ product.price }}€</div>
+                                        <div class="product_price_current">{{ product.price }}€</div>
                                     {% else %}
-                                        <!-- Prix initial -->
-                                        <div class="product-price-original">{{ product.price }}€</div>
                                         <!-- Prix restant -->
-                                        <div class="product-price-current">{{ product.left_to_pay }}€</div>
+                                        <div class="product_price_current">Reste {{ product.left_to_pay }}€</div>
                                     {% endif %}
                                 {% endif %}
                             </div>
+                            
                         </div>
                     </a>
                     {% endfor %}
@@ -82,48 +87,50 @@
         Aucun projet sélectionné.
     {% endif %}
 
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Mise en forme boutons en fonction su sexe
+            // Récupération du prono
+            var genderChoiceElement = document.getElementById('gender_choice');
+            var genderChoice = genderChoiceElement.dataset.gender;
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-    // Mise en forme boutons en fonction su sexe
-        // Récupération du prono
-        var genderChoiceElement = document.getElementById('gender_choice');
-        var genderChoice = genderChoiceElement.dataset.gender;
+            // Récupération de l'id du bouton
+            var button = document.getElementById('my_button');
 
-        // Récupération de l'id du bouton
-        var button = document.getElementById('my_button');
+            // Récupérer l'élément de remplissage
+            var fill = document.getElementById('fill');
+            // Récupérer la valeur de total_money_participations depuis le template Flask
+            var totalMoneyParticipations = {{ total_money_participations }};
+            // Récupérer la valeur de total_money_needed depuis le template Flask
+            var totalMoneyNeeded = {{ total_money_needed }};
+            
+            // Calculer le pourcentage de l'argent reçu par rapport aux fonds nécessaires
+            var percentage = (totalMoneyParticipations / totalMoneyNeeded) * 100;
 
-        // Récupérer l'élément de remplissage
-        var fill = document.getElementById('fill');
-        // Récupérer la valeur de total_money_participations depuis le template Flask
-        var totalMoneyParticipations = {{ total_money_participations }};
-        // Récupérer la valeur de total_money_needed depuis le template Flask
-        var totalMoneyNeeded = {{ total_money_needed }};
+            // Définir la classe en fonction de la valeur de gender_choice
+            if (genderChoice === "Fille") {
+                button.classList.add("gender_girl");
+            } else if (genderChoice === "Garçon") {
+                button.classList.add("gender_boy");
+            } else {
+                button.classList.add("no_gender");
+            }
+
+            //Script concernant la barre de progression
+
+
+            // Limiter le pourcentage à 100% si nécessaire
+            percentage = Math.min(percentage, 100);
+
+            // Mettre à jour la largeur de l'élément de remplissage avec le pourcentage calculé
+            fill.style.width = percentage + '%';
+
+        });
+
         
-        // Calculer le pourcentage de l'argent reçu par rapport aux fonds nécessaires
-        var percentage = (totalMoneyParticipations / totalMoneyNeeded) * 100;
-
-        // Définir la classe en fonction de la valeur de gender_choice
-        if (genderChoice === "Fille") {
-            button.classList.add("gender_girl");
-        } else if (genderChoice === "Garçon") {
-            button.classList.add("gender_boy");
-        } else {
-            button.classList.add("no_gender");
-        }
-
-        //Script concernant la barre de progression
-
-
-        // Limiter le pourcentage à 100% si nécessaire
-        percentage = Math.min(percentage, 100);
-
-        // Mettre à jour la largeur de l'élément de remplissage avec le pourcentage calculé
-        fill.style.width = percentage + '%';
-
-    });
-
-    
-</script>
+    </script>
 
 {% endblock %}

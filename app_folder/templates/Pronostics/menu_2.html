@@ -218,80 +218,82 @@
 Aucun projet sélectionné.
 {% endif %}
 
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script>
 
-<script>
-
-// Mettre à jour la valeur du champ de formulaire caché afin d'envoyer la bonne info du sexe une fois le prono validé
-function selectGender(gender) {
-document.getElementById('selectedGender').value = gender;
-}
-
-if ("{{ pronostic_done }}" === "True") {
-    // Script pour la partie lorsque le prono a été fait
-    var btn_my_answers = document.getElementById('btn_my_answers');
-    var btn_change_prono = document.getElementById('btn_change_prono');
-    var gender_choice = "{{prono_sex}}" ;
-
-    btn_my_answers.classList.remove('gender_girl', 'gender_boy', 'no_gender');
-    btn_change_prono.classList.remove('gender_girl', 'gender_boy', 'no_gender');
-
-    if (gender_choice === "Fille") {
-        btn_my_answers.classList.add("gender_girl");
-        btn_change_prono.classList.add("gender_girl");
-    } else if (gender_choice === "Garçon") {
-        btn_my_answers.classList.add("gender_boy");
-        btn_change_prono.classList.add("gender_boy");
-    } else {
-        btn_my_answers.classList.add("no_gender");
-        btn_change_prono.classList.add("no_gender");
+    // Mettre à jour la valeur du champ de formulaire caché afin d'envoyer la bonne info du sexe une fois le prono validé
+    function selectGender(gender) {
+    document.getElementById('selectedGender').value = gender;
     }
 
+    if ("{{ pronostic_done }}" === "True") {
+        // Script pour la partie lorsque le prono a été fait
+        var btn_my_answers = document.getElementById('btn_my_answers');
+        var btn_change_prono = document.getElementById('btn_change_prono');
+        var gender_choice = "{{prono_sex}}" ;
 
-} else {
-    // Script pour la partie lorsque le prono n'a pas été fait
-    function updateButtonClass() {
-        var btn_girlClicked = document.getElementById('btn_girl').dataset.clicked === 'true';
-        var btn_boyClicked = document.getElementById('btn_boy').dataset.clicked === 'true';
-        var validate_prono = document.getElementById('validate_prono');
+        btn_my_answers.classList.remove('gender_girl', 'gender_boy', 'no_gender');
+        btn_change_prono.classList.remove('gender_girl', 'gender_boy', 'no_gender');
 
-        // On supprime les classes précédentes pour repartir à chaque fois sur de bonnes bases
-        validate_prono.classList.remove('gender_girl', 'gender_boy', 'no_gender');
-        document.getElementById('btn_girl').classList.remove('btn_selected');
-        document.getElementById('btn_boy').classList.remove('btn_selected');
-
-        if (btn_girlClicked) {
-            validate_prono.classList.add('gender_girl');
-            btn_girl.classList.add('btn_selected');
-        } else if (btn_boyClicked) {
-            validate_prono.classList.add('gender_boy');
-            btn_boy.classList.add('btn_selected');
+        if (gender_choice === "Fille") {
+            btn_my_answers.classList.add("gender_girl");
+            btn_change_prono.classList.add("gender_girl");
+        } else if (gender_choice === "Garçon") {
+            btn_my_answers.classList.add("gender_boy");
+            btn_change_prono.classList.add("gender_boy");
         } else {
-            validate_prono.classList.add('no_gender');
+            btn_my_answers.classList.add("no_gender");
+            btn_change_prono.classList.add("no_gender");
         }
+
+
+    } else {
+        // Script pour la partie lorsque le prono n'a pas été fait
+        function updateButtonClass() {
+            var btn_girlClicked = document.getElementById('btn_girl').dataset.clicked === 'true';
+            var btn_boyClicked = document.getElementById('btn_boy').dataset.clicked === 'true';
+            var validate_prono = document.getElementById('validate_prono');
+
+            // On supprime les classes précédentes pour repartir à chaque fois sur de bonnes bases
+            validate_prono.classList.remove('gender_girl', 'gender_boy', 'no_gender');
+            document.getElementById('btn_girl').classList.remove('btn_selected');
+            document.getElementById('btn_boy').classList.remove('btn_selected');
+
+            if (btn_girlClicked) {
+                validate_prono.classList.add('gender_girl');
+                btn_girl.classList.add('btn_selected');
+            } else if (btn_boyClicked) {
+                validate_prono.classList.add('gender_boy');
+                btn_boy.classList.add('btn_selected');
+            } else {
+                validate_prono.classList.add('no_gender');
+            }
+        }
+
+        document.getElementById('btn_girl').addEventListener('click', function() {
+            document.getElementById('btn_girl').dataset.clicked = 'true';
+            document.getElementById('btn_boy').dataset.clicked = 'false';
+            updateButtonClass();
+        });
+
+        document.getElementById('btn_boy').addEventListener('click', function() {
+            document.getElementById('btn_boy').dataset.clicked = 'true';
+            document.getElementById('btn_girl').dataset.clicked = 'false';
+            updateButtonClass();
+        });
     }
 
-    document.getElementById('btn_girl').addEventListener('click', function() {
-        document.getElementById('btn_girl').dataset.clicked = 'true';
-        document.getElementById('btn_boy').dataset.clicked = 'false';
-        updateButtonClass();
-    });
+    // Mettre à jour la valeur de départ du curseur pour le poids et la taille
+    function updateWeightValue(value) {
+        document.getElementById("weightValue").textContent = value;
+    }
+    function updateHeightValue(value) {
+        document.getElementById("heightValue").textContent = value;
+    }
 
-    document.getElementById('btn_boy').addEventListener('click', function() {
-        document.getElementById('btn_boy').dataset.clicked = 'true';
-        document.getElementById('btn_girl').dataset.clicked = 'false';
-        updateButtonClass();
-    });
-}
-
-// Mettre à jour la valeur de départ du curseur pour le poids et la taille
-function updateWeightValue(value) {
-    document.getElementById("weightValue").textContent = value;
-}
-function updateHeightValue(value) {
-    document.getElementById("heightValue").textContent = value;
-}
-
-</script>
+    </script>
 
 {% endblock %}
 

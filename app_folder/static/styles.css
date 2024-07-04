@@ -4,7 +4,7 @@
 }
 
 
-
+/* ------------------------------------------------------------- Contenair ------------------------------------------------------------ */
 /* Mon contenair principal ------------------------------------------------------ */
 .my_container {
     width: 100%; /* Largeur maximale de 100% */
@@ -13,13 +13,56 @@
     /* background-color: aqua; */
     margin: 0 auto; /* Centre horizontalement le conteneur */
     text-align: center;
+
+    /* Pour les textes */
     font-size: 0.9em;
     font-family: 'Jost', sans-serif;
+    color: #000000;
+}
+
+/* Home page */
+.home_page_container {
+    margin: 20px;
+    text-align: center;
+    /* background-color: #666; */
+}
+
+/* Contenair pour les boutons ------------------------------------------------------ */
+.two_btn_container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* Espace constant entre les boutons */;
+}
+
+.btn_container {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.multiple_btn_container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px; /* Espace constant entre les boutons */
+}
+
+/* A DEFINIR */
+.back-button-container {
+    position: absolute;
+}
+
+.range_container{
+    margin: 0 auto;
+    max-width: 300px;
 }
 
 
-/* Styles pour le textes / titres / ... ------------------------------------------------------ */
-
+/* ------------------------------------------------------------- Styles polices ------------------------------------------------------------ */
+/* Styles de base pour le textes / titres / ... ------------------------------------------------------ */
 h1{
     font-size: 1.7em;
     font-weight: bold;
@@ -56,7 +99,7 @@ h6{
 }
 
 
-/* Eléments pour la home_page */
+/* Styles pour la home_page --------------------------------------------------------------------- */
 .caligraphy {
     font-family: jost; /* Choisissez une police de caractères de style calligraphique */
     font-size: 1.5em; /* Taille de la police */
@@ -68,15 +111,15 @@ h6{
   }
   
 .title_caligraphy {
-    font-size: 2em; /* Taille de la police */
+    font-size: 2em;
 }
 
 .sub_caligraphy {
-    font-size: 1em; /* Taille de la police */
+    font-size: 1em;
     margin-top: -25px;
 }
 
-/* Eléments pour les pronostics */
+/* Styles pour les pronostics --------------------------------------------------------------------- */
 .pronostic_title{
     font-size: 1.5em;
     font-weight: bold;
@@ -89,16 +132,53 @@ h6{
     font-weight: bold;
 }
 
+/* Styles pour l'élément input de type date */
+input[type="date"] {
+    appearance: none; /* Supprimer les styles par défaut de l'élément */
+    padding: 10px; /* Ajouter un peu d'espace autour du texte */
+    border: 1px solid #ccc; /* Ajouter une bordure grise */
+    border-radius: 5px; /* Ajouter des coins arrondis */
+    background-color: #f7f7f7; /* Ajouter une couleur de fond légère */
+}
+  
+/* Styles pour l'élément input de type date lorsqu'il est en focus */
+input[type="date"]:focus {
+outline: none; /* Supprimer la bordure de focus par défaut */
+border-color: var(--my_btn_color); /* Modifier la couleur de la bordure lorsqu'il est en focus */
+box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée lorsqu'il est en focus */
+}
 
-/* Eléments pour la liste de naissance */
+/* Styles pour la liste de naissance --------------------------------------------------------------------- */
 .product_title{
     font-size: 1.5em;
     font-weight: bold;
     margin-top: 30px;
-    margin-bottom: 10px;
+
+    color: #000000; /* Les cartes sont entourées d'un lien, nécessaire de spésifier la couleur du texte */
 }
 
-/* Eléments pour les détails des participations à la liste de naissance */
+.product_description{
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #000000; /* Les cartes sont entourées d'un lien, nécessaire de spésifier la couleur du texte */
+
+}
+
+.product_price_original {
+    font-size: 1.5em;
+    color: #555;
+    text-decoration: line-through;
+    margin-bottom: 5px;
+}
+
+.product_price_current {
+    font-size: 1.5em;
+    color: #d4854d;
+    font-weight: bold;
+}
+
+
+/* Styles pour les détails des participations à la liste de naissance */
 .product_detail_title{
     font-size: 1.8em;
     font-weight: bold;
@@ -107,8 +187,10 @@ h6{
 .product_detail_info{
     font-size: 1.2em;
 }
-    
-/* Styles pour les cartes ------------------------------------------------------ */
+
+
+/* --------------------------------------------------------------- Les cartes -------------------------------------------------------------- */
+/* Eléments de base pour les cartes */
 .card {
     padding: 20px;
     background-color: #eff1f4;
@@ -135,6 +217,8 @@ h6{
     justify-content: space-around;
 }
 
+
+/* Cartes pour les pronostics ---------------------------------------------------------------------*/
 .pronostic_card{
     width: 100%; /* Largeur de la carte en pourcentage de la largeur de l'écran */
     max-width: 600px; /* Largeur maximale pour limiter l'expansion sur les grands écrans */
@@ -150,11 +234,12 @@ h6{
 
 }
 
-
-.product-card {
-    width: 300px; /* Utiliser 100% de la largeur disponible */
+/* Cartes pour la liste de naissance ---------------------------------------------------------------------*/
+.product_card {
+    width: 100%;
+    max-width: 600px;
     min-width: 300px;
-    min-height: 385px;
+    min-height: 400px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -164,28 +249,21 @@ h6{
     margin: 10px auto; /* Centrer la carte et ajouter une marge en bas */
 }
 
-/* Media query pour les petits écrans */
-@media (max-width: 600px) {
-    .product-card {
-        width: 90%; /* Réduire la largeur pour les petits écrans */
-    }
-}
-
-/* Media query pour les très petits écrans (comme les téléphones) */
-@media (max-width: 400px) {
-    .product-card {
-        width: 95%; /* Réduire encore plus la largeur */
-        padding: 15px; /* Ajuster le padding pour s'adapter à la taille de l'écran */
-    }
-}
-
-
-.product-card:hover {
+.product_card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
     cursor: pointer;
 }
 
+.product_informations{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 10px;
+    height: 150px;
+}
+
+/* Cartes pour my_projects ---------------------------------------------------------------------*/
 .my_projects_cards{
     width: 300px;
     background-color: #fff;
@@ -219,16 +297,15 @@ h6{
 }
 
 
-.custom-card-container {
+/* A DEFINIR */
+.custom_card_container {
     display: flex;
     flex-wrap: wrap; /* Permet aux éléments de passer à la ligne si nécessaire */
     justify-content: center; /* Centre horizontalement les éléments */
     gap: 20px; /* Espace entre les éléments */
 }
 
-
-
-.product-card a {
+.product_card a {
     text-decoration: none;
     color: inherit; /* Assure que la couleur du texte reste la même que celle de son conteneur parent */
 }
@@ -264,29 +341,22 @@ h6{
 }
 
 
+/* --------------------------------------------------------------- Les images -------------------------------------------------------------- */
+/* Images pour la liste de naissance ---------------------------------------------------------------------*/
+.product_image{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    width: 100%;
+}
+
+.product_image_details{
+    margin-bottom: 60px;
+}
 
 
-
-
-/* Styles pour l'élément input de type date */
-input[type="date"] {
-    appearance: none; /* Supprimer les styles par défaut de l'élément */
-    padding: 10px; /* Ajouter un peu d'espace autour du texte */
-    border: 1px solid #ccc; /* Ajouter une bordure grise */
-    border-radius: 5px; /* Ajouter des coins arrondis */
-    background-color: #f7f7f7; /* Ajouter une couleur de fond légère */
-  }
-  
-  /* Styles pour l'élément input de type date lorsqu'il est en focus */
-  input[type="date"]:focus {
-    outline: none; /* Supprimer la bordure de focus par défaut */
-    border-color: var(--my_btn_color); /* Modifier la couleur de la bordure lorsqu'il est en focus */
-    box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée lorsqu'il est en focus */
-  }
-  
-
-
-/* Boutons présents dans le projet ------------------------------------------------------ */
+/* -------------------------------------------------------------- Les boutons -------------------------------------------------------------- */
 
 /* Eléments de base des boutons */
 .my_btn{
@@ -309,6 +379,9 @@ input[type="date"] {
     min-height: 50px;
 
 }
+.my_btn:hover {
+    filter: brightness(1.3); /* Légèrement plus lumineux au survol */
+}
 
 .my_small_btn{
     width: 150px;
@@ -328,6 +401,9 @@ input[type="date"] {
 
     display: inline-block; /* Pour s'aligner avec les éléments en ligne */
     position: relative; /* Permet de contrôler la position */
+}
+.my_small_btn:hover {
+    filter: brightness(1.2); /* Légèrement plus lumineux au survol */
 }
 
 .btn_selected {
@@ -358,78 +434,6 @@ input[type="date"] {
     background-color: rgb(255, 0, 0);
 }
 
-/* Parametres modifiés sur petit écran */
-
-@media (max-width: 768px) {
-    .my_btn {
-        font-size: 1.2em;
-        padding: 5px 10px;
-        width: 100%; /* Taille adaptative pour les petits écrans */
-        max-width: 200px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
-        min-height: 50px;
-    }
-}
-
-@media (max-width: 768px) {
-    .btn_selected {
-        font-size: 1.4em;
-        padding: 5px 10px;
-        width: 100%; /* Taille adaptative pour les petits écrans */
-        min-width: 150px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
-    }
-}
-
-/* Parametres modifiés au survol */
-
-.my_btn:hover {
-    filter: brightness(1.3); /* Légèrement plus lumineux au survol */
-}
-
-.my_small_btn:hover {
-    filter: brightness(1.2); /* Légèrement plus lumineux au survol */
-}
-
-
-
-
-
-
-
-/* Permet de passer de son prono à la tendance */
-.two_btn_container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 20px; /* Espace constant entre les boutons */;
-}
-
-.btn_container {
-    display: flex;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
-}
-
-@media (max-width: 768px) {
-    .two_btn_container {
-        gap:0px;
-    }
-}
-
-.multiple_btn_container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px; /* Espace constant entre les boutons */
-}
-
-@media (max-width: 768px) {
-    .multiple_btn_container {
-        gap:0px;
-    }
-}
-
 .white_btn {
     background-color: rgb(247, 247, 247);
     color: black;
@@ -447,6 +451,7 @@ input[type="date"] {
 
 }
 
+/* A DEFINIR */
 #product_button {
     pointer-events: none; /* Le bouton ne répondra pas aux événements de souris */
 }
@@ -456,8 +461,7 @@ input[type="date"] {
 }
 
 
-
-
+/* --------------------------------------------------------- Barres de progression --------------------------------------------------------- */
 /* Barre de progression pour la moyenne gars/fille ------------------------------------------------------ */
 .progress_container {
     width: 100%;
@@ -513,6 +517,9 @@ input[type="date"] {
     right: 10px;
 }
 
+
+/* --------------------------------------------------------- Fenêtres modales --------------------------------------------------------- */
+
 /* Elements pour les fenêtres modales ------------------------------------------------------ */
 .modal {
     display: none; /* Masquer la fenêtre modale par défaut */
@@ -538,6 +545,7 @@ input[type="date"] {
     cursor: pointer;
 }
 
+/* A DEFINIR */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -547,46 +555,7 @@ input[type="number"]::-moz-spin-buttons {
     display: none; /* Firefox */
 }
 
-
-
-
-
-
-
-
-
-
-/* Style du titre du produit */
-.product-title {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-/* Style de la description du produit */
-.product-description {
-    font-size: 1em;
-    color: #666;
-    margin-bottom: 15px;
-}
-
-/* Style du prix initial */
-.product-price-original {
-    font-size: 1.2em;
-    color: #555;
-    text-decoration: line-through;
-    margin-bottom: 5px;
-}
-
-/* Style du prix restant */
-.product-price-current {
-    font-size: 1.5em;
-    color: #d4854d;
-    font-weight: bold;
-}
-
-
+/* --------------------------------------------------------- Notifications --------------------------------------------------------- */
 .copy-notification {
     position: absolute;
     top: calc(10%); /* Positionné 20px en dessous du bas de .my_container */
@@ -599,6 +568,8 @@ input[type="number"]::-moz-spin-buttons {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+
+/* A DEFINIR */
 /* CSS pour la boîte de dialogue personnalisée */
 .custom-alert {
     position: fixed;
@@ -615,30 +586,41 @@ input[type="number"]::-moz-spin-buttons {
 }
 
 
-
+/* --------------------------------------------------------- Tableaux --------------------------------------------------------- */
 /* Styles pour les tableaux dans my_projects */
 table {
     width: 100%;
     border-collapse: collapse;
 }
+
 th, td {
     padding: 8px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
+
 th {
     background-color: #f2f2f2;
 }
+
 tr:hover {
     background-color: #f5f5f5;
 }
 
-
-.back-button-container {
-    position: absolute;
-
+.clickable-row {
+    cursor: pointer;
 }
 
+.clickable-row:hover {
+    background-color: #f1f1f1;
+}
+
+.my_link {
+    padding: 10px 20px;
+    color: white;
+}
+
+/* --------------------------------------------------------- Footer --------------------------------------------------------- */
 /* Footer styles */
 .footer {
     background-color: rgba(0, 0, 0, 0.881);
@@ -672,17 +654,6 @@ tr:hover {
     text-decoration: underline;
 }
 
-@media (max-width: 768px) {
-    .footer .container {
-        flex-direction: column;
-    }
-
-    .footer .footer-links {
-        margin-top: 10px; /* Ajustement de la marge en mode mobile */
-    }
-}
-
-
 /* Wrapper to make the footer sticky */
 .wrapper {
     display: flex;
@@ -695,14 +666,6 @@ main {
     padding-bottom: 60px; /* Hauteur du footer pour éviter de le recouvrir */
 }
 
-
-/* Pour la page de garde */
-.home_page_container {
-    margin: 20px;
-    text-align: center;
-    /* background-color: #666; */
-}
-
 /* Text Section */
 .text-section {
     z-index: 2;
@@ -711,7 +674,7 @@ main {
 }
 
 
-
+/* --------------------------------------------------------- Logo --------------------------------------------------------- */
 /* Logo Section */
 .logo-section {
     display: flex;
@@ -727,13 +690,68 @@ main {
     opacity: 0.5;
 }
 
-/* Styles pour mobile */
+/* --------------------------------------------------------- Pour le mobile --------------------------------------------------------- */
+/* de 0 à 768px */
 @media (max-width: 768px) {
+    /* Contenair */
     .home_page_container {
         margin-top: 30px;
         flex-direction: column;
         align-items: center;
     }
+
+    .two_btn_container {
+        gap:0px;
+    }
+
+    .multiple_btn_container {
+        gap:0px;
+    }
+
+    /* Styles polices */
+
+    /* Les cartes */
+    .product_card {
+        width: 90%;
+        padding: 15px;
+    }
+
+    /* Les images */
+
+    /* Les boutons */
+    .my_btn {
+        font-size: 1.2em;
+        padding: 5px 10px;
+        width: 100%; /* Taille adaptative pour les petits écrans */
+        max-width: 200px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
+        min-height: 50px;
+    }
+
+    .btn_selected {
+        font-size: 1.4em;
+        padding: 5px 10px;
+        width: 100%; /* Taille adaptative pour les petits écrans */
+        min-width: 150px; /* Taille maximale pour s'assurer qu'il ne devient pas trop grand */
+    }
+
+    /* Barres de progression */
+
+    /* Fenêtres modales */
+
+    /* Notifications */
+
+    /* Tableaux */
+
+    /* Footer */
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer .footer-links {
+        margin-top: 10px;
+    }
+
+    /* Logo */
 
     .logo-section {
         position: absolute;
@@ -747,10 +765,14 @@ main {
         max-width: 100%;
         height: auto;
     }
+
+    /* Messages flash */
 }
 
-/* Styles pour ordinateur */
+/* de 769 à l'infini */
 @media (min-width: 769px) {
+
+    /* Contenair */
     .home_page_container {
         display: flex;
         align-items: center;
@@ -758,12 +780,31 @@ main {
         padding: 10px;
     }
 
+    /* Styles polices */
+    /* A DEFINIR */
     .text-section {
         text-align: left;
         margin-bottom: 0;
         max-width: 50%;
     }
 
+    /* Les cartes */
+
+    /* Les images */
+
+    /* Les boutons */
+
+    /* Barres de progression */
+
+    /* Fenêtres modales */
+
+    /* Notifications */
+
+    /* Tableaux */
+
+    /* Footer */
+
+    /* Logo */
     .logo-section {
         position: relative;
         max-width: 50%;
@@ -779,22 +820,14 @@ main {
         opacity: 0.5;
         transition: max-width 0.5s ease; /* Ajoute une transition douce */
     }
-}
 
-/* Ajoutez cette nouvelle règle pour les tailles intermédiaires */
-@media (max-width: 1200px) {
-    .logo {
-        max-width: 100%; /* Ajustez le pourcentage selon les besoins */
-    }
-}
+    /* Messages flash */
 
-@media (max-width: 992px) {
-    .logo {
-        max-width: 100%; /* Ajustez le pourcentage selon les besoins */
-    }
+
 }
 
 
+/* --------------------------------------------------------- Messages flash --------------------------------------------------------- */
 
 .flash-message {
     padding: 15px;
@@ -820,7 +853,6 @@ main {
     z-index: 9999; /* Assure que le message soit au-dessus des autres éléments */
 }
 
-
 .flash-error {
     text-align: center;
     background-color: #f8d7da;
@@ -843,24 +875,3 @@ main {
         visibility: hidden;
     }
 }
-
-
-
-
-.range_container{
-    margin: 0 auto;
-    max-width: 300px;
-}
-
-/* Lignes pour les tableaux */
-.clickable-row {
-    cursor: pointer;
-}
-.clickable-row:hover {
-    background-color: #f1f1f1;
-}
-
-.my_link {
-    padding: 10px 20px;
-    color: white;
-    }

@@ -84,41 +84,44 @@
 {% endif %}
 
 
-<script>
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script>
 
-//Script concernant la barre de progression
-    function updateSexValue(value) {
-        document.updateSexValue("sexValue").textContent = value;
+    //Script concernant la barre de progression
+        function updateSexValue(value) {
+            document.updateSexValue("sexValue").textContent = value;
+        }
+        window.addEventListener('load', function() {
+        // Récupérer l'élément de remplissage
+        var fill = document.getElementById('fill');
+        // Mettre à jour la largeur de l'élément de remplissage avec la valeur spécifiée
+        fill.style.width = "{{ percentage_girl }}%";
+    });
+
+
+    // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
+    // Voir à terme comment mettre ce code dans le fichier script.js afin d'éviter de le dupliquer partout
+
+    // Récupérer le bouton par son ID
+    var btn_tendency = document.getElementById('btn_tendency');
+
+    // Récupérer la valeur de gender_choice
+    var gender_choice = "{{gender_choice}}" ;
+
+    // Définir la classe en fonction de la valeur de gender_choice
+    if (gender_choice === "Fille") {
+        btn_tendency.classList.add("gender_girl");
+
+    } else if (gender_choice === "Garçon") {
+        btn_tendency.classList.add("gender_boy");
+        
+    } else {
+        btn_tendency.classList.add("no_gender");
     }
-    window.addEventListener('load', function() {
-    // Récupérer l'élément de remplissage
-    var fill = document.getElementById('fill');
-    // Mettre à jour la largeur de l'élément de remplissage avec la valeur spécifiée
-    fill.style.width = "{{ percentage_girl }}%";
-});
 
-
-// Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice
-// Voir à terme comment mettre ce code dans le fichier script.js afin d'éviter de le dupliquer partout
-
-// Récupérer le bouton par son ID
-var btn_tendency = document.getElementById('btn_tendency');
-
-// Récupérer la valeur de gender_choice
-var gender_choice = "{{gender_choice}}" ;
-
-// Définir la classe en fonction de la valeur de gender_choice
-if (gender_choice === "Fille") {
-    btn_tendency.classList.add("gender_girl");
-
-} else if (gender_choice === "Garçon") {
-    btn_tendency.classList.add("gender_boy");
-    
-} else {
-    btn_tendency.classList.add("no_gender");
-}
-
-</script>
+    </script>
 
 
 
