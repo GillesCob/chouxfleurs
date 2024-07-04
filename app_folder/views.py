@@ -366,39 +366,26 @@ def menu_1():
                 'name': first_project.name
             }
     
-    try: #Si je n'ai pas de projet dans la session, erreur donc go to except
-        
-        #Sinon...
-        
-        # Objectifs ici : 
-        # - Récupérer le projet dans la session
-        # - Récupérer le prono concernant le sexe puis envoyer cette data dans la session
-        # - Identifier si le user connecté est l'admin de ce projet
-        # - Récupérer les produits de ce projet
-        # - Organisation des produits en fonction du montant restant à payer
-        # - Routes différentes afin de permettre ou non l'ajout de produit
-        
-        # -----------------
+    try: 
         current_project_id = session['selected_project']['id']
         current_project = Project.objects(id=current_project_id).first()
         
-        # -----------------
         gender_choice = get_gender_choice(current_project)
         session['gender_choice'] = gender_choice
         
-        # -----------------
         user_id = current_user.id
         admin_id = current_project.admin.id
         user_is_admin = (user_id == admin_id)
         session['admin_id'] = admin_id
         session['user_is_admin'] = user_is_admin
         
-        # -----------------
         products_for_current_project = current_project.product
         
         if products_for_current_project:
             
             products = []
+            total_money_needed = 0
+            total_money_participations = 0
 
             for product_id in products_for_current_project:
                 product = Product.objects(id=product_id).first()
@@ -412,13 +399,29 @@ def menu_1():
                     'id': product.id,
                     'left_to_pay': product.price-product.already_paid
                 })
+                
+                
+                
+                if product.type == "€" :
+                    total_money_needed += product.price
+                    
+                    product_participations = product.participation
+                    for product_participation in product_participations:
+                        participation = Participation.objects(id=product_participation).first()
+                        participation_status = participation.status
+                        if participation_status == "Terminé" or participation_status == "Reçu":
+                            total_money_participations += participation.amount
+                    
+                    
+
+                
         
             # -----------------
             products = sorted(products, key=lambda x: x['left_to_pay'], reverse=True)
             
             # -----------------
             if user_is_admin :
-                return render_template('menu_1.html', **elements_for_base, products=products)
+                return render_template('menu_1.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
             else:
                 return render_template('menu_1.html', **elements_for_base, products=products)
             
@@ -456,9 +459,10 @@ def add_product():
         already_paid = 0
         url_source = request.form.get('product_url_source')
         image_url = request.form.get('product_image_url')
+        type = "€"
         
         # Création du nouveau produit avec envoi des infos précedemment collectées
-        new_product = Product(project=current_project_id, name=name, description=description, image_url=image_url, price=price, url_source=url_source, already_paid=already_paid)
+        new_product = Product(project=current_project_id, name=name, description=description, image_url=image_url, price=price, url_source=url_source, already_paid=already_paid, type=type)
         new_product.save()
         
         # J'ajoute l'id du nouveau produit dans la liste des produits de mon objet Project

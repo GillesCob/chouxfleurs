@@ -459,7 +459,9 @@ input[type="date"] {
 
 
 /* Barre de progression pour la moyenne gars/fille ------------------------------------------------------ */
-.progress-container {
+.progress_container {
+    width: 100%;
+    max-width: 500px;
     position: relative;
     margin: 0 auto;
     border: 1px solid #000000;

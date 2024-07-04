@@ -19,6 +19,20 @@
                 <div class="my_container">
                     <button onclick="window.location.href='/add_product'" id="my_button" class="my_btn">Ajouter un produit</button>
                 </div>
+
+                {%if total_money_participations > 0}
+                    <div class="progress_container">
+                        <div class="bar-container">
+                            <div id="fill" class="fill"></div>
+                        </div>
+                        <div class="progress-label label-left">Argent reçu - {{ total_money_participations }}€</div>
+                        <div class="progress-label label-right">Fonds nécessaires - {{ total_money_needed }}€</div>
+                        <script src="script.js"></script>
+                    </div>
+                    <p>Le montant des produits donnés/prêtés ne sont pas pris en compte</br>
+                    Seules les participations identifiées comme "Reçu" sont prises en compte.</p>
+                {%endif%}
+
             {% endif %}
 
             {% if products %}
@@ -79,6 +93,16 @@
         // Récupération de l'id du bouton
         var button = document.getElementById('my_button');
 
+        // Récupérer l'élément de remplissage
+        var fill = document.getElementById('fill');
+        // Récupérer la valeur de total_money_participations depuis le template Flask
+        var totalMoneyParticipations = {{ total_money_participations }};
+        // Récupérer la valeur de total_money_needed depuis le template Flask
+        var totalMoneyNeeded = {{ total_money_needed }};
+        
+        // Calculer le pourcentage de l'argent reçu par rapport aux fonds nécessaires
+        var percentage = (totalMoneyParticipations / totalMoneyNeeded) * 100;
+
         // Définir la classe en fonction de la valeur de gender_choice
         if (genderChoice === "Fille") {
             button.classList.add("gender_girl");
@@ -87,7 +111,19 @@
         } else {
             button.classList.add("no_gender");
         }
+
+        //Script concernant la barre de progression
+
+
+        // Limiter le pourcentage à 100% si nécessaire
+        percentage = Math.min(percentage, 100);
+
+        // Mettre à jour la largeur de l'élément de remplissage avec le pourcentage calculé
+        fill.style.width = percentage + '%';
+
     });
+
+    
 </script>
 
 {% endblock %}
