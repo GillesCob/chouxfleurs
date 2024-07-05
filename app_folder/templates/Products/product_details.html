@@ -39,7 +39,7 @@
                 {% endif %}
 
                 <div class="btn_container">
-                    <a href="{{ product.url_source }}" target="_blank" class="my_btn my_link" style="color:#ffffff;" onclick="checkUrl(event)">Voir le produit</a>
+                    <button type="button" onclick="window.open('{{ product.url_source }}', '_blank')" class="my_btn">Voir le produit</button>
                 </div>
             </div>
 
