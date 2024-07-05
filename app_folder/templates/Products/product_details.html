@@ -12,16 +12,16 @@
     <div id="user_is_admin" data-user="{{ session['user_is_admin'] }}"></div>
 
     <div>
-        <!-- Mise en place d'une flèche pour revenir à menu_1.html -->
-        <a href="{{ url_for('views.menu_1') }}">
+        <!-- Mise en place d'une flèche pour revenir à liste_naissance.html -->
+        <a href="{{ url_for('views.liste_naissance') }}">
             <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
         </a>
     </div>
 
     <div class="my_container">
-            <div class="product_card" id="product_card">
+            <div class="my_card product_card" id="product_card">
                 <!-- Image du produit -->
-                <div class="product_image_container product_image_details_container">
+                <div class="product_image_container">
                     <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-width: 100%; max-height: 200px;">
                 </div>
                 <!-- Titre du produit -->
@@ -33,7 +33,7 @@
                     <div class="product_price_current">{{ product.price }}€</div>
                 {% else %}
                     <!-- Prix initial -->
-                    <div class="left_to_pay">{{ product.price }}€</div>
+                    <div class="product_price_crossed">{{ product.price }}€</div>
                     <!-- Prix restant -->
                     <div class="product_price_current">{{ left_to_pay }}€</div>
                 {% endif %}
@@ -45,7 +45,7 @@
 
         {% if session['user_is_admin'] %}
 
-            <div class="card_button gap-2">
+            <div class="two_btn_container small_btn_container">
                 <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
                 
                 <form action="{{ url_for('views.delete_product', product_id=product.id) }}" method="post">
@@ -166,7 +166,7 @@
             // Fonction pour afficher une boîte de dialogue personnalisée
             function showCustomAlert(message) {
                 const alertBox = document.createElement('div');
-                alertBox.classList.add('custom-alert');
+                alertBox.classList.add('custom_alert');
                 alertBox.textContent = message;
                 document.body.appendChild(alertBox);
 

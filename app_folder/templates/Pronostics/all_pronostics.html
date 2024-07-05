@@ -10,12 +10,12 @@
 {% if session.selected_project.id %}
     <div class="my_container">
         <!-- <div class="two_btn_container">
-            <button type="button" class="my_btn white_btn" onclick="window.location.href='/menu_2'">Mes réponses</button>
+            <button type="button" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Mes réponses</button>
             <button type="button" id="btn_tendency" class="my_btn btn_selected" >La tendance</button>
         </div> -->
         <div class="multiple_btn_container">
-                <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/menu_2'">Mes réponses</button>
-                <button type="button" class="my_btn" >La tendance</button>
+                <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Mes réponses</button>
+                <button type="button" id="btn_tendency" class="my_btn" >La tendance</button>
         </div>
 
         {%if number_of_pronostics == 1%}
@@ -30,18 +30,18 @@
 
         
 
-        <div class="inert_card">
+        <div class="my_card inert_card">
             <!-- Le sexe ----------------------------------------- -->
             <div class = "pronostic_title">
                 <label for="name" >Le sexe</label>
             </div>
 
             <div class="progress_container">
-                <div class="bar-container">
+                <div class="bar_container">
                     <div id="fill" class="fill"></div>
                 </div>
-                <div class="progress-label label-left">Fille - {{ percentage_girl }}%</div>
-                <div class="progress-label label-right">Garçon - {{ percentage_boy }}%</div>
+                <div class="progress_label label_left">Fille - {{ percentage_girl }}%</div>
+                <div class="progress_label label_right">Garçon - {{ percentage_boy }}%</div>
                 <script src="script.js"></script>
             </div>
 

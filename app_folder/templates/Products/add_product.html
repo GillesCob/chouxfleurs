@@ -10,14 +10,14 @@
  <div id="gender_choice" data-gender="{{ session['gender_choice'] }}"></div>
 
     <!-- Mise en place d'une flèche pour revenir à l'environnement précédent -->
-    <a href="{{ url_for('views.menu_1') }}">
+    <a href="{{ url_for('views.liste_naissance') }}">
         <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
     </a>
 
     <div class="my_container">
             <h1>Ajouter un produit</h1>
             <form method="post">
-                <div class="inert_card">
+                <div class="my_card inert_card">
                     <!-- Titre du produit -->
                     <label for="text" class="product_title">Titre du produit</label>
                     <input type="text" class="form-control text-center" name="product_name" placeholder="Nom du produit" maxlength="50" required>

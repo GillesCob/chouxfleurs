@@ -38,7 +38,7 @@ def login():
                         'id': str(project.id),
                         'name': project.name
                         }
-                        return redirect(url_for('views.menu_2', count_projects=count_projects))
+                        return redirect(url_for('views.pronostic', count_projects=count_projects))
                     
                     else:
                         login_user(user, remember=True)

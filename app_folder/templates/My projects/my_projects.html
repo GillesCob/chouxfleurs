@@ -59,13 +59,13 @@
         {% for project_name, project_details in projects_dict_special.items() %}
 
             {% if project_details.admin_rib_key %}
-                    <div class="project_card" data-rib="{{ project_details.admin_rib_key }}" onclick="copyRIBToClipboard(event)">
-                        <div class="product-title">{{ project_name }}</div>
-                        <div class="product-description">Cliquez pour obtenir le RIB</div>
+                    <div class="my_projects_cards" data-rib="{{ project_details.admin_rib_key }}" onclick="copyRIBToClipboard(event)">
+                        <div class="project_title">{{ project_name }}</div>
+                        <div class="product_description">Cliquez pour obtenir le RIB</div>
                     </div>
             {%else%}
-                    <div class="project_card project_card_inert" id="my_projects_cards">
-                        <div class="product-title">{{ project_name }}</div>
+                    <div class="my_card my_projects_cards inert_card">
+                        <div class="product_title">{{ project_name }}</div>
                     </div>
             {%endif%}
             
@@ -113,8 +113,8 @@
 
 <!-- Structure de la fenêtre modale pour supprimer son projet -->
 <div id="myModal_delete_project" class="modal">
-    <div class="modal-content">
-    <span class="close-icon" onclick="closeModal_delete_project()" style="float:right;">&times;</span>
+    <div class="modal_content">
+    <span class="close_icon" onclick="closeModal_delete_project()" style="float:right;">&times;</span>
         <div class="col offset-md-3 col-md-6 col-sm-12">
             <form method="POST" action="{{ url_for('views.delete_project') }}" class="p-5 text-center">        
                 <p>ATTENTION Cette action est irréversible !</p> 
@@ -129,7 +129,7 @@
 
 
 <script>
-//LIgne du tableau cliquable
+//Ligne du tableau cliquable
 document.addEventListener("DOMContentLoaded", function() {
     const rows = document.querySelectorAll(".clickable-row");
     rows.forEach(row => {
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         
         const notification = document.createElement('div');
-        notification.classList.add('copy-notification');
+        notification.classList.add('copy_notification');
         notification.textContent = "Lien copié";
 
         // Calcule la position verticale pour placer la notification sous le bouton
@@ -190,7 +190,7 @@ function copyRIBToClipboard(event) {
     const buttonRect = event.currentTarget.getBoundingClientRect(); // Récupère les dimensions du bouton
 
     const notification = document.createElement('div');
-    notification.classList.add('copy-notification');
+    notification.classList.add('copy_notification');
     notification.textContent = "RIB copié";
 
     // Calcule la position verticale pour placer la notification sous le bouton

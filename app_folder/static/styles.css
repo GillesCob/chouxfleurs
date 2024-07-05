@@ -1,6 +1,6 @@
-/* Définition de la variable pour la couleur */
+/* Eléments de base pour tout le code */
 :root {
-    --my_btn_color: rgb(185, 145, 108); /* Par exemple, une couleur orange */
+    --my_btn_color: rgba(108, 117, 125, 1);
 }
 
 
@@ -18,9 +18,10 @@
     font-size: 0.9em;
     font-family: 'Jost', sans-serif;
     color: #000000;
+
 }
 
-/* Home page */
+/* HOME PAGE ------------------------------------------------------ */
 .home_page_container {
     margin: 20px;
     text-align: center;
@@ -33,7 +34,7 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 20px; /* Espace constant entre les boutons */;
+    gap: 20px;
 }
 
 .btn_container {
@@ -50,18 +51,30 @@
     gap: 30px; /* Espace constant entre les boutons */
 }
 
+/* LISTE DE NAISSANCE ------------------------------------------------------ */
+/* Contenair pour les cartes des produits de la liste de naissance ------------------------------------------------------ */
+.product_card_container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
 /* Contenair pour les images des produits de la liste de naissance ------------------------------------------------------ */
-
 .product_image_container{
     display: flex;
     justify-content: center;
     align-items: center;
     height: 200px;
     width: 100%;
+    margin-bottom: 20px;
 }
 
-.product_image_details_container{
-    margin-bottom: 60px;
+/* Contenair pour les informations des produits de la liste de naissance ------------------------------------------------------ */
+.product_informations_container{
+    width: 100%;
+    padding: 10px;
+    height: 150px;
+    /* background-color: #155724; */
 }
 
 /* A DEFINIR */
@@ -146,7 +159,7 @@ h6{
     font-weight: bold;
 }
 
-/* Styles pour l'élément input de type date */
+/* Styles pour l'élément input de type date --------------------------------------------------------------------- */
 input[type="date"] {
     appearance: none; /* Supprimer les styles par défaut de l'élément */
     padding: 10px; /* Ajouter un peu d'espace autour du texte */
@@ -162,11 +175,10 @@ border-color: var(--my_btn_color); /* Modifier la couleur de la bordure lorsqu'i
 box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée lorsqu'il est en focus */
 }
 
-/* Styles pour la liste de naissance --------------------------------------------------------------------- */
+/* LISTE DE NAISSANCE ------------------------------------------------------ */
 .product_title{
     font-size: 1.5em;
     font-weight: bold;
-    margin-top: 30px;
 
     color: #000000; /* Les cartes sont entourées d'un lien, nécessaire de spésifier la couleur du texte */
 }
@@ -192,7 +204,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 
 .left_to_pay {
     font-size: 1.5em;
-    color: #555;
+    color: #d4854d;
     margin-bottom: 5px;
 }
 
@@ -202,8 +214,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     font-weight: bold;
 }
 
-
-/* Styles pour les détails des participations à la liste de naissance */
+/* Styles pour les détails des participations à la liste de naissance --------------------------------------------------------------------- */
 .product_detail_title{
     font-size: 1.8em;
     font-weight: bold;
@@ -213,91 +224,73 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     font-size: 1.2em;
 }
 
+/* MY PROJECTS ------------------------------------------------------ */
+/* Styles pour les projets rejoints --------------------------------------------------------------------- */
+.project_title{
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
 
 /* --------------------------------------------------------------- Les cartes -------------------------------------------------------------- */
-/* Eléments de base pour les cartes */
-.card {
-    padding: 20px;
-    background-color: #eff1f4;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
+/* Eléments de base pour TOUTES les cartes */
+.my_card{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    min-width: 400px;
-    margin-bottom: 20px;
-}
 
-.card_button {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
+    width: 100%;
+    max-width: 700px;
 
-.custom-card {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    justify-content: space-around;
-}
-
-
-/* Cartes pour les pronostics ---------------------------------------------------------------------*/
-.pronostic_card{
-    width: 100%; /* Largeur de la carte en pourcentage de la largeur de l'écran */
-    max-width: 600px; /* Largeur maximale pour limiter l'expansion sur les grands écrans */
     background-color: #fff;
+
     border-radius: 10px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
     padding: 20px;
-    text-align: center;
     transition: transform 0.3s ease;
+
+    margin-top: 0px;
     margin-bottom: 10px;
     margin-left: auto;
     margin-right: auto;
-
 }
 
-/* Cartes pour la liste de naissance ---------------------------------------------------------------------*/
-.product_card {
-    width: 100%;
-    max-width: 600px;
-    min-width: 300px;
-    min-height: 400px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    text-align: center;
-    transition: transform 0.3s ease;
-    margin: 10px auto; /* Centrer la carte et ajouter une marge en bas */
-}
-
-.product_card:hover {
+.my_card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
     cursor: pointer;
 }
 
-.product_informations{
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 10px;
-    height: 150px;
+/* Cartes pour les éléments de connexion ---------------------------------------------------------------------*/
+.auth_card{
+    max-width: 400px;
 }
+
+
+/* Cartes pour la liste de naissance ---------------------------------------------------------------------*/
+.product_card {
+    max-width: 500px;
+    min-width: 300px;
+    min-height: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    margin: 10px auto; /* Centrer la carte et ajouter une marge en bas */
+}
+
 
 /* Cartes pour my_projects ---------------------------------------------------------------------*/
 .my_projects_cards{
+
+
     width: 300px;
-    background-color: #fff;
+    min-height: 50px;
+    margin: 0 auto;
+    
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    text-align: center;
     transition: transform 0.3s ease;
-    margin: 10px auto; /* Centre horizontalement l'élément */
 }
 
 .my_projects_cards:hover {
@@ -306,28 +299,9 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     cursor: pointer;
 }
 
-/* Cartes login, register, cartes pronos,   */
-.inert_card {
-    width: 100%; /* Largeur de la carte en pourcentage de la largeur de l'écran */
-    max-width: 400px; /* Largeur maximale pour limiter l'expansion sur les grands écrans */
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
-    padding: 20px;
-    text-align: center;
-    transition: transform 0.3s ease;
-    margin-bottom: 10px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-
-/* A DEFINIR */
-.custom_card_container {
-    display: flex;
-    flex-wrap: wrap; /* Permet aux éléments de passer à la ligne si nécessaire */
-    justify-content: center; /* Centre horizontalement les éléments */
-    gap: 20px; /* Espace entre les éléments */
+.inert_card:hover {
+    transform: None;
+    cursor: default;
 }
 
 .product_card a {
@@ -385,7 +359,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     color: rgb(255, 255, 255);
     background-color: var(--my_btn_color);
 
-    border: 2px solid #000000;
+    border: 0px solid #000000;
     border-radius: 10px;
     cursor: pointer;
     min-width: 200px;
@@ -396,35 +370,12 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     filter: brightness(1.3); /* Légèrement plus lumineux au survol */
 }
 
-.my_small_btn{
-    width: 150px;
-    margin: 10px;
-    padding: 10px 10px;
-
-    text-transform: uppercase;
-    text-decoration: none;
-    color: rgb(255, 255, 255);
-    background-color: var(--my_btn_color);
-
-    border: 2px solid #000000;
-    border-radius: 10px;
-    cursor: pointer;
-
-    /* transition: background-color 1s ease; */
-
-    display: inline-block; /* Pour s'aligner avec les éléments en ligne */
-    position: relative; /* Permet de contrôler la position */
-}
-.my_small_btn:hover {
-    filter: brightness(1.2); /* Légèrement plus lumineux au survol */
-}
-
 .btn_selected {
     font-size: 1.2em;
     font-weight: bold;
     text-decoration: underline;
     text-decoration-thickness: 2px;
-    border: 3px solid #000000;
+    /* border: 3px solid #000000; */
 }
 
 .gender_girl {
@@ -436,11 +387,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 }
 
 .no_gender {
-    background-color: rgba(135, 131, 134, 0.739);
-}
-
-.black_admin_button {
-    background-color: rgb(76, 230, 25);
+    background-color: var(--my_btn_color);
 }
 
 .red_admin_button {
@@ -450,27 +397,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 .white_btn {
     background-color: rgb(247, 247, 247);
     color: black;
-}
-
-.classic_btn {
-    background-color: rgb(247, 247, 247);
-    color: black;
-    margin: 10px; /* Ajuste la marge */
-    display: inline-block; /* Pour s'aligner avec les éléments en ligne */
-    position: relative; /* Permet de contrôler la position */
-    text-align: center; /* Alignement du texte */
-    min-height: 60px; /* Hauteur minimale */
-    line-height: 50px; /* Centre le texte verticalement */
-
-}
-
-/* A DEFINIR */
-#product_button {
-    pointer-events: none; /* Le bouton ne répondra pas aux événements de souris */
-}
-
-.product_btn:hover{
-    filter: none;
+    border: 1px solid black;
 }
 
 
@@ -488,9 +415,9 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 .progress {
     background-color: #6495ED; /* Couleur de fond du reste à faire */
     height: 30px;
-    }
+}
 
-.bar-container {
+.bar_container {
     width: 100%;
     height: 30px;
     background-color: #6495ED;
@@ -514,7 +441,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     }
 }
 
-.progress-label {
+.progress_label {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -522,11 +449,11 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     color: white;
 }
 
-.label-left {
+.label_left {
     left: 10px;
 }
 
-.label-right {
+.label_right {
     right: 10px;
 }
 
@@ -546,7 +473,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     color: white;
 }
 
-.modal-content {
+.modal_content {
     background-color: #c96262;
     margin: 15% auto;
     padding: 20px;
@@ -554,7 +481,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     width: 80%;
 }
 
-.close-icon {
+.close_icon {
     cursor: pointer;
 }
 
@@ -569,7 +496,7 @@ input[type="number"]::-moz-spin-buttons {
 }
 
 /* --------------------------------------------------------- Notifications --------------------------------------------------------- */
-.copy-notification {
+.copy_notification {
     position: absolute;
     top: calc(10%); /* Positionné 20px en dessous du bas de .my_container */
     right: calc(70%); /* Positionné 200px à gauche du bord droit de .my_container */
@@ -584,7 +511,7 @@ input[type="number"]::-moz-spin-buttons {
 
 /* A DEFINIR */
 /* CSS pour la boîte de dialogue personnalisée */
-.custom-alert {
+.custom_alert {
     position: fixed;
     text-align: center;
     top: 50%;
@@ -634,27 +561,27 @@ tr:hover {
 }
 
 /* --------------------------------------------------------- Loader --------------------------------------------------------- */
-    /* Styles pour le loader */
-    .loader {
-        border: 16px solid #f3f3f3; /* Light grey */
-        border-top: 16px solid #3498db; /* Blue */
-        border-radius: 50%;
-        width: 120px;
-        height: 120px;
-        animation: spin 2s linear infinite;
-        margin: auto;
-        margin-top: 50px;
-    }
+/* Styles pour le loader */
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    margin: auto;
+    margin-top: 50px;
+}
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
-    /* Styles pour masquer le loader lorsque le décompte est terminé */
-    .hidden {
-        display: none;
-    }
+/* Styles pour masquer le loader lorsque le décompte est terminé */
+.hidden {
+    display: none;
+}
 
 /* --------------------------------------------------------- Footer --------------------------------------------------------- */
 /* Footer styles */
@@ -703,7 +630,7 @@ main {
 }
 
 /* Text Section */
-.text-section {
+.text_section {
     z-index: 2;
     color: #333;
     /* background-color: #6495ED; */
@@ -742,6 +669,10 @@ main {
 
     .multiple_btn_container {
         gap:0px;
+    }
+
+    .small_btn_container{
+        gap:20px;
     }
 
     /* Styles polices */
@@ -820,7 +751,7 @@ main {
 
     /* Styles polices */
     /* A DEFINIR */
-    .text-section {
+    .text_section {
         text-align: left;
         margin-bottom: 0;
         max-width: 50%;
