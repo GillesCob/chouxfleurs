@@ -112,19 +112,22 @@
 
 
 <!-- Structure de la fenêtre modale pour supprimer son projet -->
-<div id="myModal_delete_project" class="modal">
-    <div class="modal_content">
-    <span class="close_icon" onclick="closeModal_delete_project()" style="float:right;">&times;</span>
-        <div class="col offset-md-3 col-md-6 col-sm-12">
-            <form method="POST" action="{{ url_for('views.delete_project') }}" class="p-5 text-center">        
-                <p>ATTENTION Cette action est irréversible !</p> 
-                <div class="d-grid gap-2 col-12 mx-auto">
-                    <button type="submit" class="btn btn-danger">Supprimer mon projet</button>
-                </div>
-            </form>
+<div class="modal_overlay" id="modal_overlay" onclick="closeModal()">
+    <div id="myModal_delete_project" class="modal">
+        <div class="modal_content">
+            <span class="close_icon" onclick="closeModal()" style="float:right;">&times;</span>
+            <div class="col offset-md-3 col-md-6 col-sm-12">
+                <form method="POST" action="{{ url_for('views.delete_project') }}" class="p-5 text-center">        
+                    <p>ATTENTION Cette action est irréversible !</p> 
+                    <div class="d-grid gap-2 col-12 mx-auto">
+                        <button type="submit" class="btn btn-danger">Supprimer mon projet</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
 
 
 
@@ -141,12 +144,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 // Afficher et masquer la fenêtre modale
-    function openModal_delete_project() {
-            document.getElementById('myModal_delete_project').style.display = 'block';
+    function openModal() {
+            document.getElementById('modal_overlay').style.display = 'flex';
         }
         
-        function closeModal_delete_project() {
-            document.getElementById('myModal_delete_project').style.display = 'none';
+        function closeModal() {
+            document.getElementById('modal_overlay').style.display = 'none';
         }
 
 

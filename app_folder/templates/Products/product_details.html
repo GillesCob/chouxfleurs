@@ -160,29 +160,6 @@
             // Sélection des éléments par leur ID et ajout du gestionnaire d'événements
             document.getElementById("product_card").addEventListener("click", checkUrl);
 
-            // Fonction pour vérifier l'URL
-            function checkUrl(event) {
-                var url = "{{ product.url_source }}"; // Récupère l'URL depuis le code HTML
-
-                if (!isValidUrl(url)) {
-                    event.preventDefault(); // Empêche l'ouverture du lien s'il est invalide
-                    showCustomAlert("L'URL est actuellement indisponible. Merci de réessayer ultérieurement.");
-                }
-            }
-
-            // Fonction pour afficher une boîte de dialogue personnalisée
-            function showCustomAlert(message) {
-                const alertBox = document.createElement('div');
-                alertBox.classList.add('custom_alert');
-                alertBox.textContent = message;
-                document.body.appendChild(alertBox);
-
-                // Supprimer la boîte de dialogue après quelques secondes
-                setTimeout(function() {
-                    alertBox.remove();
-                }, 3000);
-            }
-
 
 
             // Je mets à jour la class de mon bouton en fonction de la valeur de gender_choice

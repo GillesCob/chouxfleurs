@@ -466,13 +466,29 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 /* --------------------------------------------------------- Fenêtres modales --------------------------------------------------------- */
 
 /* Elements pour les fenêtres modales ------------------------------------------------------ */
-.modal {
-    display: none; /* Masquer la fenêtre modale par défaut */
+.modal_overlay{
+    display: none;
     position: fixed;
-    z-index: 1;
-    left: 0;
     top: 0;
-    width: 100%;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    background-color: rgba(0, 0, 0, 0.5); /* Couleur de fond semi-transparente */
+    z-index: 1;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.modal {
+    display: hidden; 
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    z-index: 1;
+    left: 25%;
+    top: 10%;
+    width: 50%;
     height: 100%;
     overflow: auto;
     color: white;
@@ -481,13 +497,13 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 .modal_content {
     background-color: #c96262;
     margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
+    padding: 0px 20px;
     width: 80%;
 }
 
 .close_icon {
     cursor: pointer;
+    font-size: 2em;
 }
 
 /* A DEFINIR */
@@ -506,30 +522,12 @@ input[type="number"]::-moz-spin-buttons {
     top: calc(10%); /* Positionné 20px en dessous du bas de .my_container */
     right: calc(70%); /* Positionné 200px à gauche du bord droit de .my_container */
     min-width: 120px;
-    background-color: rgb(185, 145, 108);
+    background-color: var(--my_btn_color);
     color: #fff;
     padding: 10px 20px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
-
-
-/* A DEFINIR */
-/* CSS pour la boîte de dialogue personnalisée */
-.custom_alert {
-    position: fixed;
-    text-align: center;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgb(209, 90, 90);
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 9999; /* Assure que le message apparaît au-dessus du reste du contenu */
-}
-
 
 /* --------------------------------------------------------- Tableaux --------------------------------------------------------- */
 /* Styles pour les tableaux dans my_projects */
