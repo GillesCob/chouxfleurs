@@ -32,17 +32,16 @@
         
     </div>
 
-
-    <!-- Structure de la fenêtre modale pour supprimer son projet -->
-    <div id="myModal_delete_project" class="modal">
-        <div class="modal_content">
-        <span class="close_icon" onclick="closeModal_delete_project()" style="float:right;">&times;</span>
-            <div class="col offset-md-3 col-md-6 col-sm-12">
-                <form method="POST" action="{{ url_for('views.delete_project') }}" class="p-5 text-center">        
+    <div class="my_container">
+        <!-- Structure de la fenêtre modale pour supprimer son projet -->
+        <div id="myModal_delete_project" class="modal" onclick="closeModal_delete_project()">
+            <div class="modal_content">
+                <div class="exit_cross">
+                    <span class="close_icon" onclick="closeModal_delete_project()">&times;</span>
+                </div>
+                <form method="POST" action="{{ url_for('views.delete_project') }}" class="p-2 text-center">        
                     <p>ATTENTION Cette action est irréversible !</p> 
-                    <div class="d-grid gap-2 col-12 mx-auto">
-                        <button type="submit" class="btn btn-danger">Supprimer mon projet</button>
-                    </div>
+                    <button type="submit" class="btn btn-danger">Supprimer mon projet</button>
                 </form>
             </div>
         </div>
@@ -50,10 +49,11 @@
 
 
 
+
     <script>
     // Afficher et masquer la fenêtre modale
         function openModal_delete_project() {
-                document.getElementById('myModal_delete_project').style.display = 'block';
+                document.getElementById('myModal_delete_project').style.display = 'flex';
             }
             
             function closeModal_delete_project() {
