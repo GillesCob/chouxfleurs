@@ -27,7 +27,8 @@
                     <input type="number" class="form-control text-center" name="product_price" value="{{product.price}}">
 
                     <label for="text">Reste à financer</label>
-                    <input type="number" class="form-control text-center" name="product_left_to_pay" max="{{product.price}}" value="{{product.price - product.already_paid}}">
+                    <input type="number" class="form-control text-center" name="product_left_to_pay" 
+                    value="{{product.price - product.already_paid}}">
 
                     <label for="text">url du produit</label>
                     <input type="text" class="form-control text-center" name="product_url_source" maxlength="150" value="{{product.url_source}}">
