@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Liste de naissance
+{% endblock %}
+
+
+{% block content %}
+ <!-- Récupération du prono concernant le sexe afin de mettre en forme les boutons en conséquence -->
+ <div id="gender_choice" data-gender="{{ session['gender_choice'] }}"></div>
+  <!-- Récupération de l'info pour savoir si l'utilisateur est admin -->
+  <div id="user_is_admin" data-gender="{{ session['user_is_admin'] }}"></div>
+
+    {% if session.selected_project.id %}
+        <div class="my_container">
+            <h1>Liste de naissance</h1>
+
+            {% if session['user_is_admin'] %}
+                <div class="my_container">
+                    <button onclick="window.location.href='/add_product'" id="my_button" class="my_btn">Ajouter un produit</button>
+                </div>
+
+                {%if total_money_participations > 0%}
+                    <div class="progress_container">
+                        <div class="bar_container">
+                            <div id="fill" class="fill"></div>
+                        </div>
+                        <div class="progress_label label_left">Argent reçu - {{ total_money_participations }}€</div>
+                        <div class="progress_label label_right">Fonds nécessaires - {{ total_money_needed }}€</div>
+                        <script src="script.js"></script>
+                    </div>
+                    <p>Le montant des produits donnés/prêtés ne sont pas pris en compte</br>
+                    Seules les participations identifiées comme "Reçu" sont prises en compte.</p>
+                {%endif%}
+
+            {% endif %}
+
+            {% if products %}
+                <div class="product_card_container">
+
+                    {% for product in products %}
+                    <a href="{{ url_for('views.product_details', product_id=product.id) }}" class="product-link" style="text-decoration: none;">
+                        <div class="my_card product_card">
+                            <!-- Image du produit -->
+                            <div class="product_image_container">
+                                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-height: 200px; max-width: 250px;">
+                            </div>
+
+                            <div class="product_informations_container">
+                                <!-- Titre du produit -->
+                                <div class="product_title">{{ product.name }}</div>
+                                <!-- Description du produit -->
+                                <div class="product_description">{{ product.description[:40] }}</div>
+                                
+                                <!-- Si le produit n'est pas entiement financé -->
+                                {% if product.already_paid > 0 %}
+                                    {% if product.left_to_pay == 0 %}
+                                    {%else%}
+                                        <div class="product_price_crossed">{{ product.price }}€</div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                {% if product.left_to_pay == 0 %}
+                                    <div class="product_price">Produit financé !</div>
+                                {% else %}
+                                    {% if product.price == product.left_to_pay %}
+                                        <!-- Prix de base -->
+                                        <div class="product_price">{{ product.price }}€</div>
+                                    {% else %}
+                                        <!-- Prix restant -->
+                                        <div class="left_to_pay">Reste {{ product.left_to_pay }}€</div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-center">Aucun produit trouvé pour le moment</p>
+            {% endif %}
+        </div> 
+        
+
+
+
+
+    {% else %}
+        Aucun projet sélectionné.
+    {% endif %}
+
+    <!-- ===============================================-->
+    <!--    JavaScripts-->
+    <!-- ===============================================-->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Mise en forme boutons en fonction su sexe
+            // Récupération du prono
+            var genderChoiceElement = document.getElementById('gender_choice');
+            var genderChoice = genderChoiceElement.dataset.gender;
+
+            // Récupération de l'id du bouton
+            var button = document.getElementById('my_button');
+
+            // Récupérer l'élément de remplissage
+            var fill = document.getElementById('fill');
+            // Récupérer la valeur de total_money_participations depuis le template Flask
+            var totalMoneyParticipations = {{ total_money_participations }};
+            // Récupérer la valeur de total_money_needed depuis le template Flask
+            var totalMoneyNeeded = {{ total_money_needed }};
+            
+            // Calculer le pourcentage de l'argent reçu par rapport aux fonds nécessaires
+            var percentage = (totalMoneyParticipations / totalMoneyNeeded) * 100;
+
+            // Définir la classe en fonction de la valeur de gender_choice
+            if (genderChoice === "Fille") {
+                button.classList.add("gender_girl");
+            } else if (genderChoice === "Garçon") {
+                button.classList.add("gender_boy");
+            } else {
+                button.classList.add("no_gender");
+            }
+
+            //Script concernant la barre de progression
+
+
+            // Limiter le pourcentage à 100% si nécessaire
+            percentage = Math.min(percentage, 100);
+
+            // Mettre à jour la largeur de l'élément de remplissage avec le pourcentage calculé
+            fill.style.width = percentage + '%';
+
+        });
+
+        
+    </script>
+
+{% endblock %}
