@@ -6,6 +6,13 @@ from datetime import datetime
 
 from bson import ObjectId
 
+#Eléments ajoutés
+#Eléments pour le scrapping
+# import cloudscraper
+# import requests
+
+# from requests_html import HTMLSession
+# from bs4 import BeautifulSoup
 
 
 
@@ -455,6 +462,98 @@ def add_product():
         price = request.form.get('product_price')
         already_paid = 0
         url_source = request.form.get('product_url_source')
+        
+        
+        # #Eléments ajoutés
+        # #Scrapping afin d'aller chercher les images du produit
+        # # Vérifier l'origine de l'URL
+        # if 'leboncoin.fr' in url_source or "vinted.fr" in url_source:
+        #     # Créer une instance de cloudscraper
+        #     scraper = cloudscraper.create_scraper()
+
+        #     # Effectuer une requête HTTP pour obtenir le contenu de la page
+        #     response = scraper.get(url_source)
+
+        #     # Vérifier que la requête a réussi
+        #     if response.status_code == 200:
+        #         # Parser le contenu HTML de la page
+        #         soup = BeautifulSoup(response.content, 'html.parser')
+                
+        #         # Trouver la balise <meta> avec property="og:image"
+        #         meta_tag = soup.find('meta', property='og:image')
+                
+        #         # Vérifier si la balise <meta> a été trouvée et extraire la valeur du contenu
+        #         if meta_tag:
+        #             og_image_url = meta_tag.get('content')
+        #             print('URL de l\'image :', og_image_url)
+        #         else:
+        #             print('Balise <meta property="og:image"> non trouvée.')
+        #     else:
+        #         print('Échec de la requête, statut HTTP :', response.status_code)
+                
+        # elif 'aubert.com' in url_source :
+        #     # Créer une instance de cloudscraper
+        #     scraper = cloudscraper.create_scraper()
+
+        #     # Effectuer une requête HTTP pour obtenir le contenu de la page
+        #     response = scraper.get(url_source)
+
+        #     # Vérifier que la requête a réussi
+        #     if response.status_code == 200:
+        #         # Parser le contenu HTML de la page
+        #         soup = BeautifulSoup(response.content, 'html.parser')
+                
+        #         # Trouver la balise <img> avec class="img-responsive product"
+        #         img_tag = soup.find('img', class_='img-responsive product')
+                
+        #         # Vérifier si la balise <meta> a été trouvée et extraire la valeur du contenu
+        #         if img_tag:
+        #             img_url = img_tag.get('src')
+        #             img_url = "https://www.aubert.com/" + img_url
+        #             print('URL de l\'image :', img_url)
+        #         else:
+        #             print('Balise <img class="img-responsive product"> non trouvée.')
+        #     else:
+        #         print('Échec de la requête, statut HTTP :', response.status_code)
+
+                
+        # elif 'amazon.fr' in url_source or 'amazon.com' in url_source :
+            
+        #     # Créer une session HTML
+        #     session = HTMLSession()
+
+        #     # Effectuer une requête HTTP pour obtenir le contenu de la page
+        #     response = session.get(url_source)
+
+        #     # Exécuter le JavaScript pour charger le contenu dynamique
+        #     response.html.render()
+
+        #     # Parser le contenu HTML de la page
+        #     soup = BeautifulSoup(response.html.html, 'html.parser')
+
+        #     # Code pour Amazon
+        #     img_tag_wrapper = soup.find('div', class_='imgTagWrapper')
+            
+        #     # Vérifier si le div avec class 'imgTagWrapper' a été trouvé et extraire l'URL de l'image
+        #     if img_tag_wrapper:
+        #         img_tag = img_tag_wrapper.find('img')
+        #         if img_tag:
+        #             img_url = img_tag.get('src')
+        #             print('URL de l\'image :', img_url)
+        #         else:
+        #             print('Balise <img> non trouvée dans le div imgTagWrapper.')
+        #     else:
+        #         print('Div avec class imgTagWrapper non trouvé.')
+                
+
+        # else:
+        #     print('URL non reconnue.')
+
+        # #Fin du scrapping
+        
+        
+        
+        # image_url = img_url
         image_url = request.form.get('product_image_url')
         type = "€"
         
@@ -1388,23 +1487,40 @@ def create_project():
 def join_project():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
-
     
+    
+
     if request.method == 'POST':
         project_to_join_link = request.form.get('project_to_join')
         
         try: #je gère les erreurs notamment si je n'ai pas de "=" dans le lien
             project_to_join_id = project_to_join_link.split('=')[1].strip()[:24] #je récupère les 24 premiers caractères après le "="
             
+            #Eléments ajoutés
+            admin_user_project = Project.objects(admin=user_id).first()
+            
+            if project_to_join_id == str(admin_user_project.id):
+                flash('Vous êtes déjà l\'admin de ce projet', category='error')
+                return redirect(url_for('views.join_project', **elements_for_base))
+            
             project_exist = Project.objects(id__contains=project_to_join_id) #Je vérifie si l'id fourni fait partie des id projets existants
             
             if project_exist :
                 project_to_join = Project.objects(id=project_to_join_id).first()
                 project_to_join_name = Project.objects(id=project_to_join_id).first().name
-            
-                if current_user.id in project_to_join.users:
+                
+                
+                #Eléments ajoutés
+                users_in_project = []
+                for user in project_to_join.users:
+                    users_in_project.append(str(user))
+                    
+                print(f"Liste des users : {users_in_project}")
+                print(f"Mon id : {user_id}")
+                if str(user_id) in users_in_project:
+                    print('Je suis déjà dans le projet')
                     flash(f'Vous avez déjà rejoint le projet "{project_to_join_name}"', category='error')
-                    return redirect(url_for('views.my_account', **elements_for_base))
+                    return redirect(url_for('views.join_project', **elements_for_base))
                 
                 else:
                     project_to_join.users.append(current_user.id)
