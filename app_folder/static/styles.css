@@ -50,6 +50,20 @@
     gap: 30px; /* Espace constant entre les boutons */
 }
 
+/* Contenair pour les images des produits de la liste de naissance ------------------------------------------------------ */
+
+.product_image_container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    width: 100%;
+}
+
+.product_image_details_container{
+    margin-bottom: 60px;
+}
+
 /* A DEFINIR */
 .back-button-container {
     position: absolute;
@@ -353,18 +367,6 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 
 
 /* --------------------------------------------------------------- Les images -------------------------------------------------------------- */
-/* Images pour la liste de naissance ---------------------------------------------------------------------*/
-.product_image{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 200px;
-    width: 100%;
-}
-
-.product_image_details{
-    margin-bottom: 60px;
-}
 
 
 /* -------------------------------------------------------------- Les boutons -------------------------------------------------------------- */
