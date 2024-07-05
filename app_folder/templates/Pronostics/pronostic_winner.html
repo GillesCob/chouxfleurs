@@ -9,7 +9,7 @@
 
     <div class="my_container">
         <div class="multiple_btn_container">
-                <button type="button" id="btn_my_answers" class="my_btn btn_selected">Le gagnant</button>
+                <button type="button" id="btn_the_winner" class="my_btn">Le gagnant</button>
                 <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">La réponse</button>
                 <form action="{{ url_for('views.pronostic')}}" method="post">
                     <input type="hidden" name="go_to_pronostic" value=true>
@@ -91,6 +91,21 @@
     <!--    JavaScripts-->
     <!-- ===============================================-->
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn_the_winner = document.getElementById('btn_the_winner');
+            var gender_choice = "{{ prono_sex_btn }}";
+
+            if (btn_the_winner) {
+                btn_the_winner.classList.remove('gender_girl', 'gender_boy');
+
+                if (gender_choice === "Fille") {
+                    btn_the_winner.classList.add("gender_girl");
+                } else {
+                    btn_the_winner.classList.add("gender_boy");
+                }
+            }
+    });
+
         // Fonction pour lancer les confettis
         function launchConfetti() {
             var duration = 5 * 1000;

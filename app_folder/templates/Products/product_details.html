@@ -111,6 +111,7 @@
                         <div>
                             <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="€">Participer</button>
                         </div>
+                        <button onclick="window.location.href='{{ url_for('views.product_details',product_id=product.id) }}'" class="my_btn no_btn">Retour</button>
                     </form>
                 </div>
                 
