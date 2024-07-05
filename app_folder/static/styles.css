@@ -400,6 +400,11 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     border: 1px solid black;
 }
 
+/* Boutons pour la liste de naissance ------------------------------------------------------ */
+.no_btn {
+    background-color: #de3131;
+}
+
 
 /* --------------------------------------------------------- Barres de progression --------------------------------------------------------- */
 /* Barre de progression pour la moyenne gars/fille ------------------------------------------------------ */
