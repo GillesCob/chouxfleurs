@@ -1269,9 +1269,9 @@ def pronostic_answers():
 
 
 #ROUTES "PHOTOS" -------------------------------------------------------------------------------------------------------------
-@views.route('/photo')
+@views.route('/photos')
 @login_required
-def photo():
+def photos():
     user_id = current_user.id #J'ai l'id du user actuellement connecté
     elements_for_base = elements_for_base_template(user_id)
 
@@ -1281,11 +1281,11 @@ def photo():
         project_name = project.name
         
         user_is_admin = True
-        return render_template('Photos/photo.html', user=current_user, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base)
+        return render_template('Photos/photos.html', user=current_user, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
-        return render_template('Photos/photo.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base)
+        return render_template('Photos/photos.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base)
 
 
 #ROUTES "MY PROFIL" -------------------------------------------------------------------------------------------------------------
