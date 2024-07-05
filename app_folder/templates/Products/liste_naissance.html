@@ -31,6 +31,8 @@
                     </div>
                     <p>Le montant des produits donnés/prêtés ne sont pas pris en compte</br>
                     Seules les participations identifiées comme "Reçu" sont prises en compte.</p>
+                {%else%}
+                <p>Montant total de la liste : {{ total_money_needed }}€</p>
                 {%endif%}
 
             {% endif %}
