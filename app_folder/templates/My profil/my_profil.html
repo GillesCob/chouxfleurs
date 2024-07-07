@@ -20,24 +20,38 @@
 
     
 <!-- Structure de la fenêtre modale pour supprimer son profil -->
-    <div id="myModal_delete_profil" class="modal">
+<div class="my_container">
+    <div id="myModal_delete_profil" class="modal" onclick="closeModal_delete_profil()">
         <div class="modal_content">
-            <span class="close_icon" onclick="closeModal_delete_profil()" style="float:right;">&times;</span>
-            <div class="col offset-md-3 col-md-6 col-sm-12">
-                <form method="POST" action="{{ url_for('auth.delete_account') }}" class="p-5 text-center">
-                    <p>ATTENTION cette action est irréversible !</p>
-                    <div class="d-grid gap-2 col-12 mx-auto">
-                        <button type="submit" class="btn btn-danger">Supprimer mon profil</button>
-                    </div>
-                </form>
+            <div class="exit_cross">
+                <span class="close_icon" onclick="closeModal_delete_profil()">&times;</span>
             </div>
+            <form method="POST" action="{{ url_for('auth.delete_account') }}" class="p-5 text-center">
+                <p>ATTENTION cette action est irréversible !</p>
+                <button type="submit" class="btn btn-danger">Supprimer mon profil</button>
+            </form>
         </div>
     </div>
+</div>
+
+<!-- <div class="my_container">
+    <div id="myModal_delete_profil" class="modal" onclick="closeModal_delete_profil()">
+        <div class="modal_content">
+            <div class="exit_cross">
+                <span class="close_icon" onclick="closeModal_delete_profil()">&times;</span>
+            </div>
+            <form method="POST" action="{{ url_for('views.delete_project') }}" class="p-5 text-center">        
+                <p>ATTENTION Cette action est irréversible !</p> 
+                <button type="submit" class="btn btn-danger">Supprimer mon profil 2</button>
+            </form>
+        </div>
+    </div>
+</div> -->
 
 
 <script>
     function openModal_delete_profil() {
-        document.getElementById('myModal_delete_profil').style.display = 'block';
+        document.getElementById('myModal_delete_profil').style.display = 'flex';
     }
     
     function closeModal_delete_profil() {
