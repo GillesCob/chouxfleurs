@@ -142,16 +142,14 @@ def delete_account():
     user_pronostics = Pronostic.objects(user=user) #Je récupère tous les Objets pronostics du user
     pronostic_ids = [pronostic.id for pronostic in user_pronostics] #Je récupère les ids des pronostics sous forme de liste    
     
-    
     for pronostic_id in pronostic_ids:
         Project.objects(pronostic=pronostic_id).update(pull__pronostic=pronostic_id) #Je supprime les pronostics du user dans les projets
-        
+     
     user.delete()
-    
     #Suppression du user dans les projets
     user_in_project = Project.objects(users=current_user.id)
     user_in_project.update(pull__users=current_user.id)
-    
     session.clear()
+
     flash('Compte supprimé avec succès !', category='success')
     return redirect(url_for('auth.login'))
