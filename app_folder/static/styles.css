@@ -899,3 +899,8 @@ main {
         visibility: hidden;
     }
 }
+
+.password-toggle {
+    right: 10px;
+    cursor: pointer;
+}

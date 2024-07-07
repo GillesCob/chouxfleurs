@@ -12,8 +12,13 @@
             <form method="post">
                 <label for="email" class="register_title">Adresse mail</label>
                 <input type="email" class="form-control text-center" name="email" required>
+
                 <label for="password" class="register_title">Mot de passe</label>
-                <input type="password" class="form-control text-center" name="password" required>
+                <span class="password-toggle" onclick="togglePassword()">
+                    <i class="fa fa-eye" id="toggleIcon"></i>
+                </span>
+                <input type="password" class="form-control text-center" id="password" name="password" required>
+
                 <button type="submit" class="my_btn">Se connecter</button>
             </form>
 
@@ -25,5 +30,22 @@
             
         </div>
     </div>
+
+
+    <script>
+        function togglePassword() {
+            var passwordField = document.getElementById("password");
+            var toggleIcon = document.getElementById("toggleIcon");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleIcon.classList.remove("fa-eye");
+                toggleIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordField.type = "password";
+                toggleIcon.classList.remove("fa-eye-slash");
+                toggleIcon.classList.add("fa-eye");
+            }
+        }
+    </script>
 
 {% endblock %}

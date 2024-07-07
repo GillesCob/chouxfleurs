@@ -17,12 +17,20 @@
                 <label for="email" class="register_title">Adresse mail</label>
                 <input type="email" class="form-control text-center" name="email" required>
 
+                <!-- MDP -->
                 <label for="password" class="register_title">Mot de passe</label>
-                <input type="password" class="form-control text-center" name="password" required>
+                <span class="password-toggle" onclick="togglePassword()">
+                    <i class="fa fa-eye" id="toggleIcon"></i>
+                </span>
+                <input type="password" id="password" class="form-control text-center" name="password" required>
 
                 <label for="confirm_password" class="register_title">Confirmer le mot de passe</label>
-                <input type="password" class="form-control text-center" name="confirm_password" required>
+                <span class="password-toggle" onclick="togglePassword2()">
+                    <i class="fa fa-eye" id="toggleIcon"></i>
+                </span>
+                <input type="password" class="form-control text-center" name="confirm_password" id="password2" required>
 
+                <!-- FIN MDP -->
                 <div class="under_18_container">
                     <label for="over_18" class="register_title">Vous avez plus de 18 ans ?</label>
                     <input type="checkbox" id="over_18" name="over_18">
@@ -44,5 +52,34 @@
         </div>
     </div>
 
+    <script>
+        function togglePassword() {
+            var passwordField = document.getElementById("password");
+            var toggleIcon = document.getElementById("toggleIcon");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleIcon.classList.remove("fa-eye");
+                toggleIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordField.type = "password";
+                toggleIcon.classList.remove("fa-eye-slash");
+                toggleIcon.classList.add("fa-eye");
+            }
+        }
+
+        function togglePassword2() {
+            var passwordField = document.getElementById("password2");
+            var toggleIcon = document.getElementById("toggleIcon");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleIcon.classList.remove("fa-eye");
+                toggleIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordField.type = "password";
+                toggleIcon.classList.remove("fa-eye-slash");
+                toggleIcon.classList.add("fa-eye");
+            }
+        }
+    </script>
     
 {% endblock %}
