@@ -20,9 +20,9 @@
             {% endif %}
             <form method="post">
                 {% if actual_iban %}
-                    <input type="text" class="form-control text-center" name="iban" value="{{actual_iban}}" maxlength="150">
+                    <input type="text" class="form-control text-center" name="iban" value="{{actual_iban}}" maxlength="150" style="min-width: 300px;">
                 {% else %}
-                    <input type="text" class="form-control text-center" name="iban" placeholder="Votre IBAN" maxlength="150" required>
+                    <input type="text" class="form-control text-center" name="iban" placeholder="Votre IBAN" maxlength="150" style="min-width: 300px;" required>
                 {% endif %}
                 <button type="submit" class="my_btn validate-btn admin_button">Valider</button>
             </form>
