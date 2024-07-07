@@ -54,6 +54,18 @@ def login():
 def register():
     session.clear()
     count_projects = 0
+    project_id = request.args.get('project_id')
+    
+    if current_user.is_authenticated:
+        if project_id : 
+                project = Project.objects(id=project_id).first()
+                project_name = project.name
+                current_user_id = current_user.id
+                project.update(push__users=current_user_id)
+                flash(f'Vous avez rejoins "{project_name}"')
+                return redirect(url_for('views.home_page'))
+                
+        
     
     if request.method == 'POST':
         username = request.form.get('username')
@@ -86,7 +98,7 @@ def register():
             # send_confirmation_email(new_user.email)
             # flash('Un email de confirmation a été envoyé. Veuillez vérifier votre boîte de réception.', category='info')
             
-            project_id = request.args.get('project_id')
+            
             
             if project_id : 
                 project = Project.objects(id=project_id).first()
