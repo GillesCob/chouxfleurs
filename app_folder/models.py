@@ -13,7 +13,7 @@ class User(Document, UserMixin):
     roles = StringField(max_length=50, default='guest')
     pronostic = ListField()
     participation = ListField()
-    rib = StringField(max_length=150)
+    iban = StringField(max_length=150)
     validationCode = StringField(max_length=150)
     is_validated = BooleanField(default=False)
 

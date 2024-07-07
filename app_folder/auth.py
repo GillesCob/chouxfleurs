@@ -65,8 +65,6 @@ def register():
                 flash(f'Vous avez rejoins "{project_name}"')
                 return redirect(url_for('views.home_page'))
                 
-        
-    
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')

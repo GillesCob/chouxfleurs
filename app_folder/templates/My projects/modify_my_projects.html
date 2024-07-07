@@ -15,10 +15,10 @@
     <div class="my_container">
         <div class="two_btn_container">
             <button onclick="window.location.href='/rename_project'" class="my_btn">Renommer</button>
-            {%if admin_rib %}
-            <button onclick="window.location.href='/rib'" class="my_btn">Modifier le RIB</button>
+            {%if admin_iban %}
+            <button onclick="window.location.href='/iban'" class="my_btn">Modifier le iban</button>
                 {%else%}
-            <button onclick="window.location.href='/rib'" class="my_btn">Ajouter le RIB</button>
+            <button onclick="window.location.href='/iban'" class="my_btn">Ajouter l'IBAN</button>
                 {%endif%}
         </div>
             <button onclick="openModal_delete_project()" class="my_btn red_admin_button">Supprimer le projet</button>

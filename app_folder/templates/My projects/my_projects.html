@@ -60,11 +60,11 @@
        
         {% for project_name, project_details in projects_dict_special.items() %}
 
-            {% if project_details.admin_rib_key %}
-                    <div class="my_projects_cards" data-rib="{{ project_details.admin_rib_key }}" onclick="copyRIBToClipboard(event)">
+            {% if project_details.admin_iban_key %}
+                    <div class="my_projects_cards" data-iban="{{ project_details.admin_iban_key }}" onclick="copyibanToClipboard(event)">
                         <div class="project_title">{{ project_name }}</div>
-                        <div class="product_description">Cliquez pour obtenir le RIB</div>
-                        <p>{{ project_details.admin_rib_key }}</p>
+                        <div class="product_description">Cliquez pour obtenir le iban</div>
+                        <p>{{ project_details.admin_iban_key }}</p>
                     </div>
             {%else%}
                     <div class="my_card my_projects_cards inert_card">
@@ -156,14 +156,14 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-//Mise en forme du message informant du copier/coller du RIB
-function copyRIBToClipboard(event) {
-    const textToCopy = event.currentTarget.getAttribute('data-rib');
+//Mise en forme du message informant du copier/coller du iban
+function copyibanToClipboard(event) {
+    const textToCopy = event.currentTarget.getAttribute('data-iban');
     const buttonRect = event.currentTarget.getBoundingClientRect(); // Récupère les dimensions du bouton
 
     const notification = document.createElement('div');
     notification.classList.add('copy_notification');
-    notification.textContent = "RIB copié";
+    notification.textContent = "IBAN copié";
 
     // Calcule la position verticale pour placer la notification sous le bouton
     const notificationTop = buttonRect.top;
@@ -185,7 +185,7 @@ function copyRIBToClipboard(event) {
             notification.remove(); // Supprime la notification après 2 secondes
         }, 2000);
     }, function(err) {
-        console.error('Erreur lors de la copie du RIB: ', err);
+        console.error('Erreur lors de la copie d: ', err);
     });
 }
 

@@ -140,10 +140,10 @@ def create_projects_dict(user_id):
         
         project_admin = project.admin
         project_admin_id = project_admin.id
-        project_admin_rib = User.objects(id=project_admin_id).first().rib
+        project_admin_iban = User.objects(id=project_admin_id).first().iban
         projects_dict[project.name] = {
             "project_id_key": project_id,
-            "admin_rib_key": project_admin_rib
+            "admin_iban_key": project_admin_iban
         }
 
     return projects_dict
@@ -789,14 +789,14 @@ def confirm_participation(participation):
     #B -----------------
     elements_for_base = elements_for_base_template(user_id)
     
-    #Récupération du RIB de l'admin du projet
+    #Récupération du iban de l'admin du projet
     admin_id = session['admin_id']
-    admin_rib = User.objects(id=admin_id).first().rib
+    admin_iban = User.objects(id=admin_id).first().iban
     
     #Récupération du nom du user
     username = current_user.username
 
-    return render_template('Products/confirm_participation.html', **elements_for_base, admin_rib=admin_rib, participation=participation, username=username)
+    return render_template('Products/confirm_participation.html', **elements_for_base, admin_iban=admin_iban, participation=participation, username=username)
 
 @views.route('/delete_product/<product_id>', methods=['GET','POST'])
 @login_required
@@ -1366,7 +1366,7 @@ def my_projects():
     
     if admin_project: #Si le user actuel est l'admin d'un projet
         
-        admin_rib = User.objects(id=user_id).first().rib
+        admin_iban = User.objects(id=user_id).first().iban
         
         user_is_admin = True
         project_id = admin_project.id
@@ -1381,7 +1381,7 @@ def my_projects():
             modify_project = request.form.get('modify_project_open')
             
                 
-        return render_template('My projects/my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_rib=admin_rib, modify_project=modify_project, current_user_18=current_user_18)
+        return render_template('My projects/my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_iban=admin_iban, modify_project=modify_project, current_user_18=current_user_18)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
@@ -1400,9 +1400,9 @@ def modify_my_projects():
     
     if admin_project: #Si le user actuel est l'admin d'un projet
         
-        admin_rib = User.objects(id=user_id).first().rib
+        admin_iban = User.objects(id=user_id).first().iban
 
-    return render_template('My projects/modify_my_projects.html', admin_rib=admin_rib, **elements_for_base)
+    return render_template('My projects/modify_my_projects.html', admin_iban=admin_iban, **elements_for_base)
 
 @views.route('/participation_details', methods=['GET', 'POST']) #Redirection ok
 @login_required
@@ -1476,9 +1476,9 @@ def participation_details():
 
     return render_template('My projects/participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id, user_is_admin=user_is_admin)
 
-@views.route('/rib', methods=['GET', 'POST']) #Redirection ok
+@views.route('/iban', methods=['GET', 'POST']) #Redirection ok
 @login_required
-def rib():
+def iban():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
     
@@ -1488,16 +1488,16 @@ def rib():
     project_name = admin_project.name
     
     if request.method == 'POST':
-        rib = request.form.get('rib')
+        iban = request.form.get('iban')
         
-        user.rib = rib
+        user.iban = iban
         user.save()
         
-        flash('RIB enregistré avec succès !')
+        flash('iban enregistré avec succès !')
         return redirect(url_for('views.modify_my_projects', **elements_for_base))
     
     
-    return render_template('My projects/rib.html', user=current_user, **elements_for_base, project_name=project_name, actual_rib=user.rib)
+    return render_template('My projects/iban.html', user=current_user, **elements_for_base, project_name=project_name, actual_iban=user.iban)
    
 @views.route('/create_project', methods=['GET', 'POST']) #Redirection ok
 @login_required

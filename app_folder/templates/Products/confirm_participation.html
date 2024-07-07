@@ -24,21 +24,21 @@
 
     {% else %}
 
-        {% if admin_rib %}
+        {% if admin_iban %}
         <div class="product_card" id="product_card" onclick="copyTextToClipboard()">
             <!-- Titre du produit -->
             <h2>Merci beaucoup {{username}} pour les {{participation}}€ !</h2>
 
             <!-- Description du produit -->
             <div class="product-description">Voici les informations bancaires afin de nous les faire parvenir :</div>
-            <div class="product-description">{{ admin_rib }}</div>
+            <div class="product-description">{{ admin_iban }}</div>
         </div>
         {% else %}
             <div class="my_card inert_card">
                 <!-- Titre du produit -->
                 <h2>Votre participation de {{participation}}€ a bien été prise en compte, merci beaucoup !</h2>
                 <!-- Description du produit -->
-                <div class="product-description">Le RIB n'est pas encore disponible. Vous pourrez le retrouver dans votre espace personnel une fois qu'il aura été communiqué par son propriétaire.
+                <div class="product-description">L'IBAN n'est pas encore disponible. Vous pourrez le retrouver dans votre espace personnel une fois qu'il aura été communiqué par son propriétaire.
                 </div>
             </div>
         {% endif %}
@@ -63,10 +63,10 @@
     <script>
     //Mise en forme du message informant du copier/coller
         function copyTextToClipboard() {
-            const textToCopy = "{{ admin_rib }}";
+            const textToCopy = "{{ admin_iban }}";
             const notification = document.createElement('div');
             notification.classList.add('copy_notification');
-            notification.textContent = "RIB copié";
+            notification.textContent = "IBAN copié";
 
             document.body.appendChild(notification);
 
