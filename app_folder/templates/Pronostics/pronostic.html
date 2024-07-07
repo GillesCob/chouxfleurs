@@ -17,8 +17,10 @@
                         <input type="hidden" name="go_to_pronostic" value=false>
                         <button type="submit" class="my_btn white_btn">Le gagnant</button>
                     </form>
-                    <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">La réponse</button>
-                    <button type="button" id="btn_my_answers" class="my_btn">Mes réponses</button>
+                    <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultats</button>
+                    {% if user_is_admin == False %}
+                        <button type="button" id="btn_my_answers" class="my_btn">Mes réponses</button>
+                    {%endif%}
                 {%else%}
                     <button type="button" id="btn_my_answers" class="my_btn">Mes réponses</button>
                     <button type="button" class="my_btn white_btn" onclick="window.location.href='/all_pronostics'">La tendance</button>
