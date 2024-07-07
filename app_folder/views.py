@@ -723,7 +723,6 @@ def confirm_participation_loading(product_id):
         type_of_participation = request.form.get('submit_btn')
         if type_of_participation == "€":
             type = "€"
-            print("coucou")
             participation = request.form.get('price_input')
             print(participation)
             status = "Promesse"
