@@ -11,11 +11,14 @@
 <div class="my_container">
     <div class="multiple_btn_container">
         <button onclick="window.location.href='/pronostic_winner'" class="my_btn white_btn">Le gagnant</button>
-            <button type="button" id="btn_the_answers" class="my_btn">La réponse</button>
+            <button type="button" id="btn_the_answers" class="my_btn">Résultat</button>
+            {% if user_is_admin == False %}
+
             <form action="{{ url_for('views.pronostic')}}" method="post">
                 <input type="hidden" name="go_to_pronostic" value=true>
                 <button type="submit" class="my_btn white_btn">Mes réponses</button>
             </form>
+            {%endif%}
     </div>
 </div>
 
@@ -50,6 +53,12 @@
             <label for="date" >La date</label>
             <p class="pronostic_answer">{{ admin_results.prono_date }}</p>
         </div>
+
+        {% if user_is_admin%}
+            <div class="my_container">
+                <button onclick="window.location.href='/update_pronostic'" id="btn_change_prono" class="my_btn validate-btn">Modifier les réponses</button>
+            </div>
+        {%endif%}
 
 
     </div>

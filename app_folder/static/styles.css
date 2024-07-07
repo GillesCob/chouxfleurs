@@ -325,7 +325,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 /* Cartes pour la liste de naissance ---------------------------------------------------------------------*/
 .product_card {
     max-width: 500px;
-    min-width: 200px;
+    min-width: 300px;
     min-height: 400px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
