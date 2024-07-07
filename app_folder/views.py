@@ -729,7 +729,7 @@ def confirm_participation_loading(product_id):
         elif type_of_participation == "donation":
             type = "donation"
             participation = 0
-            status = "Don"
+            status = "Promesse"
         else:
             type = "lending"
             participation = 0
