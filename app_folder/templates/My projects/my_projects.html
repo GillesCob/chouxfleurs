@@ -64,7 +64,8 @@
                     <div class="my_projects_cards" data-iban="{{ project_details.admin_iban_key }}" onclick="copyibanToClipboard(event)">
                         <div class="project_title">{{ project_name }}</div>
                         <div class="product_description">Cliquez pour copier l'IBAN</div>
-                        <input type="text" value="{{ project_details.admin_iban_key }}" readonly>
+                        <p>{{ project_details.admin_iban_key | e }}</p>
+
                     </div>
             {%else%}
                     <div class="my_card my_projects_cards inert_card">
