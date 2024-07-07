@@ -383,6 +383,11 @@ def liste_naissance():
     # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
     
+    current_user_18 = current_user.over_18
+    if current_user_18 == False:
+        flash("Vous devez être majeur pour accéder à cette page", category='error')
+        return redirect(url_for('views.home_page', **elements_for_base))
+    
     #Variables initiales
     total_money_needed = 0
     total_money_participations = 0
@@ -1345,6 +1350,7 @@ def change_email():
 @login_required
 def my_projects():
     user_id = current_user.id
+    current_user_18 = current_user.over_18
     user_email = current_user.email
     admin_project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
     
@@ -1374,14 +1380,14 @@ def my_projects():
             modify_project = request.form.get('modify_project_open')
             
                 
-        return render_template('My projects/my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_rib=admin_rib, modify_project=modify_project)
+        return render_template('My projects/my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_rib=admin_rib, modify_project=modify_project, current_user_18=current_user_18)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
         projects_dict_special = elements_for_base['projects_dict']
         
         
-        return render_template('My projects/my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project)
+        return render_template('My projects/my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project, current_user_18=current_user_18)
 
 @views.route('/modify_my_projects') #Redirection ok
 @login_required

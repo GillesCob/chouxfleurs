@@ -9,6 +9,7 @@ class User(Document, UserMixin):
     username = StringField(max_length=20, required=True)
     email = EmailField(max_length=150, unique=True, required=True)
     password = StringField(max_length=150, required=True)
+    over_18 = BooleanField(default=False)
     roles = StringField(max_length=50, default='guest')
     pronostic = ListField()
     participation = ListField()

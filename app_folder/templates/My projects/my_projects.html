@@ -9,7 +9,6 @@
 
 
 <div class="my_container">
-
     {% if user_is_admin %}
         <!-- Tableau avec les participations à sa liste de naissance -->
         {% if user_participations %}
@@ -47,9 +46,12 @@
         
 
     {%else%}
-    <div class="btn_container">
-        <button onclick="window.location.href='/create_project'" class="my_btn">Créer un projet</button>
-    </div>
+        {%if current_user_18 == False %}
+        {%else%}
+            <div class="btn_container">
+                <button onclick="window.location.href='/create_project'" class="my_btn">Créer un projet</button>
+            </div>
+        {%endif%}
     {%endif%}
 
     

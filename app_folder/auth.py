@@ -60,6 +60,11 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
+        over_18_checkbox = request.form.get('over_18')
+        if over_18_checkbox == 'on':
+            over_18 = True
+        else:
+            over_18 = False
         
         user = User.objects(email=email).first()
         
@@ -74,7 +79,7 @@ def register():
         
         if password == confirm_password:
             hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-            new_user = User(username=username, email=email, password=hashed_password)              
+            new_user = User(username=username, email=email, password=hashed_password, over_18=over_18)              
                     
             new_user.save()
             

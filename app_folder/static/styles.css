@@ -56,6 +56,13 @@
     gap: 30px; /* Espace constant entre les boutons */
 }
 
+/* Contenair register ------------------------------------------------------ */
+
+.under_18_container{
+    display: flex;
+    flex-direction: column;
+}
+
 /* LISTE DE NAISSANCE ------------------------------------------------------ */
 /* Contenair pour les cartes des produits de la liste de naissance ------------------------------------------------------ */
 .product_card_container {
@@ -130,6 +137,10 @@ h6{
     text-align: center;
 }
 
+/* Styles pour les pages auth --------------------------------------------------------------------- */
+.register_title{
+    margin-top: 10px;
+}
 
 /* Styles pour la home_page --------------------------------------------------------------------- */
 .caligraphy {
