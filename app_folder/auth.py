@@ -47,7 +47,7 @@ def login():
                     return render_template('Auth/login.html', error="Mauvais mot de passe !", count_projects=count_projects)
             
             else:
-                return render_template('Auth/login.html', error="Nom d'utilisateur incorrect", count_projects=count_projects)
+                return render_template('Auth/login.html', error="Cet email ne possède pas de compte", count_projects=count_projects)
     return render_template('Auth/login.html', count_projects=count_projects)
 
 @auth.route('/register', methods=['GET', 'POST'])

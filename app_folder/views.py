@@ -1097,7 +1097,7 @@ def all_pronostics():
     #Date moyenne
     average_timestamp = sum(timestamps) / len(timestamps)
     average_date = datetime.fromtimestamp(average_timestamp)
-    average_date = average_date.strftime('%d-%m-%Y')
+    average_date = average_date.strftime('%d/%m/%Y')
 
     #Pourcentage de filles/gars
     percentage_girl = int(round((sex_girl*100)/number_of_pronostics,0))
