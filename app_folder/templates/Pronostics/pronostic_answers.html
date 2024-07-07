@@ -12,13 +12,11 @@
     <div class="multiple_btn_container">
         <button onclick="window.location.href='/pronostic_winner'" class="my_btn white_btn">Le gagnant</button>
             <button type="button" id="btn_the_answers" class="my_btn">Résultat</button>
-            {% if user_is_admin == False %}
 
             <form action="{{ url_for('views.pronostic')}}" method="post">
                 <input type="hidden" name="go_to_pronostic" value=true>
                 <button type="submit" class="my_btn white_btn">Mes réponses</button>
             </form>
-            {%endif%}
     </div>
 </div>
 
