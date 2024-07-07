@@ -670,21 +670,20 @@ def product_details(product_id):
     left_to_pay = product.price-product.already_paid
     
     #Reinitialisation de cette variable à chaque fois que je charge la page
-    participation = False
+    participation_choice = "no_choice"
     
     if product:
         if request.method=='POST':
             if 'participation' in request.form:
-                participation = "payment"
-                return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+                participation_choice = "payment"
+                
             elif 'donation' in request.form:
-                participation = "donation"
-                return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
-            else:
-                participation = "lending"
-                return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+                participation_choice = "donation"
+            
+            elif 'lending' in request.form:
+                participation_choice = "lending"
         
-        return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation=participation)
+        return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation_choice=participation_choice)
     else:
         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
         return render_template('Products/liste_naissance.html', **elements_for_base), 404

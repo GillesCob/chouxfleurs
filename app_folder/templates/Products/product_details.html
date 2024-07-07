@@ -44,7 +44,6 @@
             </div>
 
         {% if session['user_is_admin'] %}
-
             <div class="two_btn_container small_btn_container">
                 <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
                 
@@ -54,9 +53,8 @@
                 </form>
             </div>
 
-
         {%else%}
-            {% if participation == false %}
+            {% if participation_choice == "no_choice" %}
                 {% if left_to_pay != 0 %}
                     <!-- Participation financiere -->
                     <form id="participationForm" method="post">
@@ -76,7 +74,6 @@
                         </form>
                     </div>
  
-
                 {% else %}
                     {% if product.type == "€" %}
                         <p>Le produit est déjà financé !</p>
@@ -97,37 +94,45 @@
                     {% endif %}
                 {% endif %}
 
-                
-
-            {% elif participation == "payment" %}
-            
+            {% elif participation_choice == "payment" %}
                 <p>La confirmation de votre participation est à titre indicatif, nous nous chargerons d'acheter les produits une fois ceux-ci financés.</p>
                 <div class="range_container">
+                        
                     <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
                         <input type="range" class="form-range" id="participation_range" name="participation_range" min="1" max="{{left_to_pay}}" step="1" value="0" oninput="updatePriceFromRange(this.value)">
                         <input type="number" id="price_input" min="1" max="1000" step="1" value="1" class="text-center" oninput="updateRangeFromInput(this.value)">
                         <span>€</span>
-        
                         <div>
                             <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="€">Participer</button>
                         </div>
-                        <button onclick="window.location.href='{{ url_for('views.product_details',product_id=product.id) }}'" class="my_btn no_btn">Retour</button>
                     </form>
+
+                    <form action="{{ url_for('views.product_details', product_id=product.id) }}" method="get">
+                        <div>
+                            <button type="submit" id="no_button" class="my_btn no_btn">Retour</button>
+                        </div>
+                    </form>
+
                 </div>
                 
 
-            {% elif participation == "donation" %}
+            {% elif participation_choice == "donation" %}
                 Souhaitez-vous vraiment faire un don ?
                 <div class="two_btn_container">
                     <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
                         <div>
-                            <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="donation">Oui</button>
+                            <button type="submit" id="my_button" class="my_btn" value="donation">Oui</button>
                         </div>
                     </form>
-                    <button onclick="window.location.href='{{ url_for('views.product_details',product_id=product.id) }}'" class="my_btn no_btn">Non</button>
+
+                    <form action="{{ url_for('views.product_details', product_id=product.id) }}" method="get">
+                        <div>
+                            <button type="submit" id="no_button" class="my_btn no_btn">Retour</button>
+                        </div>
+                    </form>
                 </div>
 
-            {% elif participation == "lending" %}
+            {% elif participation_choice == "lending" %}
                 Souhaitez-vous vraiment nous prêter ce produit ?
                 <div class="two_btn_container">
                     <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
@@ -135,11 +140,15 @@
                             <button type="submit" id="my_button" class="my_btn" name="submit_btn" value="lending">Oui</button>
                         </div>
                     </form>
-                    <button onclick="window.location.href='{{ url_for('views.product_details',product_id=product.id) }}'" class="my_btn no_btn">Non</button>
+
+                    <form action="{{ url_for('views.product_details', product_id=product.id) }}" method="get">
+                        <div>
+                            <button type="submit" id="no_button" class="my_btn no_btn">Retour</button>
+                        </div>
+                    </form>
 
                 </div>
 
-            {% elif participation == "confirmed" %}
             {% endif %}
 
         {% endif %}
