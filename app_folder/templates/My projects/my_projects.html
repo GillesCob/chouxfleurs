@@ -64,6 +64,7 @@
                     <div class="my_projects_cards" data-rib="{{ project_details.admin_rib_key }}" onclick="copyRIBToClipboard(event)">
                         <div class="project_title">{{ project_name }}</div>
                         <div class="product_description">Cliquez pour obtenir le RIB</div>
+                        <p>{{ project_details.admin_rib_key }}</p>
                     </div>
             {%else%}
                     <div class="my_card my_projects_cards inert_card">
