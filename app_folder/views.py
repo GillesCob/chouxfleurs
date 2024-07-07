@@ -730,7 +730,7 @@ def confirm_participation_loading(product_id):
         elif type_of_participation == "donation":
             type = "donation"
             participation = 0
-            status = "Promesse"
+            status = "Don"
         else:
             type = "lending"
             participation = 0
@@ -1537,7 +1537,6 @@ def create_project():
 def join_project():
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
-    
     
 
     if request.method == 'POST':
