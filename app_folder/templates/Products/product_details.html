@@ -99,7 +99,7 @@
                 <div class="range_container">
                         
                     <form action="{{ url_for('views.confirm_participation_loading', product_id=product.id) }}" method="post">
-                        <input type="range" class="form-range" id="participation_range" name="participation_range" min="1" max="{{left_to_pay}}" step="1" value="0" oninput="updatePriceFromRange(this.value)">
+                        <!-- <input type="range" class="form-range" id="participation_range" name="participation_range" min="1" max="{{left_to_pay}}" step="1" value="0" oninput="updatePriceFromRange(this.value)"> -->
                         <input type="number" id="price_input" min="1" max="1000" step="1" value="1" class="text-center" oninput="updateRangeFromInput(this.value)">
                         <span>€</span>
                         <div>
