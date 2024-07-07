@@ -63,11 +63,7 @@
             {% if project_details.admin_iban_key %}
                     <div class="my_projects_cards" data-iban="{{ project_details.admin_iban_key }}" onclick="copyibanToClipboard(event)">
                         <div class="project_title">{{ project_name }}</div>
-                        <p><code>{{ project_details.admin_iban_key }}</code></p>
                         <p><pre>{{ project_details.admin_iban_key }}</pre></p>
-
-                        <p>{{ project_details.admin_iban_key | e }}</p>
-
                     </div>
             {%else%}
                     <div class="my_card my_projects_cards inert_card">
