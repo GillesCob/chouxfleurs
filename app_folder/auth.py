@@ -216,16 +216,26 @@ def delete_account():
     
     
     user_pronostics = Pronostic.objects(user=user)
-    pronostic_ids = [pronostic.id for pronostic in user_pronostics]
+    if user_pronostics is None:
+        print("Le user n'a pas de pronostics")
+        pass
+    else:
+        pronostic_ids = [pronostic.id for pronostic in user_pronostics]
+        
+        for pronostic_id in pronostic_ids:
+            Project.objects(pronostic=pronostic_id).update(pull__pronostic=pronostic_id) #Je supprime les pronostics du user dans les projets
     
-    for pronostic_id in pronostic_ids:
-        Project.objects(pronostic=pronostic_id).update(pull__pronostic=pronostic_id) #Je supprime les pronostics du user dans les projets
-     
-    user_obj.delete()
     
     #Suppression du user dans les projets
+    print("Je vais essayer de retirer le user des projets")
     user_in_project = Project.objects(users=current_user.id)
     user_in_project.update(pull__users=current_user.id)
+    print("User retiré des projets")
+    
+    print("Je vais essayer de supprimer le user")
+    user_obj.delete()
+    print("User supprimé")
+
     session.clear()
 
     flash('Compte supprimé avec succès !', category='success')
