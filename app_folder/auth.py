@@ -215,7 +215,7 @@ def delete_account():
     
     
     
-    user_pronostics = Pronostic.objects(user=user)
+    user_pronostics = Pronostic.objects(user=user_id)
     if user_pronostics is None:
         print("Le user n'a pas de pronostics")
         pass
