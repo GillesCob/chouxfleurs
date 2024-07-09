@@ -59,11 +59,15 @@ def register():
     if current_user.is_authenticated:
         if project_id : 
                 project = Project.objects(id=project_id).first()
-                project_name = project.name
-                current_user_id = current_user.id
-                project.update(push__users=current_user_id)
-                flash(f'Vous avez rejoins "{project_name}"')
-                return redirect(url_for('views.home_page'))
+                project_users = project.users
+                if current_user.id in project_users:
+                    flash('Vous avez déjà rejoint ce projet', category='info')
+                    return redirect(url_for('views.home_page'))
+                else:
+                    project_name = project.name
+                    project.update(push__users=current_user.id)
+                    flash(f'Vous avez rejoins "{project_name}"')
+                    return redirect(url_for('views.home_page'))
                 
     if request.method == 'POST':
         username = request.form.get('username')

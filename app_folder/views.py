@@ -55,6 +55,17 @@ for key, scores in scores_pronostics.items():
         scores_pronostics['Total_possible'] += scores['good']
 
 #FONCTIONS -------------------------------------------------------------------------------------------------------------
+#Fonction afin de mettre un projet dans la session
+# def selected_project_in_session(project_id):
+#     current_user_projects = current_user
+#     current_project = Project.objects(id=project_id).first()
+#     if current_project:
+#         session['selected_project'] = { #Création de la session
+#             'id': str(current_project.id),
+#             'name': current_project.name
+#         }
+    
+
 # Fonction utilisée pour créer un nouveau pronostic dans la route pronostic
 def new_pronostic(user, current_project_id, current_project, pronostics_for_current_project, user_is_admin):
     if request.method == 'POST':
