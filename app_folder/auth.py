@@ -48,6 +48,7 @@ def login():
             
             else:
                 return render_template('Auth/login.html', error="Cet email ne possède pas de compte", count_projects=count_projects)
+        
     return render_template('Auth/login.html', count_projects=count_projects)
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -275,8 +276,6 @@ def delete_account():
                 
                 
     user_obj.delete() #III
-
-    session.clear()
 
     flash('Compte supprimé avec succès !', category='success')
     return redirect(url_for('auth.login'))
