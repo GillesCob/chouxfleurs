@@ -6,6 +6,9 @@ from datetime import datetime
 
 from bson import ObjectId
 
+from mongoengine.errors import ValidationError
+
+
 #Eléments ajoutés
 #Eléments pour le scrapping
 # import cloudscraper
@@ -1552,18 +1555,16 @@ def join_project():
     if request.method == 'POST':
         project_to_join_link = request.form.get('project_to_join')
         
-        try: #je gère les erreurs notamment si je n'ai pas de "=" dans le lien
-            project_to_join_id = project_to_join_link.split('=')[1].strip()[:24] #je récupère les 24 premiers caractères après le "="
-            
-            #Eléments ajoutés
+        try:
+            project_to_join_id = project_to_join_link.split('=')[1].strip()[:24]
+            project_exist = Project.objects(id__contains=project_to_join_id) #Je vérifie si l'id fourni fait partie des id projets existants
+
             admin_user_project = Project.objects(admin=user_id).first()
             
             if project_to_join_id == str(admin_user_project.id):
                 flash('Vous êtes déjà l\'admin de ce projet', category='error')
                 return redirect(url_for('views.join_project', **elements_for_base))
-            
-            project_exist = Project.objects(id__contains=project_to_join_id) #Je vérifie si l'id fourni fait partie des id projets existants
-            
+
             if project_exist :
                 project_to_join = Project.objects(id=project_to_join_id).first()
                 project_to_join_name = Project.objects(id=project_to_join_id).first().name
@@ -1594,10 +1595,11 @@ def join_project():
                     return redirect(url_for('views.home_page', **elements_for_base))
 
             else:
+                print("coucou2")
                 flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
                 return redirect(url_for('views.join_project', **elements_for_base))
             
-        except (IndexError, ValueError):
+        except (IndexError, ValueError, ValidationError):
             flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
             return redirect(url_for('views.join_project', **elements_for_base))
         
