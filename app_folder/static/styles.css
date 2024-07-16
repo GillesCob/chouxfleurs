@@ -467,6 +467,30 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     border: 1px solid black;
 }
 
+/* Boutons pour base.html ------------------------------------------------------ */
+
+#backToTopBtn {
+    display: none; /* Caché par défaut */
+    position: fixed; /* Positionné en bas à droite */
+    bottom: 20px; /* Distance du bas */
+    right: 20px; /* Distance de la droite */
+    z-index: 99; /* Assurez-vous qu'il est au-dessus d'autres éléments */
+    font-size: 18px; /* Taille de la police */
+    background-color: #000; /* Couleur de fond */
+    color: #fff; /* Couleur du texte */
+    border: none; /* Pas de bordure */
+    outline: none; /* Pas de contour */
+    cursor: pointer; /* Curseur en forme de main */
+    padding: 10px; /* Padding */
+    border-radius: 5px; /* Coins arrondis */
+}
+
+#backToTopBtn:hover {
+    background-color: #555; /* Couleur de fond en survol */
+}
+
+
+
 /* Boutons pour la liste de naissance ------------------------------------------------------ */
 .no_btn {
     background-color: #de3131;

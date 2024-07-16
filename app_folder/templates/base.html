@@ -49,7 +49,6 @@
     <body>
 
         <div class="wrapper">
-
             <!--Navbar-->
             <!--https://getbootstrap.com/docs/5.3/components/navbar/-->
             <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top">
@@ -188,7 +187,33 @@
             </div>
         </footer>
 
+        <!-- Bouton de retour en haut -->
+        <button onclick="topFunction()" id="backToTopBtn" title="Retour en haut"><i class="fas fa-arrow-up"></i></button>
 
+        <script>
+            // Obtenez le bouton
+            var mybutton = document.getElementById("backToTopBtn");
+        
+            // Lorsque l'utilisateur fait défiler la page de 20px vers le bas, affichez le bouton
+            window.onscroll = function() {
+                scrollFunction();
+            };
+        
+            function scrollFunction() {
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    mybutton.style.display = "block";
+                } else {
+                    mybutton.style.display = "none";
+                }
+            }
+        
+            // Lorsque l'utilisateur clique sur le bouton, faites défiler jusqu'en haut de la page
+            function topFunction() {
+                document.body.scrollTop = 0; // Pour Safari
+                document.documentElement.scrollTop = 0; // Pour Chrome, Firefox, IE et Opera
+            }
+        </script>
+        
     </body>
 
     <!-- ===============================================-->
