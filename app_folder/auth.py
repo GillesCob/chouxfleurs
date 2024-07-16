@@ -6,6 +6,9 @@ from app_folder.views import elements_for_base_template
 
 from .models import User, Project, Pronostic, Product, Participation
 
+from bson import ObjectId
+
+
 auth = Blueprint("auth", __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -159,12 +162,12 @@ def delete_account():
     user_obj = User.objects(id=current_user.id).first()
     user_id = user_obj.id
     
-    
-    #Je vais d'abord m'occuper du projet pour lequel le user est l'admin avec dans l'ordre :
+
+    #Je vais d'abord m'occuper du projet pour lequel le user est l'admin :
         #I - Je m'occupe de mettre à jour les listes de pronostic et de participation pour chaque user du projet à supprimer
-            #1 - Listing des ID de tous les produits (ObjectID)
-            #2 - Listing des ID de tous les pronostics (ObjectID)
-            #3 - Listing des ID de tous les users (ObjectID)
+            #1 - Listing des ID de tous les produits du projet à supprimer (ObjectID)
+            #2 - Listing des ID de tous les pronostics du projet à supprimer (ObjectID)
+            #3 - Listing des ID de tous les users du projet à supprimer (ObjectID)
             
             #4 - Listing des ID de toutes les participations pour chaque produits (STR)
             #5 - Listing des ID de tous les pronostics (STR)
@@ -172,35 +175,36 @@ def delete_account():
             #6 - Liste de l'ensemble des participations du user (ObjectID)
             #7 - Liste de l'ensemble des pronostics du user (ObjectID)
             
-            #8 - Si une participation du user(#6) est dans la liste des participations du projet(#4), je la retire
-            #9 - Si un pronostic du user(#7) est dans la liste des pronostics du projet(#5), je le retire
+            #8 - Si une participation du user(#6) est dans la liste des participations du projet(#4), je la retire de sa liste
+            #9 - Si un pronostic du user(#7) est dans la liste des pronostics du projet(#5), je le retire de sa liste
             
             #10 - Je supprime le projet ce qui en cascade supprime 
-                # - Les pronostics
-                # - Les produits
-                # - Les participations
+                # - Les objets pronostics
+                # - Les objets produits
+                # - Les objets participations
             
-        #II - Le user a pu participer à des projets. Je dois donc supprimer ses pronos, ses participations à des produits et sa présence dans les projets
-            #11 - Listing des ID de tous les pronostics du user (ObjectID)
-            #12 - Suppression de tous les pronostics du user pour l'ensemble des projets
-            #13 - Listing de tous les projets dans lesquels le user est présent
-            #14 - Suppression de la présence du user dans l'ensemble des projets
-            #15 - Listing de toutes les participations du user
-            #16 - Identification des produits auxquels le user a participé
-            #17 - Mettre à jour le already_paid des produits en fonction de la participation du user
-            #18 - Mettre  à jour le statut du produit : si participation du user != "€" alors type = €
-            #19 - Retirer la participation du user du produit
+        #II - Le user a pu participer à des projets. Je dois donc supprimer ses infos dans les projets (id de ses pronos) + La trace de ses participations dans les produits 
+            #11 - Listing de tous les projets dans lesquels le user est présent
+            #12 - Suppression de la présence du user dans la liste des users pour chaque projet
+            #13 - Suppression de ses pronos dans les listes des projets
+            #14 - Listing de toutes les participations du user
+            #15 - La participation a été envoyée ou reçu. Je ne vais pas la supprimer mais plutôt l'attribuer à un profil "user_deleted"
+            #16 - Si la participation est financie, je retire sa promesse du montant "already_paid" du produit
+            #117 - Si Don ou Prêt, "already_paid" = 0 et "type" = € pour le produit
             
-        #III - Suppression du user
-    
-    
-    project = Project.objects(admin=user_id).first()
-    if project is None:
+        #III - Suppression du user ce qui en cascade supprime
+            # - Ses objets pronostics
+            # - Ses objets participations
+
+   
+ #I --------------------------------------------------------------------------------------------------------------------
+    project_to_delete = Project.objects(admin=user_id).first()
+    if project_to_delete is None:
         pass
     else:
-        product_list = project.product #1
-        pronostic_list = project.pronostic #2
-        user_list = project.users #3
+        product_list = project_to_delete.product #1
+        pronostic_list = project_to_delete.pronostic #2
+        user_list = project_to_delete.users #3
         
         participations_list_str = []
         pronostics_list_str = []
@@ -209,7 +213,7 @@ def delete_account():
             pass
         else :
             for product_id in product_list: #4
-                product = Product.objects(id=(product_id)).first()
+                product = Product.objects(id=product_id).first()
                 participations = product.participation
                 for participation in participations:
                     participations_list_str.append(str(participation))
@@ -221,61 +225,80 @@ def delete_account():
                 pronostics_list_str.append(str(pronostic_id))
 
 
-        if user_list is None:      
+        if user_list is None:
             pass
         else:
             for user in user_list:
-                user_obj = User.objects(id=user).first()
+                user_obj_2 = User.objects(id=user).first()
+                user_participations = user_obj_2.participation #6
+                user_pronostics = user_obj_2.pronostic #7
                 
-                user_participations = user_obj.participation #6
-                user_pronostics = user_obj.pronostic #7
+                if user_participations is None:
+                    pass
+                else:
+                    for user_participation in user_participations:
+                        if str(user_participation) in participations_list_str:
+                            user_obj_2.update(pull__participation=user_participation) #8
+                            user_obj_2.save()
                 
-                for user_participation in user_participations:
-                    if str(user_participation) in participations_list_str:
-                        user_obj.update(pull__participation=user_participation) #8
-                        user_obj.save()
-                
-                for user_pronostic in user_pronostics:
-                    if str(user_pronostic) in pronostics_list_str:
-                        user_obj.update(pull__pronostic=user_pronostic) #9
-                        user_obj.save()
+                if user_pronostics is None:
+                    pass
+                else:
+                    for user_pronostic in user_pronostics:
+                        if str(user_pronostic) in pronostics_list_str:
+                            user_obj_2.update(pull__pronostic=user_pronostic) #9
+                            user_obj_2.save()
+                            
+        project_to_delete.delete() #10
+ 
+
+#II --------------------------------------------------------------------------------------------------------------------
+    user_in_projects = Project.objects(users=user_id) #11
+    if user_in_projects is None:
+        pass
+    else:
+        for user_in_project in user_in_projects:
+            project_obj = Project.objects(id=user_in_project.id).first()
+            project_obj.update(pull__users=user_id) #12
             
-        project.delete() #10
-    
-    
-    
-    
-    user_pronostics = Pronostic.objects(user=user_obj) #11
+    user_pronostics = Pronostic.objects(user=user_obj) #13
     if user_pronostics is None:
         pass
     else:
-        pronostic_ids = [pronostic.id for pronostic in user_pronostics]
-        for pronostic_id in pronostic_ids:
-            Project.objects(pronostic=pronostic_id).update(pull__pronostic=pronostic_id) #12
+        for user_pronostic in user_pronostics:
+            pronostic_obj = Pronostic.objects(id=user_pronostic.id).first()
+            project_obj = Project.objects(id=pronostic_obj.project.id).first()
+            project_obj.update(pull__pronostic=pronostic_obj.id)
+            project_obj.save()
     
-    user_in_project = Project.objects(users=user_id) #13
-    user_in_project.update(pull__users=user_id) #14
     
-    
-    user_participations = Participation.objects(user=user_obj) #15
+    user_participations = Participation.objects(user=user_obj) #14
     if user_participations is None:
         pass
     else:
-        participation_ids = [participation.id for participation in user_participations]
-        for participation_id in participation_ids:
-            participation = Participation.objects(id=participation_id).first()
-            product = Product.objects(participation=participation_id).first() #16
-            
-            if product : 
-                product.already_paid -= participation.amount #17
-                if participation.type != "€": #18
-                    product.type = "€"
-                    
-                product.update(pull_participation=participation_id) #19
-                product.save()
+        for user_participation in user_participations:
+            participation_obj = Participation.objects(id=user_participation.id).first()
+            product_obj = Product.objects(id=participation_obj.product.id).first()
+            if participation_obj.status != "Promesse": #15 (Envoyé, Reçu ou Terminé)
+                user_deleted = User.objects(id="668d5309f35b522f8889194c").first()
+                participation_id = str(participation_obj.id)
+                user_deleted.participation.append(ObjectId(participation_id))
+                user_deleted.save()
+                participation_obj.user = user_deleted
+                participation_obj.save()
+            else:
+                if participation_obj.type == "€": #16
+                    participation_amount = participation_obj.amount
+                    product_obj.already_paid -= participation_amount
+                else :
+                    product_obj.type = "€" #17
+                    product_obj.already_paid = 0
                 
-                
-    user_obj.delete() #III
+                product_obj.update(pull__participation=participation_obj.id)
+                product_obj.save()
+
+#III --------------------------------------------------------------------------------------------------------------------
+    user_obj.delete()
 
     flash('Compte supprimé avec succès !', category='success')
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('views.home_page'))

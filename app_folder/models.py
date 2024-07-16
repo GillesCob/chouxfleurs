@@ -69,7 +69,7 @@ class Participation(Document):
     user = ReferenceField('User', reverse_delete_rule=CASCADE)
     project = ReferenceField('Project', reverse_delete_rule=CASCADE)
     type = StringField(max_length=150)
-    product = ReferenceField('Product')
+    product = ReferenceField('Product', reverse_delete_rule=CASCADE)
     amount = IntField()
     participation_date = DateTimeField()
     status = StringField(max_length=150)

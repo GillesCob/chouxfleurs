@@ -735,7 +735,6 @@ def confirm_participation_loading(product_id):
         if type_of_participation == "€":
             type = "€"
             participation = request.form.get('price_input')
-            print(participation)
             status = "Promesse"
         elif type_of_participation == "donation":
             type = "donation"
