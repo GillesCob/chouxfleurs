@@ -26,6 +26,10 @@
 
 }
 
+.wrapper{
+    padding-top: 60px;
+}
+
 /* HOME PAGE ------------------------------------------------------ */
 .home_page_container {
     margin: 20px;
