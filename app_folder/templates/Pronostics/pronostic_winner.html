@@ -10,7 +10,10 @@
     <div class="my_container">
         <div class="multiple_btn_container">
                 <button type="button" id="btn_the_winner" class="my_btn">Le gagnant</button>
-                <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultat</button>
+                {% if user_is_admin %}
+                {%else%}
+                    <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultat</button>
+                {%endif%}
                 <form action="{{ url_for('views.pronostic')}}" method="post">
                     <input type="hidden" name="go_to_pronostic" value=true>
                     <button type="submit" class="my_btn white_btn">Mes réponses</button>
@@ -18,71 +21,98 @@
         </div>
     </div>
 
-    {%if number_of_winners >1%}
-        {%for high_score_pronostic in high_score_pronostics %}
-        <div class="my_container">
-            <div class="my_card inert_card">
-                <div class = "pronostic_title">
-                    BRAVO {{ high_score_pronostic.username }} !!
-                </div>
-                <!-- Le sexe ----------------------------------------- -->
-                <div class = "pronostic_title">
-                    <label for="name" >Le sexe</label>
-                    <p class="pronostic_answer">{{ high_score}}
-                </div>
-            </div>
-        </div>
-        {%endfor%}
+    
+        {% if number_of_winners >1 %}
+            {% for high_score_pronostic in high_score_pronostics %}
+                {%if high_score_pronostic.total_score > 0%}
+                    <div class="my_container">
+                        <div class="my_card inert_card">
+                            <div class = "pronostic_title">
+                                BRAVO {{ high_score_pronostic.username }} !!
+                            </div>
+                            <!-- Le sexe ----------------------------------------- -->
+                            <div class = "pronostic_title">
+                                <label for="name" >Le sexe</label>
+                                <p class="pronostic_answer">{{ high_score}}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                        <div class="my_container">
+                            <div class="my_card inert_card">
+                                <div class = "pronostic_title">
+                                    <p>Compliqué d'afficher un gagnant vu que personne n'a eu de point...</p>
+                                    <p>Personne n'a même trouvé le sexe du bébé ?? ...</p>
+                                    <p>On doit être sur un record là... 😅</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+            {% endfor %}
 
-    {%else%}
-        {%for high_score_pronostic in high_score_pronostics %}
-            <div class="my_container">
-                <div class="my_card inert_card">
-                    <div class = "pronostic_title">
-                        BRAVO {{ high_score_pronostic.username }} !!
-                    </div>
-                    <!-- Le sexe ----------------------------------------- -->
-                    <div class = "pronostic_title">
-                        <label for="name" >Le sexe</label>
-                        <p class="pronostic_answer">{{ high_score_pronostic.sex }} - {{high_score_pronostic.sex_score}}/{{ scores_pronostics['Sex']['good'] }}</p>
-                    </div>
-                
-                    <!-- Le nom ----------------------------------------- -->
-                    <div class = "pronostic_title">
-                        <label for="name" >Le prénom</label>
-                        <p class="pronostic_answer">{{ high_score_pronostic.name }} - {{high_score_pronostic.name_score}}/{{ scores_pronostics['Name']['good'] }}</p>
-                    </div>
-                
-                    <!-- Le poids ----------------------------------------- -->
-                    <div class = "pronostic_title">
-                        <label for="weight" >Le poids</label>
-                        <p class="pronostic_answer">{{ high_score_pronostic.weight }} kilogrammes - {{high_score_pronostic.weight_score}}/{{ scores_pronostics['Weight']['good'] }}</p>
-                    </div>
-                
-                    <!-- La taille ----------------------------------------- -->
-                    <div class = "pronostic_title">
-                        <label for="height" >La taille</label>
-                        <p class="pronostic_answer">{{ high_score_pronostic.height }} centimètres - {{high_score_pronostic.height_score}}/{{ scores_pronostics['Height']['good'] }}</p>
-                    </div>
-                
-                    <!-- La date ----------------------------------------- -->
-                    <div class = "pronostic_title">
-                        <label for="date" >La date</label>
-                        <p class="pronostic_answer">{{ high_score_pronostic.date }} - {{high_score_pronostic.date_score}}/{{ scores_pronostics['Date']['good'] }}</p>
+        {% else %}
+            {% for high_score_pronostic in high_score_pronostics %}
+                {%if high_score_pronostic.total_score > 0%}
+                    <div class="my_container">
+                        <div class="my_card inert_card">
+                            <div class = "pronostic_title">
+                                BRAVO {{ high_score_pronostic.username }} !!
+                            </div>
+                            <!-- Le sexe ----------------------------------------- -->
+                            <div class = "pronostic_title">
+                                <label for="name" >Le sexe</label>
+                                <p class="pronostic_answer">{{ high_score_pronostic.sex }} - {{high_score_pronostic.sex_score}}/{{ scores_pronostics['Sex']['good'] }}</p>
+                            </div>
+                        
+                            <!-- Le nom ----------------------------------------- -->
+                            <div class = "pronostic_title">
+                                <label for="name" >Le prénom</label>
+                                <p class="pronostic_answer">{{ high_score_pronostic.name }} - {{high_score_pronostic.name_score}}/{{ scores_pronostics['Name']['good'] }}</p>
+                            </div>
+                        
+                            <!-- Le poids ----------------------------------------- -->
+                            <div class = "pronostic_title">
+                                <label for="weight" >Le poids</label>
+                                <p class="pronostic_answer">{{ high_score_pronostic.weight }} kilogrammes - {{high_score_pronostic.weight_score}}/{{ scores_pronostics['Weight']['good'] }}</p>
+                            </div>
+                        
+                            <!-- La taille ----------------------------------------- -->
+                            <div class = "pronostic_title">
+                                <label for="height" >La taille</label>
+                                <p class="pronostic_answer">{{ high_score_pronostic.height }} centimètres - {{high_score_pronostic.height_score}}/{{ scores_pronostics['Height']['good'] }}</p>
+                            </div>
+                        
+                            <!-- La date ----------------------------------------- -->
+                            <div class = "pronostic_title">
+                                <label for="date" >La date</label>
+                                <p class="pronostic_answer">{{ high_score_pronostic.date }} - {{high_score_pronostic.date_score}}/{{ scores_pronostics['Date']['good'] }}</p>
+                            </div>
+
+                            
+                            <!-- Score total ----------------------------------------- -->
+                            <div class = "pronostic_title">
+                                <label for="date" >Score Total</label>
+                                <p class="pronostic_answer">{{ high_score_pronostic.total_score }}/{{ scores_pronostics.Total_possible }}</p>
+                            </div>
+
+                        </div>
                     </div>
 
-                    
-                    <!-- Score total ----------------------------------------- -->
-                    <div class = "pronostic_title">
-                        <label for="date" >Score Total</label>
-                        <p class="pronostic_answer">{{ high_score_pronostic.total_score }}/{{ scores_pronostics.Total_possible }}</p>
+                {% else %}
+                    <div class="my_container">
+                        <div class="my_card inert_card">
+                            <div class = "pronostic_title">
+                                <p>Compliqué d'afficher un gagnant vu que personne n'a eu de point...</p>
+                                <p>Personne n'a même trouvé le sexe du bébé ?? ...</p>
+                                <p>On doit être sur un record là... 😅</p>
+                            </div>
+                        </div>
                     </div>
+                {% endif %}   
+            {% endfor %}
 
-                </div>
-            </div>
-        {%endfor%}
-
-    {%endif%}
+        {% endif %}
+    
 
     
         

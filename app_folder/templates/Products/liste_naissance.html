@@ -52,7 +52,7 @@
                                 <!-- Titre du produit -->
                                 <div class="product_title">{{ product.name }}</div>
                                 <!-- Description du produit -->
-                                <div class="product_description">{{ product.description[:40] }}</div>
+                                <div class="product_description">{{ product.description[:40] }}{% if product.description|length > 40 %}...{% endif %}</div>
                                 
                                 <!-- Si le produit n'est pas entiement financé -->
                                 {% if product.already_paid > 0 %}

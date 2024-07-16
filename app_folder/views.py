@@ -871,7 +871,6 @@ def pronostic():
                 'id': str(first_project_id),
                 'name': first_project.name
             }
-    
     try:
         current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
         current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
@@ -884,82 +883,82 @@ def pronostic():
 
         except Exception as e:
             due_date = None
-            print(f"Error: {e}")
             
         try:
             clue_name = current_project.clue_name
 
         except Exception as e:
             clue_name = None
-            print(f"Error: {e}")
             
         user_is_admin = (user_id == admin_id)
         
         pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
 
-        
         if pronostics_for_current_project : #J'ai au moins 1 pronostic pour le projet sélectionné
             at_least_one_pronostic = True
             if current_user.pronostic : #Si le user actuel a déjà un pronostic, peut-importe sur quel projet
 
-                for current_user_pronostic in current_user.pronostic:
+                current_user_pronostic_bool = bool(set(pronostics_for_current_project) & set(current_user.pronostic))
+                
+                if current_user_pronostic_bool == True : #Le user a déjà fait son prono pour le projet actuel
+                    current_user_pronostic = (set(pronostics_for_current_project) & set(current_user.pronostic)).pop()
+                    pronostic_utilisateur = Pronostic.objects(id=current_user_pronostic).first() #J'ai l'objet Pronostic actuellement sauvegardé dans la session
+                    
+                    prono_sex = pronostic_utilisateur.sex
+                    prono_name = pronostic_utilisateur.name
+                    prono_weight = float(pronostic_utilisateur.weight) /1000 #Je divise par 1000 pour avoir le poids en kg
+                    prono_height = float(pronostic_utilisateur.height)/10 #Je divise par 10 pour avoir la taille en cm
+                    prono_date = pronostic_utilisateur.date
+                    
+                    pronostic_done=True
+                    
+                    prono_sex_btn = prono_sex
+                    
+                    #Petite astuce ici permettant d'afficher les infos du gagnant en 1er en arrivant sur pronostic
+                    go_to_pronostic = False
 
-                    if current_user_pronostic in pronostics_for_current_project: #Le user a déjà fait son prono pour le projet actuel
+                    if end_pronostics == True :
+                        admin_results = get_admin_pronostic_answers()
+                        prono_sex_btn = admin_results['prono_sex']
                         
-                        pronostic_utilisateur = Pronostic.objects(id=current_user_pronostic).first() #J'ai l'objet Pronostic actuellement sauvegardé dans la session
-                        
-                        prono_sex = pronostic_utilisateur.sex
-                        prono_name = pronostic_utilisateur.name
-                        prono_weight = float(pronostic_utilisateur.weight) /1000 #Je divise par 1000 pour avoir le poids en kg
-                        prono_height = float(pronostic_utilisateur.height)/10 #Je divise par 10 pour avoir la taille en cm
-                        prono_date = pronostic_utilisateur.date
-                        
-                        pronostic_done=True
-                        
-                        prono_sex_btn = prono_sex
-                        
-                        #Petite astuce ici permettant d'afficher les infos du gagnant en 1er en arrivant sur pronostic
-                        go_to_pronostic = False
-
-                        if end_pronostics == True :
-                            admin_results = get_admin_pronostic_answers()
-                            prono_sex_btn = admin_results['prono_sex']
+                        if request.method == 'POST':
+                            go_to_pronostic = request.form.get('go_to_pronostic')
                             
-                            if request.method == 'POST':
-                                go_to_pronostic = request.form.get('go_to_pronostic')
-                                
-                            if go_to_pronostic == False :
-                                return redirect(url_for('views.pronostic_winner', **elements_for_base))
-                            
-                            else:
-                                score_prono_user = {
-                                    'Sex' : pronostic_utilisateur.sex_score,
-                                    'Name' : pronostic_utilisateur.name_score,
-                                    'Weight' : pronostic_utilisateur.weight_score,
-                                    'Height' : pronostic_utilisateur.height_score,
-                                    'Date' : pronostic_utilisateur.date_score,
-                                    'Total' : pronostic_utilisateur.total_score
-                                }
-                                
-                                total_possible = (scores_pronostics['Total_possible'])
-                                
-                                return render_template('Pronostics/pronostic.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_pronostic=go_to_pronostic, score_prono_user=score_prono_user, scores_pronostics=scores_pronostics, total_possible=total_possible, prono_sex_btn=prono_sex_btn, **elements_for_base)
+                        if go_to_pronostic == False :
+                            return redirect(url_for('views.pronostic_winner', **elements_for_base))
                         
                         else:
-                            return render_template('Pronostics/pronostic.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_pronostic=go_to_pronostic, prono_sex_btn=prono_sex_btn, **elements_for_base)
+                            score_prono_user = {
+                                'Sex' : pronostic_utilisateur.sex_score,
+                                'Name' : pronostic_utilisateur.name_score,
+                                'Weight' : pronostic_utilisateur.weight_score,
+                                'Height' : pronostic_utilisateur.height_score,
+                                'Date' : pronostic_utilisateur.date_score,
+                                'Total' : pronostic_utilisateur.total_score
+                            }
+                            
+                            total_possible = (scores_pronostics['Total_possible'])
+                            
+                            return render_template('Pronostics/pronostic.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_pronostic=go_to_pronostic, score_prono_user=score_prono_user, scores_pronostics=scores_pronostics, total_possible=total_possible, prono_sex_btn=prono_sex_btn, **elements_for_base)
+                    
+                    else:
+                        return render_template('Pronostics/pronostic.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_pronostic=go_to_pronostic, prono_sex_btn=prono_sex_btn, **elements_for_base)
 
-                    else : #Si le user actuel a déjà fait un prono mais pas pour le projet actuel
-                        result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
-                        if result:
-                            if user_is_admin :
-                                current_project.end_pronostics = True
-                                end_pronostics = current_project.end_pronostics
-                                current_project.save()
-                                
-                            return redirect(url_for('views.pronostic'))
+                else : #
+                    result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
+                    if result:
+                        if user_is_admin :
+                            current_project.end_pronostics = True
+                            end_pronostics = current_project.end_pronostics
+                            current_project.save()
+                            
+                        return redirect(url_for('views.pronostic'))
             
             else : #J'arrive ici si le user n'a JAMAIS fait de pronostic sur aucun projet ET n'est pas le 1er à pronostiquer pour le projet en cours
-                result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
+                try:
+                    result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
+                except:
+                    return redirect(url_for('views.pronostic'))
                 if result:
                     if user_is_admin :
                         current_project.end_pronostics = True
@@ -969,6 +968,7 @@ def pronostic():
 
         else : #C'est ici que va s'enregistrer le 1er prono de mon projet
             result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
+            
             if result:
                 if user_is_admin :
                     current_project.end_pronostics = True
@@ -1048,7 +1048,6 @@ def update_pronostic():
 @views.route('/all_pronostics', methods=['GET', 'POST'])
 @login_required
 def all_pronostics():
-    user = current_user
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
     
@@ -1073,7 +1072,6 @@ def all_pronostics():
     timestamps = []
     names = {}
     
-    print(number_of_pronostics)
     
     for pronostic in pronostics:
          
@@ -1138,6 +1136,9 @@ def pronostic_winner():
     
     admin_results = get_admin_pronostic_answers()
     prono_sex_btn = admin_results['prono_sex']
+    
+    admin_id = current_project.admin.id
+    user_is_admin = (user_id == admin_id)
        
     #Je récupere ensuite les infos des users
     number_of_winners = 0
@@ -1268,7 +1269,7 @@ def pronostic_winner():
         
     print(f"Nombre de gagnants : {number_of_winners}")
 
-    return render_template('Pronostics/pronostic_winner.html', scores_pronostics=scores_pronostics, number_of_winners=number_of_winners, high_score_pronostics=high_score_pronostics, prono_sex_btn=prono_sex_btn, **elements_for_base)
+    return render_template('Pronostics/pronostic_winner.html', scores_pronostics=scores_pronostics, number_of_winners=number_of_winners, high_score_pronostics=high_score_pronostics, prono_sex_btn=prono_sex_btn, user_is_admin=user_is_admin, **elements_for_base)
 
 @views.route('/pronostic_answers', methods=['GET', 'POST'])
 @login_required
