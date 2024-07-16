@@ -476,17 +476,21 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     right: 20px; /* Distance de la droite */
     z-index: 99; /* Assurez-vous qu'il est au-dessus d'autres éléments */
     font-size: 18px; /* Taille de la police */
-    background-color: #000; /* Couleur de fond */
-    color: #fff; /* Couleur du texte */
-    border: none; /* Pas de bordure */
+    background-color: #ffffff7c;
+    
+    border: 2px solid black;
+    color: #000000; /* Couleur du texte */
     outline: none; /* Pas de contour */
     cursor: pointer; /* Curseur en forme de main */
     padding: 10px; /* Padding */
-    border-radius: 5px; /* Coins arrondis */
+    border-radius: 100%; /* Coins arrondis */
+    width: 50px; /* Largeur */
+    height: 50px; /* Hauteur */
 }
 
 #backToTopBtn:hover {
-    background-color: #555; /* Couleur de fond en survol */
+    background-color: #000000; /* Couleur de fond en survol */
+    color: white;
 }
 
 
