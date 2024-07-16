@@ -194,13 +194,13 @@
             // Obtenez le bouton
             var mybutton = document.getElementById("backToTopBtn");
         
-            // Lorsque l'utilisateur fait défiler la page de 20px vers le bas, affichez le bouton
+            // Lorsque l'utilisateur fait défiler la page de 500px vers le bas, affichez le bouton
             window.onscroll = function() {
                 scrollFunction();
             };
         
             function scrollFunction() {
-                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                if (document.body.scrollTop > 500 || document.documentElement.scrollTop > 500) {
                     mybutton.style.display = "block";
                 } else {
                     mybutton.style.display = "none";
