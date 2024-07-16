@@ -212,6 +212,10 @@ h6{
     font-weight: bold;
 }
 
+.prono_numbers{
+    min-width: 40px;
+}
+
 /* Styles pour l'élément input de type date --------------------------------------------------------------------- */
 input[type="date"] {
     appearance: none; /* Supprimer les styles par défaut de l'élément */
