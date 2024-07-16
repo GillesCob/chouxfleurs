@@ -338,7 +338,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
     margin: 10px auto; /* Centrer la carte et ajouter une marge en bas */
-    background-color: aqua;
+    /* background-color: aqua; */
     display: block;
 }
 
