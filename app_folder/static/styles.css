@@ -368,7 +368,6 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 
 .inert_card:hover {
     transform: None;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     cursor: default;
 }
 
