@@ -61,12 +61,15 @@
 }
 
 /* Contenair register ------------------------------------------------------ */
-
 .under_18_container{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.delete_project_appear_button{
+    cursor: pointer;
 }
 
 /* LISTE DE NAISSANCE ------------------------------------------------------ */
@@ -127,7 +130,6 @@ h3{
     margin: 10px 0;
 }
 
-
 .page_title{
     color: #000000;
     font-size: 1.5em;
@@ -157,7 +159,7 @@ h6{
     text-align: justify; /* Justification du texte pour un aspect plus fluide */
     padding: 10px; /* Espacement intérieur autour du texte */
     text-align: center;
-  }
+}
   
   .with_bubbles {
     position: relative;
@@ -192,7 +194,6 @@ h6{
         background-color: rgb(0, 0, 0); /* Couleur de la bulle */
     }
 }
-
 
 .title_caligraphy {
     font-size: 2em;
@@ -279,6 +280,12 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     font-weight: bold;
 }
 
+.participation_text{
+    font-size: 1.1em;
+    margin-top: 10px auto;
+    margin-bottom: 0px;
+}
+
 /* Styles pour les détails des participations à la liste de naissance --------------------------------------------------------------------- */
 .product_detail_title{
     font-size: 1.8em;
@@ -316,10 +323,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     padding: 20px;
     transition: transform 0.3s ease;
 
-    margin-top: 0px;
-    margin-bottom: 10px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0px auto 10px auto;
 }
 
 .my_card:hover {
@@ -339,18 +343,32 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     max-width: 500px;
     min-width: 300px;
     min-height: 400px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
     transition: transform 0.3s ease;
     margin: 10px auto; /* Centrer la carte et ajouter une marge en bas */
-    /* background-color: aqua; */
     display: block;
+}
+
+.product_card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.363);
+    cursor: pointer;
+}
+
+.inert_product_card:hover {
+    transform: None;
+    cursor: default;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.363);
+}
+
+.product_card a {
+    text-decoration: none;
+    color: inherit; /* Assure que la couleur du texte reste la même que celle de son conteneur parent */
 }
 
 
 /* Cartes pour my_projects ---------------------------------------------------------------------*/
 .my_projects_cards{
-
-
     width: 300px;
     min-height: 50px;
     margin: 0 auto;
@@ -369,11 +387,6 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 .inert_card:hover {
     transform: None;
     cursor: default;
-}
-
-.product_card a {
-    text-decoration: none;
-    color: inherit; /* Assure que la couleur du texte reste la même que celle de son conteneur parent */
 }
 
 .project_card{

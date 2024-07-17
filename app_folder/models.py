@@ -73,3 +73,4 @@ class Participation(Document):
     amount = IntField()
     participation_date = DateTimeField()
     status = StringField(max_length=150)
+    other_user = StringField(max_length=150)

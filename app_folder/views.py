@@ -201,12 +201,12 @@ def user_participations_side_project_func():
             
             status = participation_obj.status
             
+            #Je vérifie que la participation n'a pas été faite pour le compte de quelqu'un d'autre sur son propre projet
+            if participation_obj.other_user == None:
+                if project_name not in user_participations_side_project:
+                    user_participations_side_project[project_name] = []  # Créez une liste vide pour chaque nouvel utilisateur
             
-            # Ajoutez la participation au dictionnaire user_participations
-            if project_name not in user_participations_side_project:
-                user_participations_side_project[project_name] = []  # Créez une liste vide pour chaque nouvel utilisateur
-            
-            user_participations_side_project[project_name].append((participation_id, product_name, participation_amount, status))
+                user_participations_side_project[project_name].append((participation_id, product_name, participation_amount, status))
     else:
         user_participations_side_project = None
             
@@ -228,9 +228,8 @@ def my_project_participations():
         return redirect(url_for('views.home_page', user=current_user, **elements_for_base))
     
     
-    for project_product in project_products: #Pour chaque produit de ce projet
-        product_id = ObjectId(project_product) #Je récupère son id
-        #J'ai l'id de mon produit, je vais aller chercher les id des participations pour ce produit
+    for project_product in project_products:
+        product_id = ObjectId(project_product)
         product_participations = Participation.objects(product=product_id)
         
         for product_participation in product_participations:
@@ -241,6 +240,9 @@ def my_project_participations():
             product_name = Product.objects(id=product_id).first().name
             participant_id = product_participation.user.id
             participant_username = User.objects(id=participant_id).first().username
+            
+            if product_participation.other_user != None:
+                participant_username = product_participation.other_user
             
             if product_participation.type == "€":
                 amount = product_participation.amount
@@ -668,27 +670,13 @@ def update_product(product_id):
 @views.route('/product_details/<product_id>', methods=['GET','POST'])
 @login_required
 def product_details(product_id):
-    #Prérequis grâce à la route liste_naissance
-        # J'ai déjà créé une session avec : 
-            # - l'id du projet actuellement sélectionné
-            # - le nom du projet actuellement sélectionné
-            # - le choix du sexe fait par le user actuellement connecté
-            # - L'info si le user actuel est l'admin du projet actuellement sélectionné
-            # - l'id de l'admin du projet
-
-    #A -----------------
     user_id = current_user.id
-    #B -----------------
     elements_for_base = elements_for_base_template(user_id)
     
-        
-    # Je récupe l'objet Product concerné
     product = Product.objects(id=product_id).first()
     
-    #Je calcule le montant restant à payer
     left_to_pay = product.price-product.already_paid
     
-    #Reinitialisation de cette variable à chaque fois que je charge la page
     participation_choice = "no_choice"
     
     if product:
@@ -710,27 +698,10 @@ def product_details(product_id):
 @views.route('/confirm_participation_loading/<product_id>', methods=['GET','POST'])
 @login_required
 def confirm_participation_loading(product_id):
-    #Prérequis grâce à la route liste_naissance
-    # J'ai déjà créé une session avec : 
-        # - l'id du projet actuellement sélectionné
-        # - le nom du projet actuellement sélectionné
-        # - le choix du sexe fait par le user actuellement connecté
-        # - L'info si le user actuel est l'admin du projet actuellement sélectionné
-        # - l'id de l'admin du projet
-
-    #A -----------------
     user_id = current_user.id
-    #B -----------------
     elements_for_base = elements_for_base_template(user_id)
-    
-    #Cette page sert à enregistrer la participation du user à un produit sur la page product_details
-    # J'ai la participation, j'ai l'id du produit, j'ai le projet, ... Je vais mettre tout ça dans la bdd
-    
-    #Le passage sur cette page est temporaire et une réorientation automatique est alors faite sur la page confirm_participation
-    #Cela évite lors du rechargement de la page de renvoyer un formulaire déjà envoyé
 
     if request.method == 'POST':
-        # Je récupe toutes les datas nécessaires à la création de la participation
         user = User.objects(id=user_id).first()
         project = session.get('selected_project', {}).get('id')
         
@@ -747,12 +718,17 @@ def confirm_participation_loading(product_id):
             type = "lending"
             participation = 0
             status = "Promesse"
+            
+        other_user_participation = request.form.get('other_user')
         
+        if other_user_participation:
+            new_participation = Participation(user=user_id, type=type, project=project, product=product_id, amount=participation, participation_date=datetime.now(), status=status, other_user=other_user_participation)
         
-        new_participation = Participation(user=user_id, type=type, project=project, product=product_id, amount=participation, participation_date=datetime.now(), status=status)
+        else:
+            new_participation = Participation(user=user_id, type=type, project=project, product=product_id, amount=participation, participation_date=datetime.now(), status=status)
+            
         new_participation.save()
         
-        #J'ajoute l'id de la participation dans mon objet Product
         product = Product.objects(id=product_id).first()
         
         if type == "€":
@@ -773,7 +749,6 @@ def confirm_participation_loading(product_id):
             
         product.save()
         
-        #J'ajoute l'id de la participation dans mon objet User
         user.participation.append(new_participation.id)
         user.save()
 
@@ -783,7 +758,6 @@ def confirm_participation_loading(product_id):
     if product:
         return render_template('Products/product_participation.html', product=product, **elements_for_base)
     else:
-        # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
         return render_template('Products/liste_naissance.html', **elements_for_base), 404
 
 @views.route('/confirm_participation/<participation>', methods=['GET','POST'])
