@@ -8,6 +8,8 @@ from bson import ObjectId
 
 from mongoengine.errors import ValidationError
 
+import re
+
 
 #Eléments ajoutés
 #Eléments pour le scrapping
@@ -80,6 +82,10 @@ def new_pronostic(user, current_project_id, current_project, pronostics_for_curr
         date =  f"{jour}/{mois}/{annee}"
         
         name = capitalize_name(name)
+        print(name)
+        
+        if re.search(r'(-.*-)|(\s.*\s)', name):
+            name = "Proposer un nom valide"
                 
         new_pronostic = Pronostic(
             user=user,
@@ -114,8 +120,11 @@ def new_pronostic(user, current_project_id, current_project, pronostics_for_curr
                 
                 if user_is_admin:
                    flash("Félicitations pour l'heureux évement !! 🥳 ")    
-                else:       
-                    flash('Pronostic sauvegardé avec succès !')
+                else:
+                    if name == "Proposer un nom valide":
+                        flash('Nom invalide, veuillez mettre à jour votre pronostic', category='error')
+                    else:
+                        flash('Pronostic sauvegardé avec succès !')
                 return {
                     'pronostic_done': pronostic_done,
                     'prono_sex': prono_sex,
@@ -1018,6 +1027,10 @@ def update_pronostic():
                 if date:
                     annee, mois, jour = date.split("-")
                     date =  f"{jour}/{mois}/{annee}"
+                    
+                if re.search(r'(-.*-)|(\s.*\s)', name):
+                    flash('Nom invalide', category='error')
+                    return redirect(url_for('views.update_pronostic'))
                 
                 if sex:
                     pronostic_utilisateur.sex = sex

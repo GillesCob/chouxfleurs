@@ -23,7 +23,6 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-
 }
 
 .wrapper{
@@ -366,6 +365,29 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     color: inherit; /* Assure que la couleur du texte reste la même que celle de son conteneur parent */
 }
 
+/* Cartes pour les pronostics ---------------------------------------------------------------------*/
+.prono_answers{
+    max-width: 300px;
+
+}
+
+
+.card_title{
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .prono_answers {
+        flex: 1 1 calc(50% - 20px); /* Affiche 2 cartes par ligne sur les petits écrans */
+    }
+}
+
+@media (max-width: 576px) {
+    .prono_answers {
+        flex: 1 1 100%; /* Affiche une carte par ligne sur les très petits écrans */
+    }
+}
+
 
 /* Cartes pour my_projects ---------------------------------------------------------------------*/
 .my_projects_cards{
@@ -637,12 +659,6 @@ input[type="number"]::-moz-spin-buttons {
 }
 
 /* --------------------------------------------------------- Tableaux --------------------------------------------------------- */
-/* Styles pour les tableaux dans les pronostics */
-.my_table {
-    width: 80%;
-    border-collapse: collapse;
-
-}
 /* Styles pour les tableaux dans my_projects */
 table {
     width: 100%;
