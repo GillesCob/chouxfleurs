@@ -58,16 +58,15 @@ for key, scores in scores_pronostics.items():
         scores_pronostics['Total_possible'] += scores['good']
 
 #FONCTIONS -------------------------------------------------------------------------------------------------------------
-#Fonction afin de mettre un projet dans la session
-# def selected_project_in_session(project_id):
-#     current_user_projects = current_user
-#     current_project = Project.objects(id=project_id).first()
-#     if current_project:
-#         session['selected_project'] = { #Création de la session
-#             'id': str(current_project.id),
-#             'name': current_project.name
-#         }
+#Fonction pour récupérer l'info si le user est l'admin du projet en cours ou non
+def user_is_admin_project():
+    user_id = current_user.id
+    current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
+    current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
+    admin_id = current_project.admin.id
+    user_is_admin = (user_id == admin_id)
     
+    return user_is_admin
 
 # Fonction utilisée pour créer un nouveau pronostic dans la route pronostic
 def new_pronostic(user, current_project_id, current_project, pronostics_for_current_project, user_is_admin):
@@ -125,6 +124,31 @@ def new_pronostic(user, current_project_id, current_project, pronostics_for_curr
                     'prono_height': prono_height,
                     'prono_date': prono_date
                 }
+
+#Fonction pour récupérer les réponses aux pronos des users
+def get_pronostic_answers():
+    current_project_id = session['selected_project']['id']
+    current_project_obj = Project.objects(id=current_project_id).first()
+    
+    pronostics_for_current_project = Pronostic.objects(project=current_project_obj)
+    
+    pronostic_answers = {}
+    for pronostic_obj in pronostics_for_current_project:
+        pronostic_user_id = pronostic_obj.user.id
+        user_username = User.objects(id=pronostic_user_id).first().username
+        
+        if pronostic_user_id != current_user.id:
+            pronostic_answers[pronostic_user_id] = {
+                'username': user_username,
+                'sex': pronostic_obj.sex,
+                'name': pronostic_obj.name,
+                'weight': (pronostic_obj.weight)/1000,
+                'height': (pronostic_obj.height)/10,
+                'date': pronostic_obj.date,
+            }
+    
+    return pronostic_answers
+
 
 #La navbar est évolutive en fonction de l'utilisateur connecté, des projets. Je dois lui envoyer des données et celles-ci doivent être les mêmes pour chaque route. Je crée donc une fonction qui va me permettre de récupérer ces données et de les envoyer dans chaque route. Je n'ai ainsi pas à modifier chaque route à chaque fois que je veux ajouter des éléments à la navbar.
 def elements_for_base_template(user_id):
@@ -1038,6 +1062,8 @@ def all_pronostics():
     
     user_id = current_user.id
     
+    user_is_admin = user_is_admin_project()
+    
     #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
     gender_choice = get_gender_choice(current_project)
     
@@ -1092,7 +1118,7 @@ def all_pronostics():
     names = dict(sorted(names.items(), key=lambda item: item[1], reverse=True))
 
     
-    return render_template('Pronostics/all_pronostics.html', average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, number_of_pronostics=number_of_pronostics, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice)
+    return render_template('Pronostics/all_pronostics.html', user_is_admin=user_is_admin, average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, number_of_pronostics=number_of_pronostics, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice)
 
 @views.route('/pronostic_winner', methods=['GET', 'POST'])
 @login_required
@@ -1260,6 +1286,21 @@ def pronostic_answers():
     prono_sex_btn = admin_results['prono_sex']
     
     return render_template('Pronostics/pronostic_answers.html', admin_results=admin_results, prono_sex_btn=prono_sex_btn, **elements_for_base)
+
+@views.route('/pronostic_all_answers', methods=['GET', 'POST'])
+@login_required
+def pronostic_all_answers():
+    #A -----------------
+    user_id = current_user.id
+    #B -----------------
+    elements_for_base = elements_for_base_template(user_id)
+    
+    user_is_admin = user_is_admin_project()
+    
+    all_pronostics = get_pronostic_answers()
+        
+    return render_template('Pronostics/pronostic_all_answers.html',user_is_admin=user_is_admin, all_pronostics=all_pronostics, **elements_for_base)
+
 
 
 #ROUTES "PHOTOS" -------------------------------------------------------------------------------------------------------------

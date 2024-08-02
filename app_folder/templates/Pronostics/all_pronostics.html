@@ -9,13 +9,13 @@
 
 {% if session.selected_project.id %}
     <div class="my_container">
-        <!-- <div class="two_btn_container">
-            <button type="button" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Mes réponses</button>
-            <button type="button" id="btn_tendency" class="my_btn btn_selected" >La tendance</button>
-        </div> -->
+
         <div class="multiple_btn_container">
                 <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Mes réponses</button>
-                <button type="button" id="btn_tendency" class="my_btn" >La tendance</button>
+                {% if user_is_admin %}
+                    <button type="button" id="pronostic_all_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic_all_answers'">Les réponses</button>
+                {%endif%}
+                <button type="button" id="btn_tendency" class="my_btn">La tendance</button>
         </div>
 
         {%if number_of_pronostics == 1%}
