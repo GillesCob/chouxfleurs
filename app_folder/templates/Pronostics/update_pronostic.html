@@ -27,6 +27,9 @@
             <!-- Le nom ----------------------------------------- -->
             <div class = "pronostic_title">
                 <label for="name" >Le nom</label>
+                {%if clue_name != None %}
+                    <p class="pronostic_answer">Indice : {{clue_name}}</p>
+                {%endif%}
                 <input type="text" class="form-control text-center" name="name" value="{{prono_name}}">
             </div>
             
@@ -52,13 +55,16 @@
             <!-- La date ----------------------------------------- -->
             <div class = "pronostic_title">
                 <label for="date" >La date</label>
+                {%if due_date != None %}
+                    <p class="pronostic_answer">Date du terme : {{due_date}}</p>
+                {%endif%}
             </div>
-            date actuelle : {{prono_date}}
+            Votre prono actuel : {{prono_date}}
             <input type="date" class="form-control text-center" name="date" value="{{prono_date}}">
             
             <!-- Validation du pronostic ----------------------------------------- -->
              <div class="my_container">
-                <button type="submit" class="my_btn" id="update_prono">Changer de pronostic</button>
+                <button type="submit" class="my_btn" id="update_prono">Modifier le pronostic</button>
             </div>
         
         </form>

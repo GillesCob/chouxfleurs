@@ -1001,7 +1001,23 @@ def update_pronostic():
     
     user_id = current_user.id
     elements_for_base = elements_for_base_template(user_id)
+    
+    current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
+    current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session     
+        
+    try:
+        due_date = current_project.due_date
+        due_date = due_date.strftime('%d/%m/%Y')
 
+    except Exception as e:
+        due_date = None
+        
+    try:
+        clue_name = current_project.clue_name
+
+    except Exception as e:
+        clue_name = None
+        
 
     current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
     current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
@@ -1057,7 +1073,7 @@ def update_pronostic():
                 flash('Pronostic mis à jour avec succès !')
                 return redirect(url_for('views.pronostic'))
     
-    return render_template('Pronostics/update_pronostic.html', user=current_user, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, **elements_for_base)
+    return render_template('Pronostics/update_pronostic.html', user=current_user, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, due_date=due_date, clue_name=clue_name, **elements_for_base)
 
 @views.route('/all_pronostics', methods=['GET', 'POST'])
 @login_required
