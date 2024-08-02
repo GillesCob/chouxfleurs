@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    All pronostics
+{% endblock %}
+
+
+{% block content %}
+<div class="my_container">
+    {% if user_is_admin %}
+    <div class="multiple_btn_container">
+        {%if end_pronostics == True%}
+            <form action="{{ url_for('views.pronostic_winner')}}" method="post">
+                <input type="hidden" name="go_to_pronostic" value=false>
+                <button type="submit" class="my_btn white_btn">Le gagnant</button>
+            </form>
+        {% if user_is_admin %}
+        {%else%}
+            <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultat</button>
+        {%endif%}
+            <button type="button" id="btn_my_answers" class="my_btn">Mes réponses</button>
+            <button type="button" id="pronostic_all_answers" class="my_btn">Les réponses</button>
+        {%else%}
+            <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Mes réponses</button>
+            <button type="button" id="pronostic_all_answers" class="my_btn">Les réponses</button>
+            <button type="button" class="my_btn white_btn" onclick="window.location.href='/all_pronostics'">La tendance</button>
+        {%endif%}
+    </div>
+
+{%endif%}
+
+</div>
+
+
+
+<div class="my_container">
+        <table class="my_table">
+            <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Sexe</th>
+                    <th>Nom</th>
+                    <th>Poids</th>
+                    <th>Taille</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_id, pronostic in all_pronostics.items() %}
+                <tr>
+                    <td>{{ pronostic.username }}</td>
+                    <td>{{ pronostic.sex }}</td>
+                    <td>{{ pronostic.name }}</td>
+                    <td>{{ pronostic.weight }}kg</td>
+                    <td>{{ pronostic.height }}cm</td>
+                    <td>{{ pronostic.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+</div>
+
+<!-- ===============================================-->
+<!--    JavaScripts-->
+<!-- ===============================================-->
+<script>
+
+</script>
+    
+{% endblock %}
