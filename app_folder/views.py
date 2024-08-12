@@ -450,11 +450,12 @@ def home_page():
 @views.route('/liste_naissance')
 @login_required
 def liste_naissance():
-    # Elements initiaux : 
     # A - Récupérer l'id du user connecté
     user_id = current_user.id
     # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     current_user_18 = current_user.over_18
     if current_user_18 == False:
@@ -465,17 +466,6 @@ def liste_naissance():
     total_money_needed = 0
     total_money_participations = 0
 
-    # Pas de projet dans la session, je récupe le premier dans lequel le user est afin d'en créer une
-    if 'selected_project' not in session:
-        user_in_project = Project.objects(users__contains=user_id) #user_id dans la liste users d'un projet ?
-        
-        if user_in_project:
-            first_project = user_in_project.first() 
-            
-            session['selected_project'] = { #Création de la session
-                'id': str(first_project.id),
-                'name': first_project.name
-            }
     
     try: 
         current_project_id = session['selected_project']['id']
@@ -539,18 +529,12 @@ def liste_naissance():
 @views.route('/add_product', methods=['GET', 'POST'])
 @login_required
 def add_product():
-    #Prérequis grâce à la route liste_naissance
-        # J'ai déjà créé une session avec : 
-            # - l'id du projet actuellement sélectionné
-            # - le nom du projet actuellement sélectionné
-            # - le choix du sexe fait par le user actuellement connecté
-            # - L'info si le user actuel est l'admin du projet actuellement sélectionné
-            # - l'id de l'admin du projet
-
-    #A -----------------
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
-    #B -----------------
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     
     #Ajout d'un nouveau produit
@@ -677,17 +661,12 @@ def add_product():
 @views.route('/update_product/<product_id>', methods=['GET', 'POST'])
 @login_required
 def update_product(product_id):
-    #Prérequis grâce à la route liste_naissance
-        # J'ai déjà créé une session avec : 
-            # - l'id du projet actuellement sélectionné
-            # - le nom du projet actuellement sélectionné
-            # - le choix du sexe fait par le user actuellement connecté
-            # - L'info si le user actuel est l'admin du projet actuellement sélectionné
-
-    #A -----------------
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
-    #B -----------------
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     product = Product.objects(id=product_id).first()
 
@@ -727,8 +706,12 @@ def update_product(product_id):
 @views.route('/product_details/<product_id>', methods=['GET','POST'])
 @login_required
 def product_details(product_id):
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     product = Product.objects(id=product_id).first()
     
@@ -755,8 +738,12 @@ def product_details(product_id):
 @views.route('/confirm_participation_loading/<product_id>', methods=['GET','POST'])
 @login_required
 def confirm_participation_loading(product_id):
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     if request.method == 'POST':
         user = User.objects(id=user_id).first()
@@ -820,18 +807,12 @@ def confirm_participation_loading(product_id):
 @views.route('/confirm_participation/<participation>', methods=['GET','POST'])
 @login_required
 def confirm_participation(participation):
-    #Prérequis grâce à la route liste_naissance
-    # J'ai déjà créé une session avec : 
-        # - l'id du projet actuellement sélectionné
-        # - le nom du projet actuellement sélectionné
-        # - le choix du sexe fait par le user actuellement connecté
-        # - L'info si le user actuel est l'admin du projet actuellement sélectionné
-        # - l'id de l'admin du projet
-
-    #A -----------------
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
-    #B -----------------
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     #Récupération du iban de l'admin du projet
     admin_id = session['admin_id']
@@ -845,13 +826,12 @@ def confirm_participation(participation):
 @views.route('/delete_product/<product_id>', methods=['GET','POST'])
 @login_required
 def delete_product(product_id):
-    #Prérequis grâce à la route liste_naissance
-    # J'ai déjà créé une session avec : 
-        # - l'id du projet actuellement sélectionné
-        # - le nom du projet actuellement sélectionné
-        # - le choix du sexe fait par le user actuellement connecté
-        # - L'info si le user actuel est l'admin du projet actuellement sélectionné
-        # - l'id de l'admin du projet
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     # Je récupère l'objet Product concerné
     product = Product.objects(id=product_id).first()
@@ -888,8 +868,12 @@ def delete_product(product_id):
 @views.route('/pronostic', methods=['GET', 'POST'])
 @login_required
 def pronostic():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     at_least_one_pronostic = False
     # Si le user est déjà dans un projet et que je n'ai rien dans la session (parce que je viens de me connecter), je récupère le premier projet dans lequel le user est afin d'ouvrir une session et ne pas avoir à choisir un projet à chaque fois que je me connecte.
@@ -1021,10 +1005,14 @@ def pronostic():
 @views.route('/update_pronostic', methods=['GET', 'POST']) 
 @login_required
 def update_pronostic():
-    user = current_user
-    
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
+    
+    user = current_user
     
     current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
     current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session     
@@ -1102,8 +1090,12 @@ def update_pronostic():
 @views.route('/all_pronostics', methods=['GET', 'POST'])
 @login_required
 def all_pronostics():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     current_project_id = session['selected_project']['id']
     current_project = Project.objects(id=current_project_id).first()
@@ -1176,10 +1168,12 @@ def all_pronostics():
 @views.route('/pronostic_winner', methods=['GET', 'POST'])
 @login_required
 def pronostic_winner():
-    #A -----------------
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
-    #B -----------------
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     #Récupération des éléments afin de pouvoir récupérer les infos
     current_project_id = session['selected_project']['id']
@@ -1330,10 +1324,12 @@ def pronostic_winner():
 @views.route('/pronostic_answers', methods=['GET', 'POST'])
 @login_required
 def pronostic_answers():
-    #A -----------------
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
-    #B -----------------
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     admin_results = get_admin_pronostic_answers()
     prono_sex_btn = admin_results['prono_sex']
@@ -1362,8 +1358,12 @@ def pronostic_all_answers():
 @views.route('/photos')
 @login_required
 def photos():
-    user_id = current_user.id #J'ai l'id du user actuellement connecté
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
     
@@ -1382,8 +1382,12 @@ def photos():
 @views.route('/my_profil') #Redirection ok
 @login_required
 def my_profil():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     user_email = current_user.email
 
@@ -1392,8 +1396,12 @@ def my_profil():
 @views.route('/change_username', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def change_username():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     user_username = current_user.username
     user = User.objects(id=user_id).first()
@@ -1412,8 +1420,12 @@ def change_username():
 @views.route('/change_email', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def change_email():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     user_email = current_user.email
     user = User.objects(id=user_id).first()
@@ -1434,12 +1446,17 @@ def change_email():
 @views.route('/my_projects', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def my_projects():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
+    
     current_user_18 = current_user.over_18
     user_email = current_user.email
     admin_project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
     
-    elements_for_base = elements_for_base_template(user_id)
     projects_dict_special = elements_for_base['projects_dict'].copy()
     
     user_email = User.objects(id=user_id).first().email
@@ -1477,8 +1494,12 @@ def my_projects():
 @views.route('/modify_my_projects') #Redirection ok
 @login_required
 def modify_my_projects():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     admin_project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
     
@@ -1491,9 +1512,12 @@ def modify_my_projects():
 @views.route('/participation_details', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def participation_details():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
-    
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)   
 
     
     # Récupération de l'id depuis l'url ou bien depuis le formulaire (utile quand je change le statut d'une participation) par ex
@@ -1563,8 +1587,12 @@ def participation_details():
 @views.route('/iban', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def iban():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     user = User.objects(id=user_id).first()
     
@@ -1586,8 +1614,12 @@ def iban():
 @views.route('/create_project', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def create_project():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     
     if request.method == 'POST':
@@ -1618,8 +1650,12 @@ def create_project():
 @views.route('/join_project', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def join_project():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
 
     if request.method == 'POST':
@@ -1679,8 +1715,12 @@ def join_project():
 @views.route('/rename_project', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def rename_project():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     project = Project.objects(admin=user_id).first()
 
@@ -1704,8 +1744,12 @@ def rename_project():
 @views.route('/change_clue_due_date', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def change_clue_due_date():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     project = Project.objects(admin=user_id).first()
     try:
@@ -1728,7 +1772,13 @@ def change_clue_due_date():
 @views.route('/delete_clue_due_date', methods=['GET', 'POST']) #Pas de redirection
 @login_required
 def delete_clue_due_date():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
+    
     project = Project.objects(admin=user_id).first()
     
     # Supprimer la date du terme
@@ -1739,8 +1789,12 @@ def delete_clue_due_date():
 @views.route('/change_clue_name', methods=['GET', 'POST']) #Redirection ok
 @login_required
 def change_clue_name():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     project = Project.objects(admin=user_id).first()
     try:
@@ -1761,7 +1815,13 @@ def change_clue_name():
 @views.route('/delete_clue_name', methods=['POST']) #Pas de redirection
 @login_required
 def delete_clue_name():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
+    
     project = Project.objects(admin=user_id).first()
     
     # Supprimer l'indice concernant le nom
@@ -1774,8 +1834,12 @@ def delete_clue_name():
 @views.route('/delete_project', methods=['POST']) #Pas de redirection
 @login_required
 def delete_project():
-    user_id = current_user.id #J'ai l'id du user actuelelment connecté
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     project = Project.objects(admin=user_id).first()
     products_in_project = project.product
@@ -1840,8 +1904,12 @@ def delete_project():
 @views.route('/select_project', methods=['GET', 'POST'])
 @login_required
 def select_project():
+    # A - Récupérer l'id du user connecté
     user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     
     projects = Project.objects(users__contains=current_user.id)
@@ -1862,8 +1930,12 @@ def select_project():
 
 @views.route('/other_data')
 def other_data():
-    user_id = current_user.id #J'ai l'id du user actuellement connecté
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
 
     
     # Rendre le template base.html avec les données spécifiques
@@ -1871,8 +1943,12 @@ def other_data():
 
 @views.route('/admin', methods=['GET', 'POST'])
 def admin():
-    user_id = current_user.id #J'ai l'id du user actuellement connecté
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
     
     if request.method == 'POST':
         pronostics = Pronostic.objects()
