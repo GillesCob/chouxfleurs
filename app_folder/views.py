@@ -159,7 +159,7 @@ def get_pronostic_answers():
             }
             
      # Inverser l'ordre du dictionnaire
-    reversed_pronostic_answers = OrderedDict(reversed(list(pronostic_answers.items())))
+    pronostic_answers = OrderedDict(reversed(list(pronostic_answers.items())))
     
     return pronostic_answers
 
