@@ -14,10 +14,10 @@
                 <input type="hidden" name="go_to_pronostic" value=false>
                 <button type="submit" class="my_btn white_btn">Le gagnant</button>
             </form>
-        {% if user_is_admin %}
-        {%else%}
-            <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultat</button>
-        {%endif%}
+            {% if user_is_admin %}
+            {%else%}
+                <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultat</button>
+            {%endif%}
             <button type="button" id="btn_my_answers" class="my_btn">Mes réponses</button>
             <button type="button" id="pronostic_all_answers" class="my_btn">Les réponses</button>
         {%else%}

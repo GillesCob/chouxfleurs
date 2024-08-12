@@ -10,6 +10,8 @@ from mongoengine.errors import ValidationError
 
 import re
 
+from collections import OrderedDict
+
 
 #Eléments ajoutés
 #Eléments pour le scrapping
@@ -155,6 +157,9 @@ def get_pronostic_answers():
                 'height': (pronostic_obj.height)/10,
                 'date': pronostic_obj.date,
             }
+            
+     # Inverser l'ordre du dictionnaire
+    reversed_pronostic_answers = OrderedDict(reversed(list(pronostic_answers.items())))
     
     return pronostic_answers
 
