@@ -205,6 +205,25 @@ def project_name_in_session():
         current_project_name = session['selected_project']['name']
         return current_project_name
 
+#Fonction afin d'ajouter un projet à la session
+def project_in_session(user_id, elements_for_base):
+    
+    if 'selected_project' not in session:
+        user_in_project = Project.objects(users__contains=user_id) #user_id dans la liste users d'un projet ?
+        
+        if user_in_project:
+            first_project = user_in_project.first() 
+            
+            session['selected_project'] = { #Création de la session
+                'id': str(first_project.id),
+                'name': first_project.name
+            }
+            
+            
+        else:
+            flash("Veuillez créer ou rejoindre un projet avant d'accéder à une liste de naissance", category='error')
+            return redirect(url_for('views.my_projects', **elements_for_base))
+            
 
 #Fonction pour récupérer SA participation aux projets
 def user_participations_side_project_func():
@@ -1328,6 +1347,8 @@ def pronostic_all_answers():
     user_id = current_user.id
     #B -----------------
     elements_for_base = elements_for_base_template(user_id)
+    #C -----------------
+    project_in_session(user_id, elements_for_base)
     
     user_is_admin = user_is_admin_project()
     
