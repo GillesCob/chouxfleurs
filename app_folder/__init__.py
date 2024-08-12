@@ -9,6 +9,8 @@ from dotenv import load_dotenv, find_dotenv
 from .views import views
 from .auth import auth
 
+import boto3
+
 
 #CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
 load_dotenv(find_dotenv())
@@ -24,6 +26,11 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 MAIL_SERVER = os.getenv("MAIL_SERVER")
 MAIL_USERNAME = os.getenv("MAIL_USERNAME")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
+WASABI_ACCESS_KEY = os.environ.get("WASABI_ACCESS_KEY")
+WASABI_SECRET_KEY = os.environ.get("WASABI_SECRET_KEY")
+WASABI_REGION = os.environ.get("WASABI_REGION")
+WASABI_BUCKET_NAME = os.environ.get("WASABI_BUCKET_NAME")
 
 
 #CREATION INSTANCES
@@ -52,6 +59,10 @@ def create_app():
     app.config['MONGODB_HOST'] = f'mongodb+srv://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_URL}/{MONGODB_MODE}'
     app.config['MESSAGE_FLASHING_OPTIONS'] = {'duration': 5}
     app.config['SECRET_KEY'] = SECRET_KEY
+    
+    #WASABI
+
+
 
     db.init_app(app)
     
