@@ -1,6 +1,6 @@
-from flask import render_template, Blueprint, redirect, url_for, flash, request, session
+from flask import render_template, Blueprint, redirect, url_for, flash, request, session, jsonify
 from flask_login import current_user, login_required, logout_user
-from .models import Pronostic, User, Project, Product, Participation
+from .models import Pronostic, User, Project, Product, Participation, Photos, Messages
 
 from datetime import datetime
 
@@ -11,6 +11,29 @@ from mongoengine.errors import ValidationError
 import re
 
 from collections import OrderedDict
+
+# from slugify import slugify
+import boto3
+from boto3 import s3
+import os
+from dotenv import load_dotenv, find_dotenv
+
+#CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
+load_dotenv(find_dotenv())
+# Configuration Wasabi S3
+wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+wasabi_region = os.getenv('WASABI_REGION')
+wasabi_bucket_name = os.getenv('WASABI_BUCKET_NAME')
+
+# Création d'une session S3
+s3_client = boto3.client(
+    's3',
+    endpoint_url=f'https://s3.{wasabi_region}.wasabisys.com',
+    aws_access_key_id=wasabi_access_key,
+    aws_secret_access_key=wasabi_secret_key,
+    region_name=wasabi_region
+)
 
 
 #Eléments ajoutés
@@ -219,7 +242,6 @@ def project_in_session(user_id, elements_for_base):
                 'name': first_project.name
             }
             
-            
         else:
             flash("Veuillez créer ou rejoindre un projet avant d'accéder à une liste de naissance", category='error')
             return redirect(url_for('views.my_projects', **elements_for_base))
@@ -375,6 +397,15 @@ def get_admin_pronostic_answers():
             admin_results['prono_date'] = pronostic_obj.date
             
     return admin_results
+
+
+def hide_page():
+    ok_gilles = False
+    gilles_mail = "gilles@gilles.com"
+    maxime_email = "bielmann.maxime@gmail.com"
+    if current_user.email == gilles_mail or current_user.email == maxime_email:
+        ok_gilles = True
+    return ok_gilles
 
 #ROUTES -------------------------------------------------------------------------------------------------------------
 @views.route('/')
@@ -1355,27 +1386,215 @@ def pronostic_all_answers():
 
 
 #ROUTES "PHOTOS" -------------------------------------------------------------------------------------------------------------
-@views.route('/photos')
+@views.route('/photos', methods=['GET', 'POST'])
 @login_required
-def photos():
-    # A - Récupérer l'id du user connecté
+def photos():   
+   # A - Récupérer l'id du user connecté
     user_id = current_user.id
     # B - Récupérer les éléments de base pour la navbar
     elements_for_base = elements_for_base_template(user_id)
     # C - Récupérer le projet actuellement sélectionné
     project_in_session(user_id, elements_for_base)
-
-    project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
     
-    if project : #Si le user actuel est l'admin d'un projet
-        project_name = project.name
-        
-        user_is_admin = True
-        return render_template('Photos/photos.html', user=current_user, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base)
+    #Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
+    ok_gilles = hide_page()
+    
+    # Récupérer le projet sélectionné dans la session
+    selected_project_id = session['selected_project']['id']
+    project = Project.objects(id=selected_project_id).first()
+    if not project:
+        return "Project not found", 404
+    
+    photos = Photos.objects(project=project).order_by('-date')  # Ordre inversé basé sur la date
 
-    else: #Si le user actuel n'est pas l'admin d'un projet
-        user_is_admin = False
-        return render_template('Photos/photos.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base)
+    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos=photos, **elements_for_base)
+    
+@views.route('/photo_and_messages/<photo_id>', methods=['GET', 'POST'])
+@login_required
+def photo_and_messages(photo_id):
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
+    
+    # Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
+    ok_gilles = hide_page()
+    
+    
+    # Récupérer le projet sélectionné dans la session
+    selected_project_id = session['selected_project']['id']
+    project = Project.objects(id=selected_project_id).first()
+    if not project:
+        return "Project not found", 404
+
+    # Récupérer la photo spécifique à partir de l'ID
+    photo_selected = Photos.objects(id=photo_id, project=project).first()
+    if not photo_selected:
+        return "Photo not found", 404
+    
+    # Récupérer toutes les photos du projet pour le carrousel
+    photos = Photos.objects(project=project).order_by('-date')
+    
+    #Ajouter un commentaire
+    if request.method == 'POST':
+        
+        #Je récupe d'abord l'info concernant la photo concernée
+        photo_for_message_id = request.form.get('photo_id')
+        print(f"ID de la photo pour lequel je veux ajouter un message : {photo_for_message_id}")
+        photo_for_message_obj = Photos.objects(id=photo_for_message_id).first()
+        
+        message_content = request.form.get('message')
+        answer_content = request.form.get('answer')
+        
+        parent_message_id = request.form.get('parent_message_id')
+        if parent_message_id:
+            parent_message = Messages.objects(id=parent_message_id).first()
+        
+        
+        if answer_content:
+            #Créer une réponse à un message
+            new_message = Messages(
+            user = user_id,
+            project=project,
+            photo=photo_for_message_obj,
+            message=answer_content,
+            date=datetime.now(),
+            type_message= 'Answer',
+            parent_message = parent_message
+        )
+            new_message.save()
+            parent_message.child_message.append(new_message)
+            parent_message.save()
+            
+        else:
+            # Créer un nouvel objet message
+            new_message = Messages(
+            user = user_id,
+            project=project,
+            photo=photo_for_message_obj,
+            message=message_content,
+            date=datetime.now(),
+            type_message= 'Message'
+        )
+            new_message.save()
+                    
+                
+        flash('Votre message a bien été ajouté !', category='success')
+        return redirect(url_for('views.photo_and_messages', photo_id=photo_for_message_id))  # Rediriger vers la photo actuelle
+
+
+
+    photos_datas = []
+    for photo in photos:
+        # Récupérer les messages associés à la photo
+        messages = Messages.objects(photo=photo)
+        
+        # Liste pour stocker les messages et leurs réponses pour cette photo
+        photo_messages = []
+
+        for message in messages:
+            if message.type_message == 'Answer':
+                pass
+            else:
+                # Récupérer les messages enfants avec leurs détails
+                child_messages = []
+                if message.child_message:
+                    # Récupérer les objets messages enfants à partir des IDs
+                    child_message_objs = Messages.objects(id__in=[child.id for child in message.child_message])
+                    for child_message_obj in child_message_objs:
+                        child_message_data = {
+                            'user': child_message_obj.user.username if child_message_obj.user else None,
+                            'message': child_message_obj.message,
+                            'date': child_message_obj.date,
+                        }
+                        child_messages.append(child_message_data)
+                
+                # Créer un dictionnaire pour chaque message avec ses réponses
+                message_data = {
+                    'message_id': message.id,
+                    'message': message.message,
+                    'date': message.date,
+                    'user': message.user.username if message.user else None,
+                    'child_messages': child_messages
+                }
+                
+                # Ajouter le message avec ses réponses à la liste des messages pour cette photo
+                photo_messages.append(message_data)
+        
+        
+        photo_data = {
+            'photo_id': photo.id,
+            'photo_url': photo.url_source,
+            'messages': photo_messages
+        }
+        photos_datas.append(photo_data)
+        
+    # Trouver l'index de la photo sélectionnée
+    photo_selected_index = next((index for index, photo_data in enumerate(photos_datas) if photo_data['photo_id'] == photo_selected.id), None)
+
+    # Si l'index est trouvé, réorganiser la liste
+    if photo_selected_index is not None:
+        photos_datas = photos_datas[photo_selected_index:] + photos_datas[:photo_selected_index]
+    
+    return render_template('Photos/photo_and_messages.html', user=current_user, ok_gilles=ok_gilles, photos_datas=photos_datas, photos=photos, **elements_for_base)
+
+
+@views.route('/add_photos', methods=['GET', 'POST'])
+@login_required
+def add_photos():
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
+    
+    #Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
+    ok_gilles = hide_page()
+    
+    # Récupérer le projet sélectionné dans la session
+    selected_project_id = session['selected_project']['id']
+    project = Project.objects(id=selected_project_id).first()
+    if not project:
+        return "Project not found", 404
+        
+    if project:  # Si le user actuel est l'admin d'un projet
+        file = request.files.get('photo')
+        if file:
+            brut_slug = f'{project.id}-photo-{datetime.now()}'
+            slug_url = brut_slug.replace(" ", "-")
+            file.save('/tmp/' + slug_url)  # Sauvegarder le fichier dans un répertoire temporaire
+
+            with open('/tmp/' + slug_url, 'rb') as f:
+                s3 = boto3.client('s3',
+                    endpoint_url='https://s3.eu-west-2.wasabisys.com/chouxfleurs',
+                    aws_access_key_id=os.getenv('WASABI_ACCESS_KEY'),
+                    aws_secret_access_key=os.getenv('WASABI_SECRET_KEY'))
+                s3.upload_fileobj(f, "chouxfleurs", slug_url)
+            
+            new_photo = Photos(
+            project=project,
+            url_source=slug_url,
+            date=datetime.now(),
+            )
+            new_photo.save()
+
+            project.photos.append(slug_url)
+            project.save()
+
+            flash('Votre photo a bien été ajoutée !', category='success')
+            return render_template('Photos/photos.html', **elements_for_base, ok_gilles=ok_gilles)
+        else:
+            return render_template('Photos/add_photo.html', **elements_for_base)
+    else:
+        flash('Vous ne pouvez pas accéder à cette page!', category='error')
+        return render_template('Photos/photos.html', **elements_for_base)
 
 
 #ROUTES "MY PROFIL" -------------------------------------------------------------------------------------------------------------
@@ -1978,3 +2197,74 @@ def admin():
 
     # Rendre le template base.html avec les données spécifiques
     return render_template('admin.html', **elements_for_base)
+
+
+# #Ajouter un commentaire
+# if request.method == 'POST':
+#     # Récupérer les données du formulaire
+#     message_content = request.form.get('message')
+    
+#     # Créer un nouvel objet message
+#     new_message = Messages(
+#         user = user_id,
+#         project=project,
+#         # photo=photo,
+#         message=message_content,
+#         date=datetime.now()
+#     )
+    
+#     # Sauvegarder le message dans la base de données
+#     new_message.save()
+    
+#     flash('Votre message a bien été ajouté !', category='success')
+#     return redirect(url_for('views.photos'))  # Rediriger vers une page appropriée
+
+
+
+# return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, **elements_for_base)
+
+
+
+
+
+
+# if request.method == 'POST':
+#         # Récupérer les données du formulaire
+#         message_content = request.form.get('message')
+#         photo_id = request.form.get('photo_id')
+#         parent_message_id = request.form.get('parent_message_id')
+
+#         # Trouver l'objet photo
+#         photo = Photos.objects(id=photo_id).first()
+
+#         # Créer un nouvel objet message
+#         new_message = Messages(
+#             user=current_user,
+#             project=project,
+#             photo=photo,
+#             message=message_content,
+#             date=datetime.now(),
+#             type_message='Message'
+#         )
+
+#         # Si un message parent est spécifié, ajouter la référence au message parent
+#         if parent_message_id:
+#             parent_message = Messages.objects(id=parent_message_id).first()
+
+#             new_message.parent_message = parent_message
+#             new_message.type_message = 'Answer'
+#             new_message.save()
+                            
+#             parent_message.child_message.append(new_message.id)
+#             parent_message.save()
+
+#         # Sauvegarder le message dans la base de données
+#         new_message.save()
+
+#         flash('Votre message a bien été ajouté !', category='success')
+#         return redirect(url_for('views.photos', **elements_for_base))
+    
+
+
+
+    

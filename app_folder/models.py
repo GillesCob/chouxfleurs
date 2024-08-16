@@ -29,6 +29,7 @@ class Project(Document):
     product = ListField()
     end_pronostics = BooleanField(default=False)
     clue_name = StringField(max_length=150)
+    photos = ListField()
 
 
 class Pronostic(Document):
@@ -74,3 +75,26 @@ class Participation(Document):
     participation_date = DateTimeField()
     status = StringField(max_length=150)
     other_user = StringField(max_length=150)
+
+
+class Photos(Document):
+    meta = {'collection': 'Photos_collection'}
+    
+    project = ReferenceField('Project', reverse_delete_rule=CASCADE)
+    url_source = StringField(max_length=150)
+    date = DateTimeField()
+
+
+class Messages(Document):
+    meta = {'collection': 'Messages_collection'}
+    
+    user = ReferenceField('User', reverse_delete_rule=CASCADE)
+    project = ReferenceField('Project', reverse_delete_rule=CASCADE)
+    photo = ReferenceField('Photos', reverse_delete_rule=CASCADE)
+    message = StringField(max_length=150)
+    date = DateTimeField()
+    parent_message = ReferenceField('self', reverse_delete_rule=CASCADE, null=True, blank=True)
+    child_message = ListField(ReferenceField('self', reverse_delete_rule=CASCADE))
+    type_message = StringField(max_length=150)
+
+        

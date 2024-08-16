@@ -8,7 +8,7 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV "/Users/gillescobigo/Documents/GitHub/flask_mongo_authentication/venv_folder"
+setenv VIRTUAL_ENV "/Users/gillescobigo/Documents/GitHub/BB-site-2/venv_folder"
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/bin:$PATH"

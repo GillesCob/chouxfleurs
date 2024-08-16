@@ -160,38 +160,38 @@ h6{
     text-align: center;
 }
   
-  .with_bubbles {
-    position: relative;
-    display: inline-block;
+.with_bubbles {
+position: relative;
+display: inline-block;
 
 
 
-    /* Positionnement des bulles */
-    /* Bulle à gauche */
-    &::before {
-        content: '';
-        position: absolute;
-        left: -10px; /* Ajustez la position de la bulle à gauche */
-        top: 50%; /* Centré verticalement */
-        transform: translateY(-50%);
-        width: 5px; /* Largeur de la bulle */
-        height: 5px; /* Hauteur de la bulle */
-        border-radius: 50%; /* Forme de la bulle (ronde) */
-        background-color: rgb(0, 0, 0); /* Couleur de la bulle */
-    }
+/* Positionnement des bulles */
+/* Bulle à gauche */
+&::before {
+    content: '';
+    position: absolute;
+    left: -10px; /* Ajustez la position de la bulle à gauche */
+    top: 50%; /* Centré verticalement */
+    transform: translateY(-50%);
+    width: 5px; /* Largeur de la bulle */
+    height: 5px; /* Hauteur de la bulle */
+    border-radius: 50%; /* Forme de la bulle (ronde) */
+    background-color: rgb(0, 0, 0); /* Couleur de la bulle */
+}
 
-    /* Bulle à droite */
-    &::after {
-        content: '';
-        position: absolute;
-        right: -10px; /* Ajustez la position de la bulle à droite */
-        top: 50%; /* Centré verticalement */
-        transform: translateY(-50%);
-        width: 5px; /* Largeur de la bulle */
-        height: 5px; /* Hauteur de la bulle */
-        border-radius: 50%; /* Forme de la bulle (ronde) */
-        background-color: rgb(0, 0, 0); /* Couleur de la bulle */
-    }
+/* Bulle à droite */
+&::after {
+    content: '';
+    position: absolute;
+    right: -10px; /* Ajustez la position de la bulle à droite */
+    top: 50%; /* Centré verticalement */
+    transform: translateY(-50%);
+    width: 5px; /* Largeur de la bulle */
+    height: 5px; /* Hauteur de la bulle */
+    border-radius: 50%; /* Forme de la bulle (ronde) */
+    background-color: rgb(0, 0, 0); /* Couleur de la bulle */
+}
 }
 
 .title_caligraphy {
@@ -234,6 +234,12 @@ input[type="date"]:focus {
 outline: none; /* Supprimer la bordure de focus par défaut */
 border-color: var(--my_btn_color); /* Modifier la couleur de la bordure lorsqu'il est en focus */
 box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée lorsqu'il est en focus */
+}
+
+/* Styles pour la page photo --------------------------------------------------------------------- */
+.white_text {
+    color: white;
+    font-size: large;
 }
 
 /* LISTE DE NAISSANCE ------------------------------------------------------ */
@@ -980,4 +986,228 @@ main {
 .password-toggle {
     right: 10px;
     cursor: pointer;
+}
+
+
+
+/* --------------------------------------------------------- Caroussel photos --------------------------------------------------------- */
+.black_container{
+    background-color: black;
+}
+
+.photo_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    text-align: center;
+    background-color: black;
+    min-height: 500px;
+
+
+}
+.photo_container img {
+    max-width: 100%;
+    height: auto;
+    max-height: 500px;
+}
+
+
+
+  
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    width: 200px;
+    margin: 0 auto;
+}
+
+
+/* --------------------------------------------------------- Mosaique photos --------------------------------------------------------- */
+.photo-mosaic {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Vous pouvez ajuster 200px à la taille minimale souhaitée pour chaque photo */
+    gap: 10px; /* Espacement entre les photos */
+    padding: 10px; /* Espacement intérieur de la mosaïque */
+}
+
+.photo-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.photo-item {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Permet de remplir la zone sans déformer l'image */
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.photo-item:hover {
+    transform: scale(1.05); /* Effet de zoom au survol */
+}
+
+
+.black_background{
+    background-color: black;
+}
+
+.my_image_container {
+    width: 100%;
+    text-align: center;
+}
+
+.my_image_container img {
+    width: auto;
+    max-width: 90%;
+    max-height: 700px;
+    height: auto;
+    display: inline-block;
+}
+
+/* Conteneur global pour les messages */
+.my_messages_container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Message principal */
+.parent_message {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.parent_message p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.parent_message .message_header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.parent_message .message_header .user {
+    font-weight: bold;
+    color: #333;
+}
+
+.parent_message .message_header .date {
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* Messages secondaires (réponses) */
+.child_messages {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px solid #e0e0e0;
+}
+
+.child_message {
+    margin-bottom: 10px;
+}
+
+.child_message p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.child_message .message_header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.child_message .message_header .user {
+    font-weight: bold;
+    color: #555;
+}
+
+.child_message .message_header .date {
+    font-size: 0.85em;
+    color: #999;
+}
+
+/* Ajouter un message principal */
+
+.comment_form_container{
+    margin: auto;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 80%;
+}
+
+.comment_form_container textarea {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.submit-button {
+    display: block;
+    width: 20%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+.answer_form_container{
+    margin: auto;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 100%;
+}
+
+.answer_form_container textarea {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    resize: vertical;
 }

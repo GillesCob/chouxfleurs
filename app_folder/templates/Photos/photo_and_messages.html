@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Photos
+{% endblock %}
+
+{% block content %}
+    {% if ok_gilles %}
+        <!-- Mise en place d'une flèche pour revenir à l'environnement précédent -->
+        <div class="black_background">
+            <a href="{{ url_for('views.photos') }}">
+                <img src="{{ url_for('static', filename='images/left-arrow_white.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+            </a>
+
+
+            <div class="controls">
+                <button id="prevBtn">Précédent</button>
+                <button id="nextBtn">Suivant</button>
+            </div>
+
+
+            <!-- Affichage de l'image -->
+                <div class="my_container">
+                <div class="my_image_container">
+                    <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo">
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire pour ajouter un nouveau commentaire -->
+        <div class="comment_form_container">
+            <form action="{{ url_for('views.photo_and_messages', photo_id=photos_datas[0].photo_id) }}" method="POST">
+                <input type="hidden" id="newmessageDisplay" name="photo_id" value="{{ photos_datas[0].photo_id }}">
+                <textarea name="message" rows="2" placeholder="Ajouter un nouveau commentaire..." required></textarea>
+                <button type="submit" class="submit-button">Envoyer</button>
+            </form>
+        </div>
+        
+
+        <!-- Affichage des messages associés à l'image -->
+        <div class="my_messages_container">
+            <div id="messagesDisplay"></div>
+        </div>
+        
+
+
+
+    {% else %}
+        <style>
+            body {
+                background-color: #000000;
+                color: white;
+            }
+        </style>
+        <div class="my_container white_text">
+            <h1>Coming Soon</h1>
+            <p>Il faudra avoir un peu de patience avant l'ouverture de cet environnement !</p>
+        </div>
+    {% endif %}
+
+
+    
+    <script>
+        // Convertit les données Python en JSON pour être utilisées dans JavaScript
+        const photos_datas = {{ photos_datas|tojson }};
+        let currentIndex = 0;
+
+        const photoDisplay = document.getElementById('photoDisplay');
+        const photoUrlDisplay = document.getElementById('photoUrlDisplay');
+        const messagesDisplay = document.getElementById('messagesDisplay');
+        const newmessagesDisplay = document.getElementById('newmessageDisplay');
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function updateDisplay() {
+            const photoData = photos_datas[currentIndex];
+            
+            // Met à jour la source de l'image
+            photoDisplay.src = photoData.photo_url;
+
+            //Mettre à jour l'id de la photo pour le nouveau commentaire
+            newmessageDisplay.value = photoData.photo_id;
+
+
+            // Met à jour les messages associés
+            messagesDisplay.innerHTML = '';
+            photoData.messages.forEach(msg => {
+                let messageHtml = `
+                    <div class="parent_message">
+                        <p>${msg.user}: ${msg.message}</p>
+                        <div class="child_messages">
+                `;
+                msg.child_messages.forEach(childMsg => {
+                    messageHtml += `
+                        <div class="child_message">
+                            <p>${childMsg.user}: ${childMsg.message}</p>
+                        </div>
+                    `;
+                });
+                messageHtml += `
+                        </div>
+                        <div class="answer_form_container">
+                            <form action="{{ url_for('views.photo_and_messages', photo_id=photos_datas[0].photo_id) }}" method="POST">
+                                <input type="hidden" name="parent_message_id" value="${msg.message_id}">
+                                <input type="hidden" id="newmessageDisplay" name="photo_id" value="{{ photos_datas[0].photo_id }}">
+                                <textarea name="answer" rows="1" placeholder="Répondre..." required></textarea>
+                                <button type="submit" class="submit-button">Envoyer</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                messagesDisplay.innerHTML += messageHtml;
+            });
+
+        }
+
+
+
+        prevBtn.addEventListener('click', () => {
+            let previousIndex;
+            
+            if (currentIndex === 0) {
+                previousIndex = photos_datas.length - 1;
+            } else {
+                previousIndex = currentIndex - 1;
+            }
+            
+            // Récupérer l'ID de la photo précédente
+            const previousPhotoId = photos_datas[previousIndex].photo_id;
+
+            // Rediriger vers la route avec l'ID de la photo précédente
+            window.location.href = `/photo_and_messages/${previousPhotoId}`;
+        });
+
+
+        nextBtn.addEventListener('click', () => {
+            let nextIndex;
+            
+            if (currentIndex === photos_datas.length - 1) {
+                nextIndex = 0; // Revenir au début si on est à la dernière photo
+            } else {
+                nextIndex = currentIndex + 1;
+            }
+            
+            // Récupérer l'ID de la photo suivante
+            const nextPhotoId = photos_datas[nextIndex].photo_id;
+
+            // Rediriger vers la route avec l'ID de la photo suivante
+            window.location.href = `/photo_and_messages/${nextPhotoId}`;
+        });
+
+
+        // Affiche la première photo au chargement
+        updateDisplay();
+    </script>
+
+{% endblock %}
+

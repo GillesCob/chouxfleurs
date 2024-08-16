@@ -4,50 +4,36 @@
     Photos
 {% endblock %}
 
-
 {% block content %}
-
-<style>
-
-    .container {
-        text-align: center;
-    }
-    h1 {
-        color: #ffffff;
-        font-size: 3rem;
-        margin-bottom: 20px;
-        margin-top: 50px;
-    }
-    p {
-        color: #ffffff;
-        font-size: 1.5rem;
-    }
-</style>
-</head>
 <body>
-<div class="container">
-    <h1>Coming Soon</h1>
-    <p>Il faudra avoir un peu de patience avant l'ouverture de cet environnement !</p>
+    {% if ok_gilles == True %}
+    <a href="{{ url_for('views.add_photos') }}" class="btn btn-primary">Ajouter une Photo</a>
 
-</div>
-
-<!--Night mode-->
-<style>
-    body{
-        background-color: #000000;
-        color: white;
-    }
-</style>
-
-
-<!-- {% if user_is_admin %}
-<p>Possible d'ajouter des photos</p>
-
-{%else%}
-<p>Possible de consulter les photos</p>
-
-{%endif%} -->
-
-
-
+        <div class="photo-mosaic">
+            {% if photos %}
+                {% for photo in photos %}
+                    <div class="photo-container">
+                        <!-- Mettre à jour le lien pour inclure l'ID de la photo -->
+                        <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
+                            <img src="{{ photo.url_source }}" alt="photo" class="photo-item">
+                        </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                Vous n'avez pas de photos pour le moment.
+            {% endif %}
+        </div>
+    {% else %}
+        <style>
+            body {
+                background-color: #000000;
+                color: white;
+            }
+        </style>
+        <div class="my_container white_text">
+            <h1>Coming Soon</h1>
+            <p>Il faudra avoir un peu de patience avant l'ouverture de cet environnement !</p>
+        </div>
+    {% endif %}
+</body>
 {% endblock %}

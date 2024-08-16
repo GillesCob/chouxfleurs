@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Photos
+{% endblock %}
+
+{% block content %}
+<body>
+    <div class="add-photo-container">
+        <h1>Ajouter une Photo</h1>
+        <form action="{{ url_for('views.add_photos') }}" method="POST" enctype="multipart/form-data">
+            <label for="photo">Choisir une photo:</label>
+            <input type="file" id="photo" name="photo" accept="image/*" required>
+            <button type="submit" class="btn btn-primary">Ajouter la Photo</button>
+        </form>
+    </div>
+    
+</body>
+{% endblock %}

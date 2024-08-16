@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/gillescobigo/Documents/GitHub/flask_mongo_authentication/venv_folder"
+set -gx VIRTUAL_ENV "/Users/gillescobigo/Documents/GitHub/BB-site-2/venv_folder"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH
