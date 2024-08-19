@@ -1670,12 +1670,13 @@ def add_photos():
                 config=Config(signature_version='s3v4')
             )
 
+            # Uploader le fichier vers Wasabi
             s3.upload_file(local_file_path, wasabi_bucket_name, slug_url)
 
             # Créer une nouvelle instance de photo et sauvegarder dans la base de données
             new_photo = Photos(
                 project=project,
-                url_source=slug_url,
+                url_source=wasabi_endpoint_url+"/"+wasabi_bucket_name+"/"+slug_url,
                 description=description,
                 date=datetime.now(),
             )
@@ -1689,7 +1690,7 @@ def add_photos():
             os.remove(local_file_path)
 
             flash('Votre photo a bien été ajoutée !', category='success')
-            return render_template('Photos/photos.html', **elements_for_base, ok_gilles=ok_gilles)
+            return redirect(url_for('views.photos'))
 
         else:
             return render_template('Photos/add_photo.html', **elements_for_base)
