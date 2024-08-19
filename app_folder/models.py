@@ -16,6 +16,7 @@ class User(Document, UserMixin):
     iban = StringField(max_length=150)
     validationCode = StringField(max_length=150)
     is_validated = BooleanField(default=False)
+    notification_enabled = BooleanField(default=True)
 
 
 class Project(Document):
@@ -96,5 +97,7 @@ class Messages(Document):
     parent_message = ReferenceField('self', reverse_delete_rule=CASCADE, null=True, blank=True)
     child_message = ListField(ReferenceField('self', reverse_delete_rule=CASCADE))
     type_message = StringField(max_length=150)
+    seen_by_users = ListField(ReferenceField(User))
+
 
         

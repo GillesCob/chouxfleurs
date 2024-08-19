@@ -192,12 +192,14 @@ def elements_for_base_template(user_id):
     count_projects = count_user_in_project(user_id)
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
-            
+    has_unread_comments = messages_notifications(user_id)
+
+    
     return {
         'count_projects' : count_projects,
         'projects_dict' : projects_dict,
         'project_name_in_session' : project_in_session,
-        # 'super_admin' : super_admin
+        'unread_comments' :has_unread_comments,
             }
 
 #Fonctions appelées par elements_for_base_template()
@@ -227,6 +229,33 @@ def project_name_in_session():
     if 'selected_project' in session:
         current_project_name = session['selected_project']['name']
         return current_project_name
+
+def messages_notifications(user_id):
+    actual_user = User.objects(id=user_id).first()
+    
+    if actual_user.notification_enabled == False:
+        return False
+    else:
+        # Récupérer le projet actuellement sélectionné
+        selected_project_id = session.get('selected_project', {}).get('id')
+        if selected_project_id:
+            project = Project.objects(id=selected_project_id).first()
+        else:
+            project = None
+            
+        # Initialiser le flag pour les commentaires non lus
+        has_unread_comments = False
+        
+        if project:
+            photos = Photos.objects(project=project)
+            for photo in photos:
+                # Récupérer tous les commentaires pour chaque photo
+                comments = Messages.objects(photo=photo)
+                # Vérifier si au moins un commentaire n'a pas été vu par l'utilisateur
+                if any(actual_user not in comment.seen_by_users for comment in comments):
+                    has_unread_comments = True
+                    break  # Pas besoin de continuer si on a trouvé au moins un commentaire non lu
+        return has_unread_comments
 
 #Fonction afin d'ajouter un projet à la session
 def project_in_session(user_id, elements_for_base):
@@ -401,9 +430,8 @@ def get_admin_pronostic_answers():
 
 def hide_page():
     ok_gilles = False
-    gilles_mail = "gilles@gilles.com"
-    maxime_email = "bielmann.maxime@gmail.com"
-    if current_user.email == gilles_mail or current_user.email == maxime_email:
+    mails_ok = ["gilles@gilles.com", "bielmann.maxime@gmail.com", "gilles2@gilles.com"]
+    if current_user.email in mails_ok:
         ok_gilles = True
     return ok_gilles
 
@@ -1406,8 +1434,23 @@ def photos():
         return "Project not found", 404
     
     photos = Photos.objects(project=project).order_by('-date')  # Ordre inversé basé sur la date
+    
+    #Partie du code afin d'identifier les photos qui ont des commentaires encore non lus
+    # Liste pour stocker les photos avec des commentaires non lus
+    photos_with_unread_comments = []
 
-    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos=photos, **elements_for_base)
+    # Parcourez chaque photo pour vérifier les commentaires non lus
+    for photo in photos:
+        # Récupérez tous les commentaires pour cette photo
+        comments = Messages.objects(photo=photo)
+        
+        # Vérifiez si au moins un commentaire n'a pas été vu par l'utilisateur
+        has_unread_comments = any(current_user not in comment.seen_by_users for comment in comments)
+        
+        if has_unread_comments:
+            photos_with_unread_comments.append(photo)
+
+    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos=photos, photos_with_unread_comments=photos_with_unread_comments, **elements_for_base)
     
 @views.route('/photo_and_messages/<photo_id>', methods=['GET', 'POST'])
 @login_required
@@ -1448,7 +1491,17 @@ def photo_and_messages(photo_id):
         photo_for_message_obj = Photos.objects(id=photo_for_message_id).first()
         
         message_content = request.form.get('message')
-        answer_content = request.form.get('answer')
+        answer_content = (request.form.get('answer'))
+        
+        if message_content :
+            if message_content.strip() == '':
+                flash('Votre message ne peut être vide !', category='error')
+                return redirect(url_for('views.photo_and_messages', photo_id=photo_for_message_id))  # Rediriger vers la photo actuelle
+            
+        if answer_content :
+            if answer_content.strip() == '':
+                flash('Votre réponse ne peut être vide !', category='error')
+                return redirect(url_for('views.photo_and_messages', photo_id=photo_for_message_id))
         
         parent_message_id = request.form.get('parent_message_id')
         if parent_message_id:
@@ -1464,9 +1517,12 @@ def photo_and_messages(photo_id):
             message=answer_content,
             date=datetime.now(),
             type_message= 'Answer',
-            parent_message = parent_message
+            parent_message = parent_message,
+            seen_by_users = [user_id],
         )
+
             new_message.save()
+            
             parent_message.child_message.append(new_message)
             parent_message.save()
             
@@ -1478,7 +1534,8 @@ def photo_and_messages(photo_id):
             photo=photo_for_message_obj,
             message=message_content,
             date=datetime.now(),
-            type_message= 'Message'
+            type_message= 'Message',
+            seen_by_users = [user_id],
         )
             new_message.save()
                     
@@ -1522,9 +1579,12 @@ def photo_and_messages(photo_id):
                     'child_messages': child_messages
                 }
                 
+                
+                
                 # Ajouter le message avec ses réponses à la liste des messages pour cette photo
                 photo_messages.append(message_data)
         
+        photo_messages.reverse()
         
         photo_data = {
             'photo_id': photo.id,
@@ -1533,12 +1593,26 @@ def photo_and_messages(photo_id):
         }
         photos_datas.append(photo_data)
         
+        
     # Trouver l'index de la photo sélectionnée
     photo_selected_index = next((index for index, photo_data in enumerate(photos_datas) if photo_data['photo_id'] == photo_selected.id), None)
 
     # Si l'index est trouvé, réorganiser la liste
     if photo_selected_index is not None:
         photos_datas = photos_datas[photo_selected_index:] + photos_datas[:photo_selected_index]
+    
+    
+    #Ajout de l'id du current_user dans la liste seen_by_user des commentaires si le current_user n'avait pas déjà vu le commentaire
+    # Récupérer les IDs des commentaires pour la photo sélectionnée
+    displayed_message_ids = []
+    messages_for_selected_photo = Messages.objects(photo=photo_selected)
+    for message_obj in messages_for_selected_photo:
+        displayed_message_ids.append(message_obj.id)
+        
+    for message_id in displayed_message_ids:
+        message = Messages.objects(id=message_id).first()
+        if message and current_user.id not in message.seen_by_users:
+            message.update(add_to_set__seen_by_users=current_user.id)
     
     return render_template('Photos/photo_and_messages.html', user=current_user, ok_gilles=ok_gilles, photos_datas=photos_datas, photos=photos, **elements_for_base)
 
@@ -1612,7 +1686,7 @@ def my_profil():
 
     return render_template('My profil/my_profil.html', user=current_user, **elements_for_base, user_email=user_email)
 
-@views.route('/change_username', methods=['GET', 'POST']) #Redirection ok
+@views.route('/change_username', methods=['GET', 'POST'])
 @login_required
 def change_username():
     # A - Récupérer l'id du user connecté
@@ -1636,7 +1710,7 @@ def change_username():
         
     return render_template('My profil/change_username.html', user=current_user, user_username=user_username, **elements_for_base)
 
-@views.route('/change_email', methods=['GET', 'POST']) #Redirection ok
+@views.route('/change_email', methods=['GET', 'POST'])
 @login_required
 def change_email():
     # A - Récupérer l'id du user connecté
@@ -1660,9 +1734,20 @@ def change_email():
         
     return render_template('My profil/change_email.html', user=current_user, user_email=user_email, **elements_for_base)
 
+@views.route('/change_notification', methods=['GET', 'POST'])
+@login_required
+def change_notification():
+    notification_enabled = request.form.get('notification_enabled') == 'on'
+
+    current_user.notification_enabled = notification_enabled
+    current_user.save()
+
+    flash('Paramètre de notification mis à jour avec succès!', 'success')
+
+    return redirect(url_for('views.my_profil'))
 
 #ROUTES "MY PROJECTS" -------------------------------------------------------------------------------------------------------------
-@views.route('/my_projects', methods=['GET', 'POST']) #Redirection ok
+@views.route('/my_projects', methods=['GET', 'POST'])
 @login_required
 def my_projects():
     # A - Récupérer l'id du user connecté
@@ -1710,7 +1795,7 @@ def my_projects():
         
         return render_template('My projects/my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project, current_user_18=current_user_18)
 
-@views.route('/modify_my_projects') #Redirection ok
+@views.route('/modify_my_projects')
 @login_required
 def modify_my_projects():
     # A - Récupérer l'id du user connecté
@@ -1728,7 +1813,7 @@ def modify_my_projects():
 
     return render_template('My projects/modify_my_projects.html', admin_iban=admin_iban, **elements_for_base)
 
-@views.route('/participation_details', methods=['GET', 'POST']) #Redirection ok
+@views.route('/participation_details', methods=['GET', 'POST'])
 @login_required
 def participation_details():
     # A - Récupérer l'id du user connecté
@@ -1803,7 +1888,7 @@ def participation_details():
 
     return render_template('My projects/participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id, user_is_admin=user_is_admin)
 
-@views.route('/iban', methods=['GET', 'POST']) #Redirection ok
+@views.route('/iban', methods=['GET', 'POST'])
 @login_required
 def iban():
     # A - Récupérer l'id du user connecté
@@ -1830,7 +1915,7 @@ def iban():
     
     return render_template('My projects/iban.html', user=current_user, **elements_for_base, project_name=project_name, actual_iban=user.iban)
    
-@views.route('/create_project', methods=['GET', 'POST']) #Redirection ok
+@views.route('/create_project', methods=['GET', 'POST'])
 @login_required
 def create_project():
     # A - Récupérer l'id du user connecté
@@ -1866,7 +1951,7 @@ def create_project():
         
     return render_template('My projects/create_project.html', user=current_user, **elements_for_base)
 
-@views.route('/join_project', methods=['GET', 'POST']) #Redirection ok
+@views.route('/join_project', methods=['GET', 'POST'])
 @login_required
 def join_project():
     # A - Récupérer l'id du user connecté
@@ -1931,7 +2016,7 @@ def join_project():
     else:
         return render_template('My projects/join_project.html', user=current_user, **elements_for_base)
 
-@views.route('/rename_project', methods=['GET', 'POST']) #Redirection ok
+@views.route('/rename_project', methods=['GET', 'POST'])
 @login_required
 def rename_project():
     # A - Récupérer l'id du user connecté
@@ -1960,7 +2045,7 @@ def rename_project():
         
     return render_template('My projects/rename_project.html', user=current_user, actual_name=actual_name, **elements_for_base)
 
-@views.route('/change_clue_due_date', methods=['GET', 'POST']) #Redirection ok
+@views.route('/change_clue_due_date', methods=['GET', 'POST'])
 @login_required
 def change_clue_due_date():
     # A - Récupérer l'id du user connecté
@@ -1988,7 +2073,7 @@ def change_clue_due_date():
         
     return render_template('My projects/change_clue_due_date.html', due_date=due_date, **elements_for_base)
 
-@views.route('/delete_clue_due_date', methods=['GET', 'POST']) #Pas de redirection
+@views.route('/delete_clue_due_date', methods=['GET', 'POST'])
 @login_required
 def delete_clue_due_date():
     # A - Récupérer l'id du user connecté
@@ -2005,7 +2090,7 @@ def delete_clue_due_date():
     flash("Date du terme supprimée avec succès !", category='success')
     return redirect(url_for('views.change_clue_due_date'))
 
-@views.route('/change_clue_name', methods=['GET', 'POST']) #Redirection ok
+@views.route('/change_clue_name', methods=['GET', 'POST'])
 @login_required
 def change_clue_name():
     # A - Récupérer l'id du user connecté
@@ -2031,7 +2116,7 @@ def change_clue_name():
         
     return render_template('My projects/change_clue_name.html', clue_name=clue_name, **elements_for_base)
 
-@views.route('/delete_clue_name', methods=['POST']) #Pas de redirection
+@views.route('/delete_clue_name', methods=['POST'])
 @login_required
 def delete_clue_name():
     # A - Récupérer l'id du user connecté
@@ -2050,7 +2135,7 @@ def delete_clue_name():
     flash("Indice concernant le prénom supprimé avec succès !", category='success')
     return redirect(url_for('views.change_clue_name'))
 
-@views.route('/delete_project', methods=['POST']) #Pas de redirection
+@views.route('/delete_project', methods=['POST'])
 @login_required
 def delete_project():
     # A - Récupérer l'id du user connecté

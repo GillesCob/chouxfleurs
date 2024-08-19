@@ -13,18 +13,22 @@
             </a>
 
 
-            <div class="controls">
-                <button id="prevBtn">Précédent</button>
-                <button id="nextBtn">Suivant</button>
+            <div class="multiple_btn_container ">
+                <button id="prevBtn" class="my_btn">Précédent</button>
+                <button id="nextBtn" class="my_btn">Suivant</button>
             </div>
 
 
             <!-- Affichage de l'image -->
-                <div class="my_container">
+            <div class="my_container">
                 <div class="my_image_container">
-                    <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo">
+                    <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo" style="cursor: pointer;" onclick="openFullscreen(this);">
                 </div>
             </div>
+        </div>
+
+        <div id="fullscreen" style="display: none;">
+            <img id="fullscreenImage" src="" style="width: 100vw; height: 100vh; object-fit: contain;">
         </div>
 
         <!-- Formulaire pour ajouter un nouveau commentaire -->
@@ -32,7 +36,7 @@
             <form action="{{ url_for('views.photo_and_messages', photo_id=photos_datas[0].photo_id) }}" method="POST">
                 <input type="hidden" id="newmessageDisplay" name="photo_id" value="{{ photos_datas[0].photo_id }}">
                 <textarea name="message" rows="2" placeholder="Ajouter un nouveau commentaire..." required></textarea>
-                <button type="submit" class="submit-button">Envoyer</button>
+                <button type="submit" class="my_btn">Envoyer</button>
             </form>
         </div>
         
@@ -105,7 +109,7 @@
                                 <input type="hidden" name="parent_message_id" value="${msg.message_id}">
                                 <input type="hidden" id="newmessageDisplay" name="photo_id" value="{{ photos_datas[0].photo_id }}">
                                 <textarea name="answer" rows="1" placeholder="Répondre..." required></textarea>
-                                <button type="submit" class="submit-button">Envoyer</button>
+                                <button type="submit" class="my_btn">Répondre</button>
                             </form>
                         </div>
                     </div>
@@ -153,6 +157,19 @@
 
         // Affiche la première photo au chargement
         updateDisplay();
+
+        function openFullscreen(img) {
+            var fullscreen = document.getElementById('fullscreen');
+            var fullscreenImage = document.getElementById('fullscreenImage');
+            fullscreenImage.src = img.src; // Met à jour la source de l'image en plein écran
+            fullscreen.style.display = 'flex'; // Affiche le conteneur en plein écran
+
+            // Lorsque le conteneur plein écran est cliqué, le cacher
+            fullscreen.onclick = function() {
+                fullscreen.style.display = 'none';
+            };
+        }
+
     </script>
 
 {% endblock %}

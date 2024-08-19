@@ -1035,7 +1035,7 @@ main {
 
 
 /* --------------------------------------------------------- Mosaique photos --------------------------------------------------------- */
-.photo-mosaic {
+.photo_mosaic {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Vous pouvez ajuster 200px à la taille minimale souhaitée pour chaque photo */
     gap: 10px; /* Espacement entre les photos */
@@ -1046,6 +1046,41 @@ main {
     overflow: hidden;
     position: relative;
 }
+
+/* Cercle de notification pour les photos avec des commentaires non lus */
+.photo-container.has-unread-comments::after {
+    content: ''; /* Nécessaire pour afficher le pseudo-élément */
+    position: absolute;
+    top: 10px; /* Positionne le cercle en haut à droite de la photo */
+    right: 10px; /* Positionne le cercle en haut à droite de la photo */
+    width: 10px; /* Largeur du cercle */
+    height: 10px; /* Hauteur du cercle */
+    background-color: red; /* Couleur de fond du cercle */
+    border-radius: 50%; /* Rend le cercle rond */
+    z-index: 10; /* Assure que le cercle est au-dessus de la photo */
+}
+
+
+
+/* Style pour le conteneur de l'élément de liste */
+.notification {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Style pour le point rouge de notification */
+.notification_dot {
+    position: absolute;
+    top: 5px;
+    right: -5px; /* Positionné légèrement à droite du lien */
+    width: 10px; /* Largeur du point */
+    height: 10px; /* Hauteur du point */
+    background-color: red; /* Couleur du point */
+    border-radius: 50%; /* Forme ronde */
+    z-index: 10; /* Assure que le point est au-dessus du lien */
+}
+
 
 .photo-item {
     width: 100%;
@@ -1221,5 +1256,37 @@ main {
     box-sizing: border-box;
     resize: vertical;
 }
-=======
->>>>>>> Stashed changes
+
+
+
+.form-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-check-input {
+    margin-right: 12px; /* Espace de 12px entre l'input et le label */
+}
+
+
+
+/* CSS pour le conteneur plein écran */
+#fullscreen {
+    position: fixed; /* Assure que le conteneur occupe toute la fenêtre */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8); /* Fond semi-transparent */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Assure que le conteneur est au-dessus de tout le reste */
+}
+
+/* CSS pour l'image en plein écran */
+#fullscreenImage {
+    max-width: 100%;
+    max-height: 100%;
+}

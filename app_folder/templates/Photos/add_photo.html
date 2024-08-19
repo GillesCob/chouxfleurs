@@ -6,12 +6,14 @@
 
 {% block content %}
 <body>
-    <div class="add-photo-container">
+    <div class="my_container">
         <h1>Ajouter une Photo</h1>
+    </br>
         <form action="{{ url_for('views.add_photos') }}" method="POST" enctype="multipart/form-data">
-            <label for="photo">Choisir une photo:</label>
             <input type="file" id="photo" name="photo" accept="image/*" required>
-            <button type="submit" class="btn btn-primary">Ajouter la Photo</button>
+            </br>
+            </br>
+            <button type="submit" class="my_btn">Ajouter la Photo</button>
         </form>
     </div>
     

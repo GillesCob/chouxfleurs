@@ -108,9 +108,15 @@
                                     <li>
                                         <a class="nav-link " href="{{url_for('views.liste_naissance')}}">Liste de naissance</a>
                                     </li>
-                                    <li>
-                                        <a class="nav-link" href="{{url_for('views.photos')}}">Photos</a>
-                                    </li>
+                                    <div class="notification">
+                                        <li>
+                                            <a class="nav-link notification" href="{{url_for('views.photos')}}">Photos</a>
+                                            {% if unread_comments == True %}
+                                                <div class="notification_dot"></div>
+                                            {% endif %}
+                                        </li>
+                                    </div>
+                                    
                                 </ul>
                             {% endif%}
 
