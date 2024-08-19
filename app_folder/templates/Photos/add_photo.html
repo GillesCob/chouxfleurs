@@ -6,13 +6,18 @@
 
 {% block content %}
 <body>
+    <!-- Mise en place d'une flèche pour revenir à l'environnement précédent -->
+    <a href="{{ url_for('views.photos') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+
     <div class="my_container">
         <h1>Ajouter une Photo</h1>
     </br>
         <form action="{{ url_for('views.add_photos') }}" method="POST" enctype="multipart/form-data">
             <input type="file" id="photo" name="photo" accept="image/*" required>
-            </br>
-            </br>
+            <!-- #Je vais ajouter un champ pour le titre de la photo -->
+            <input type="text" id="description" name="description" placeholder="Commentaire" maxlength="50">
             <button type="submit" class="my_btn">Ajouter la Photo</button>
         </form>
     </div>

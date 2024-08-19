@@ -1589,6 +1589,7 @@ def photo_and_messages(photo_id):
         photo_data = {
             'photo_id': photo.id,
             'photo_url': photo.url_source,
+            'description': photo.description,
             'messages': photo_messages
         }
         photos_datas.append(photo_data)
@@ -1616,7 +1617,6 @@ def photo_and_messages(photo_id):
     
     return render_template('Photos/photo_and_messages.html', user=current_user, ok_gilles=ok_gilles, photos_datas=photos_datas, photos=photos, **elements_for_base)
 
-
 @views.route('/add_photos', methods=['GET', 'POST'])
 @login_required
 def add_photos():
@@ -1640,6 +1640,7 @@ def add_photos():
         
     if project:  # Si le user actuel est l'admin d'un projet
         file = request.files.get('photo')
+        description = request.form.get('description')
         if file:
             brut_slug = f'{project.id}-photo-{datetime.now()}'
             slug_url = brut_slug.replace(" ", "-")
@@ -1655,6 +1656,7 @@ def add_photos():
             new_photo = Photos(
             project=project,
             url_source=slug_url,
+            description=description,
             date=datetime.now(),
             )
             new_photo.save()

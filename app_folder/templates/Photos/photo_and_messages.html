@@ -23,6 +23,11 @@
             <div class="my_container">
                 <div class="my_image_container">
                     <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo" style="cursor: pointer;" onclick="openFullscreen(this);">
+                    {% if photos_datas[0].description != None %}
+                        <div class="photo_description">
+                            {{ photos_datas[0].description }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

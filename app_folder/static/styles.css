@@ -1278,7 +1278,7 @@ main {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.8); /* Fond semi-transparent */
+    background: rgba(0, 0, 0, 1); /* Fond semi-transparent */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1289,4 +1289,8 @@ main {
 #fullscreenImage {
     max-width: 100%;
     max-height: 100%;
+}
+
+.photo_description{
+    color: white;
 }
