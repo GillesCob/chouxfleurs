@@ -17,6 +17,9 @@ import boto3
 from boto3 import s3
 import os
 from dotenv import load_dotenv, find_dotenv
+from botocore.client import Config
+
+
 
 #CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
 load_dotenv(find_dotenv())
@@ -1424,6 +1427,9 @@ def photos():
     # C - Récupérer le projet actuellement sélectionné
     project_in_session(user_id, elements_for_base)
     
+    #D - je récupe l'info pour savoir su le user est l'admin du projet
+    user_is_admin = user_is_admin_project()
+    
     #Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
     ok_gilles = hide_page()
     
@@ -1450,7 +1456,7 @@ def photos():
         if has_unread_comments:
             photos_with_unread_comments.append(photo)
 
-    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos=photos, photos_with_unread_comments=photos_with_unread_comments, **elements_for_base)
+    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos=photos, photos_with_unread_comments=photos_with_unread_comments, user_is_admin=user_is_admin, **elements_for_base)
     
 @views.route('/photo_and_messages/<photo_id>', methods=['GET', 'POST'])
 @login_required
@@ -1466,7 +1472,6 @@ def photo_and_messages(photo_id):
     
     # Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
     ok_gilles = hide_page()
-    
     
     # Récupérer le projet sélectionné dans la session
     selected_project_id = session['selected_project']['id']
@@ -1629,7 +1634,7 @@ def add_photos():
     # C - Récupérer le projet actuellement sélectionné
     project_in_session(user_id, elements_for_base)
     
-    #Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
+    # Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
     ok_gilles = hide_page()
     
     # Récupérer le projet sélectionné dans la session
@@ -1642,30 +1647,50 @@ def add_photos():
         file = request.files.get('photo')
         description = request.form.get('description')
         if file:
-            brut_slug = f'{project.id}-photo-{datetime.now()}'
+            # Générer un slug pour l'URL de la photo
+            brut_slug = f'{project.id}-photo-{datetime.now().strftime("%Y%m%d%H%M%S")}'
             slug_url = brut_slug.replace(" ", "-")
-            file.save('/tmp/' + slug_url)  # Sauvegarder le fichier dans un répertoire temporaire
 
-            with open('/tmp/' + slug_url, 'rb') as f:
-                s3 = boto3.client('s3',
-                    endpoint_url='https://s3.eu-west-2.wasabisys.com/chouxfleurs',
-                    aws_access_key_id=os.getenv('WASABI_ACCESS_KEY'),
-                    aws_secret_access_key=os.getenv('WASABI_SECRET_KEY'))
-                s3.upload_fileobj(f, "chouxfleurs", slug_url)
-            
+            # Sauvegarder le fichier localement dans un répertoire temporaire
+            local_file_path = f'/tmp/{slug_url}'
+            file.save(local_file_path)
+
+            # Configuration pour Wasabi
+            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+            wasabi_bucket_name = 'chouxfleurs.fr'
+            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+
+            # Initialiser le client S3 pour Wasabi
+            s3 = boto3.client(
+                's3',
+                endpoint_url=wasabi_endpoint_url,
+                aws_access_key_id=wasabi_access_key,
+                aws_secret_access_key=wasabi_secret_key,
+                config=Config(signature_version='s3v4')
+            )
+
+            s3.upload_file(local_file_path, wasabi_bucket_name, slug_url)
+
+            # Créer une nouvelle instance de photo et sauvegarder dans la base de données
             new_photo = Photos(
-            project=project,
-            url_source=slug_url,
-            description=description,
-            date=datetime.now(),
+                project=project,
+                url_source=slug_url,
+                description=description,
+                date=datetime.now(),
             )
             new_photo.save()
 
-            project.photos.append(slug_url)
+            # Mettre à jour la liste des photos du projet
+            project.photos.append(new_photo)
             project.save()
+
+            # Supprimer le fichier temporaire local
+            os.remove(local_file_path)
 
             flash('Votre photo a bien été ajoutée !', category='success')
             return render_template('Photos/photos.html', **elements_for_base, ok_gilles=ok_gilles)
+
         else:
             return render_template('Photos/add_photo.html', **elements_for_base)
     else:
