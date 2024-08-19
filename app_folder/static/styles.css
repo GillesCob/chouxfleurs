@@ -7,11 +7,10 @@
 /* ------------------------------------------------------------- Contenair ------------------------------------------------------------ */
 /* Mon contenair principal ------------------------------------------------------ */
 .my_container {
-    width: 100%; /* Largeur maximale de 100% */
-    max-width: 1500px; /* Limite la largeur maximale du container */
+    width: 100%;
+    max-width: 1500px;
     padding: 20px;
-    /* background-color: aqua; */
-    margin: 0 auto; /* Centre horizontalement le conteneur */
+    margin: 0 auto;
     text-align: center;
 
     /* Pour les textes */
@@ -24,6 +23,16 @@
     align-items: center;
     flex-direction: column;
 }
+
+.my_container hr {
+    width: 100%; /* Assurez-vous que la ligne horizontale prend toute la largeur disponible */
+    height: 2px; /* Hauteur de la ligne */
+    background-color: var(--my_btn_color); /* Couleur de la ligne */
+    margin: 20px 0; /* Marges autour de la ligne */
+    border: none; /* Supprimez les bordures par défaut */
+    align-self: stretch; /* Étendre la ligne sur toute la largeur du conteneur flex */
+}
+
 
 .wrapper{
     padding-top: 60px;
@@ -987,6 +996,7 @@ main {
     right: 10px;
     cursor: pointer;
 }
+<<<<<<< Updated upstream
 
 
 
@@ -1211,3 +1221,5 @@ main {
     box-sizing: border-box;
     resize: vertical;
 }
+=======
+>>>>>>> Stashed changes

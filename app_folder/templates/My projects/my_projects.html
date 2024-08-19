@@ -9,6 +9,7 @@
 
 
 <div class="my_container">
+
     {% if user_is_admin %}
         <!-- Tableau avec les participations à sa liste de naissance -->
         {% if user_participations %}
@@ -43,7 +44,8 @@
             <button onclick="window.location.href='/modify_my_projects'" class="my_btn" style="margin-right: 10px;" >Modifier </br> "{{project_name}}"</button>
             <button class="my_btn" onclick="copyTextToClipboard()">Copier mon lien d'affiliation</button>
         </div>
-        
+
+    
 
     {%else%}
         {%if current_user_18 == False %}
@@ -54,9 +56,11 @@
         {%endif%}
     {%endif%}
 
+    <hr class="custom_hr">
+
     
     {%if projects_dict_special %}
-    <h1>Les projets dont je fais partie</h1>
+    <h1>Les projets dont je fais partie : </h1>
        
         {% for project_name, project_details in projects_dict_special.items() %}
 
@@ -68,21 +72,20 @@
 
                     </div>
             {%else%}
-                    <div class="my_card my_projects_cards inert_card">
+                    <div class="my_card my_projects_cards project_card_inert">
                         <div class="product_title">{{ project_name }}</div>
                     </div>
             {%endif%}
             
         {% endfor %}
 
-
     {%else%}
     <!-- Je ne mets rien -->
     {%endif%}
-
+   
     {% if user_participations_side_project %}
     <!-- Tableau avec mes participations aux listes de naissance -->
-        <h1 class="page_title mt-4">Ma participation aux listes de naissance</h1>
+        <h2>Ma participation aux listes de naissance</h2>
             <table>
                 <thead>
                     <tr>
@@ -111,6 +114,7 @@
         <button onclick="window.location.href='/join_project'" class="my_btn">Rejoindre un projet</button>
     </div>
 </div>
+
 
 
 <script>
