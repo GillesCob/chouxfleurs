@@ -833,7 +833,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 }
 
 .specific_photo img {
-    width: 100%;
+    width: auto;
     height: auto;
     display: block; /* Supprime l'espace en bas de l'image si elle est utilisée en ligne */
     max-height: 400px;
