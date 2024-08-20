@@ -36,7 +36,10 @@
                         </div>
                     </div>
 
-                    <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo" style="cursor: pointer;" onclick="openFullscreen(this);">
+                    <div class="specific_photo">
+                        <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo" style="cursor: pointer;" onclick="openFullscreen(this);">
+                    </div>
+
                     {% if photos_datas[0].description %}
                         <div class="text_white">
                             {{ photos_datas[0].description }}
@@ -58,7 +61,7 @@
             <form action="{{ url_for('views.photo_and_messages', photo_id=photos_datas[0].photo_id) }}" method="POST">
                 <input type="hidden" id="newmessageDisplay" name="photo_id" value="{{ photos_datas[0].photo_id }}">
                 <textarea name="message" rows="2" placeholder="Ajouter un nouveau commentaire..." required></textarea>
-                <button type="submit" class="my_btn">Envoyer</button>
+                <button type="submit" class="my_btn my_small_btn">Envoyer</button>
             </form>
         </div>
         
@@ -131,7 +134,7 @@
                                 <input type="hidden" name="parent_message_id" value="${msg.message_id}">
                                 <input type="hidden" id="newmessageDisplay" name="photo_id" value="{{ photos_datas[0].photo_id }}">
                                 <textarea name="answer" rows="1" placeholder="Répondre..." required></textarea>
-                                <button type="submit" class="my_btn">Répondre</button>
+                                <button type="submit" class="my_btn my_small_btn">Répondre</button>
                             </form>
                         </div>
                     </div>
@@ -140,8 +143,6 @@
             });
 
         }
-
-
 
         prevBtn.addEventListener('click', () => {
             let previousIndex;
