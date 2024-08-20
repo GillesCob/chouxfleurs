@@ -38,6 +38,10 @@
     padding-top: 60px;
 }
 
+.black_background{
+    background-color: black;
+}
+
 /* HOME PAGE ------------------------------------------------------ */
 .home_page_container {
     margin: 20px;
@@ -116,6 +120,143 @@
     max-width: 300px;
 }
 
+/* PHOTOS ------------------------------------------------------ */
+/* Contenair pour les photos ------------------------------------------------------ */
+.photo_mosaic {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px; 
+    padding: 10px;
+}
+
+.photo_galery_container {
+    overflow: hidden;
+    position: relative;
+}
+
+/* Contenair pour les messages principaux ------------------------------------------------------ */
+.my_messages_container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.parent_message {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.parent_message p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.parent_message .message_header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.parent_message .message_header .user {
+    font-weight: bold;
+    color: #333;
+}
+
+.parent_message .message_header .date {
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* Contenair pour les messages enfant ------------------------------------------------------ */
+.child_messages {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px solid #e0e0e0;
+}
+
+.child_message {
+    margin-bottom: 10px;
+}
+
+.child_message p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.child_message .message_header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.child_message .message_header .user {
+    font-weight: bold;
+    color: #555;
+}
+
+.child_message .message_header .date {
+    font-size: 0.85em;
+    color: #999;
+}
+
+.comment_form_container{
+    margin: auto;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 80%;
+}
+
+.comment_form_container textarea {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.answer_form_container{
+    margin: auto;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 100%;
+}
+
+.answer_form_container textarea {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    resize: vertical;
+}
 
 /* ------------------------------------------------------------- Styles polices ------------------------------------------------------------ */
 /* Styles de base pour le textes / titres / ... ------------------------------------------------------ */
@@ -151,6 +292,15 @@ h6{
     font-size: 1.5em;
     font-weight: bold;
     text-align: center;
+}
+
+.text_white{
+    color: white;
+}
+
+.text_red {
+    color: red;
+    background-color: #FF69B4;
 }
 
 /* Styles pour les pages auth --------------------------------------------------------------------- */
@@ -457,8 +607,31 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 }
 
 
-/* --------------------------------------------------------------- Les images -------------------------------------------------------------- */
+/* --------------------------------------------------------------- Les images/photos -------------------------------------------------------------- */
 
+.photo_item {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Permet de remplir la zone sans déformer l'image */
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.photo_item:hover {
+    transform: scale(1.05); /* Effet de zoom au survol */
+}
+
+.my_image_container {
+    width: 100%;
+    text-align: center;
+    position: relative;
+}
+
+.my_image_container img {
+    width: auto;
+    height: 500px;
+    display: inline-block;
+}
 
 /* -------------------------------------------------------------- Les boutons -------------------------------------------------------------- */
 
@@ -481,8 +654,8 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     cursor: pointer;
     min-width: 200px;
     min-height: 50px;
-
 }
+
 .my_btn:hover {
     filter: brightness(1.3); /* Légèrement plus lumineux au survol */
 }
@@ -517,6 +690,39 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     border: 1px solid black;
 }
 
+.red_btn {
+    background-color: red;
+}
+
+.my_small_btn {
+    width: 100px;
+    min-width: 100px;
+    height: 25px;
+    min-height: 25px;
+    padding: 5px 5px;
+    font-size: 0.6em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* Je souhaite garder la fonction de bouton sans la mise en page */
+.not_btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+}
+
+.not_btn:hover,
+.not_btn:focus {
+    filter: brightness(0.8);
+    outline: none;
+}
+
 /* Boutons pour base.html ------------------------------------------------------ */
 
 #backToTopBtn {
@@ -543,11 +749,79 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     color: white;
 }
 
-
-
 /* Boutons pour la liste de naissance ------------------------------------------------------ */
 .no_btn {
     background-color: #de3131;
+}
+
+/* Boutons pour les notifications ------------------------------------------------------ */
+.form_check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form_check-input {
+    margin-right: 12px; /* Espace de 12px entre l'input et le label */
+}
+
+
+/* Bouton pour les paramres des photos ------------------------------------------------------ */
+.photo_options {
+    position: absolute;
+    top: 10px;    /* Ajustez la position verticale */
+    right: 10px;   /* Ajustez la position horizontale */
+    width: 50px;  /* Largeur du carré */
+    height: 50px; /* Hauteur du carré */
+    z-index: 10;  /* Assure que le carré est au-dessus de l'image */
+}
+
+.dots_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.dot {
+    width: 6px;
+    height: 6px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 50%;
+    margin: 2px 0;
+}
+
+.options_menu {
+    display: none;
+    position: absolute;
+    top: 30px;
+    right: 0;
+    background-color: #333;
+    border-radius: 5px;
+    padding: 5px;
+    z-index: 100;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    width: 150px;
+}
+
+.options_menu button {
+    margin: 5px auto;
+}
+
+.options_menu a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    transition: background-color 0.3s ease;
+}
+
+.options_menu a:hover {
+    background-color: #555;
+}
+
+.photo_options:hover .options_menu {
+    display: block;
 }
 
 
@@ -608,6 +882,27 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 }
 
 
+/* --------------------------------------------------------- Plein écran --------------------------------------------------------- */
+
+#fullscreen {
+    position: fixed; /* Assure que le conteneur occupe toute la fenêtre */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#fullscreenImage {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+
 /* --------------------------------------------------------- Fenêtres modales --------------------------------------------------------- */
 
 /* Elements pour les fenêtres modales ------------------------------------------------------ */
@@ -660,6 +955,11 @@ input[type="number"]::-moz-spin-buttons {
     display: none; /* Firefox */
 }
 
+.photo_description{
+    height: 100px;
+    width: 100%;
+}
+
 /* --------------------------------------------------------- Notifications --------------------------------------------------------- */
 .copy_notification {
     position: absolute;
@@ -705,6 +1005,39 @@ tr:hover {
 .my_link {
     padding: 10px 20px;
     color: white;
+}
+
+/* --------------------------------------------------------- Notifications --------------------------------------------------------- */
+
+.photo_galery_container.has_unread_comments::after {
+    content: ''; /* Nécessaire pour afficher le pseudo-élément */
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+/* Style pour le conteneur de l'élément de liste */
+.notification {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Style pour le point rouge de notification */
+.notification_dot {
+    position: absolute;
+    top: 5px;
+    right: -5px; /* Positionné légèrement à droite du lien */
+    width: 10px; /* Largeur du point */
+    height: 10px; /* Hauteur du point */
+    background-color: red; /* Couleur du point */
+    border-radius: 50%; /* Forme ronde */
+    z-index: 10; /* Assure que le point est au-dessus du lien */
 }
 
 /* --------------------------------------------------------- Loader --------------------------------------------------------- */
@@ -939,9 +1272,6 @@ main {
         transition: max-width 0.5s ease; /* Ajoute une transition douce */
     }
 
-    /* Messages flash */
-
-
 }
 
 
@@ -996,301 +1326,16 @@ main {
     right: 10px;
     cursor: pointer;
 }
-<<<<<<< Updated upstream
+
+
+/* --------------------------------------------------------- En vrac pendant le dev --------------------------------------------------------- */
 
 
 
-/* --------------------------------------------------------- Caroussel photos --------------------------------------------------------- */
-.black_container{
-    background-color: black;
-}
-
-.photo_container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-    text-align: center;
-    background-color: black;
-    min-height: 500px;
-
-
-}
-.photo_container img {
-    max-width: 100%;
-    height: auto;
-    max-height: 500px;
-}
 
 
 
-  
-
-.controls {
-    display: flex;
-    justify-content: space-between;
-    width: 200px;
-    margin: 0 auto;
-}
-
-
-/* --------------------------------------------------------- Mosaique photos --------------------------------------------------------- */
-.photo_mosaic {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Vous pouvez ajuster 200px à la taille minimale souhaitée pour chaque photo */
-    gap: 10px; /* Espacement entre les photos */
-    padding: 10px; /* Espacement intérieur de la mosaïque */
-}
-
-.photo-container {
-    overflow: hidden;
-    position: relative;
-}
-
-/* Cercle de notification pour les photos avec des commentaires non lus */
-.photo-container.has-unread-comments::after {
-    content: ''; /* Nécessaire pour afficher le pseudo-élément */
-    position: absolute;
-    top: 10px; /* Positionne le cercle en haut à droite de la photo */
-    right: 10px; /* Positionne le cercle en haut à droite de la photo */
-    width: 10px; /* Largeur du cercle */
-    height: 10px; /* Hauteur du cercle */
-    background-color: red; /* Couleur de fond du cercle */
-    border-radius: 50%; /* Rend le cercle rond */
-    z-index: 10; /* Assure que le cercle est au-dessus de la photo */
-}
 
 
 
-/* Style pour le conteneur de l'élément de liste */
-.notification {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
 
-/* Style pour le point rouge de notification */
-.notification_dot {
-    position: absolute;
-    top: 5px;
-    right: -5px; /* Positionné légèrement à droite du lien */
-    width: 10px; /* Largeur du point */
-    height: 10px; /* Hauteur du point */
-    background-color: red; /* Couleur du point */
-    border-radius: 50%; /* Forme ronde */
-    z-index: 10; /* Assure que le point est au-dessus du lien */
-}
-
-
-.photo-item {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Permet de remplir la zone sans déformer l'image */
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.photo-item:hover {
-    transform: scale(1.05); /* Effet de zoom au survol */
-}
-
-
-.black_background{
-    background-color: black;
-}
-
-.my_image_container {
-    width: 100%;
-    text-align: center;
-}
-
-.my_image_container img {
-    width: auto;
-    max-width: 90%;
-    max-height: 700px;
-    height: auto;
-    display: inline-block;
-}
-
-/* Conteneur global pour les messages */
-.my_messages_container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Message principal */
-.parent_message {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.parent_message p {
-    margin: 0;
-    font-size: 16px;
-    line-height: 1.5;
-}
-
-.parent_message .message_header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.parent_message .message_header .user {
-    font-weight: bold;
-    color: #333;
-}
-
-.parent_message .message_header .date {
-    font-size: 0.9em;
-    color: #777;
-}
-
-/* Messages secondaires (réponses) */
-.child_messages {
-    margin-top: 10px;
-    padding-left: 20px;
-    border-left: 2px solid #e0e0e0;
-}
-
-.child_message {
-    margin-bottom: 10px;
-}
-
-.child_message p {
-    margin: 0;
-    font-size: 15px;
-    line-height: 1.4;
-}
-
-.child_message .message_header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
-}
-
-.child_message .message_header .user {
-    font-weight: bold;
-    color: #555;
-}
-
-.child_message .message_header .date {
-    font-size: 0.85em;
-    color: #999;
-}
-
-/* Ajouter un message principal */
-
-.comment_form_container{
-    margin: auto;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    width: 80%;
-}
-
-.comment_form_container textarea {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    font-size: 16px;
-    line-height: 1.5;
-    box-sizing: border-box;
-    resize: vertical;
-}
-
-.submit-button {
-    display: block;
-    width: 20%;
-    padding: 10px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #007bff;
-    color: #ffffff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.submit-button:hover {
-    background-color: #0056b3;
-}
-
-.answer_form_container{
-    margin: auto;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    width: 100%;
-}
-
-.answer_form_container textarea {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    font-size: 16px;
-    line-height: 1.5;
-    box-sizing: border-box;
-    resize: vertical;
-}
-
-
-
-.form-check {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.form-check-input {
-    margin-right: 12px; /* Espace de 12px entre l'input et le label */
-}
-
-
-
-/* CSS pour le conteneur plein écran */
-#fullscreen {
-    position: fixed; /* Assure que le conteneur occupe toute la fenêtre */
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999; /* Assure que le conteneur est au-dessus de tout le reste */
-}
-
-/* CSS pour l'image en plein écran */
-#fullscreenImage {
-    max-width: 100%;
-    max-height: 100%;
-}
-
-.photo_description{
-    color: white;
-}

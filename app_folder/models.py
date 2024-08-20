@@ -83,6 +83,7 @@ class Photos(Document):
     
     project = ReferenceField('Project', reverse_delete_rule=CASCADE)
     url_source = StringField(max_length=150)
+    slug_url = StringField(max_length=150)
     description = StringField(max_length=50)
     date = DateTimeField()
 

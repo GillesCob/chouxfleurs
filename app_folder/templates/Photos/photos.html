@@ -16,15 +16,12 @@
         <div class="photo_mosaic">
             {% if photos %}
                 {% for photo in photos %}
-                    <div class="photo-container {% if photo in photos_with_unread_comments %}has-unread-comments{% endif %}">
-                        <!-- Mettre à jour le lien pour inclure l'ID de la photo -->
-                        <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
-                            <img src="{{ photo.url_source }}" alt="photo" class="photo-item">
-                        </a>
-                    </div>
+                        <div class="photo_galery_container {% if photo in photos_with_unread_comments %}has_unread_comments{% endif %}">
+                            <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
+                                <img src="{{ photo.url_source }}" alt="photo" class="photo_item">
+                            </a>
+                        </div>
                 {% endfor %}
-            {% else %}
-                Vous n'avez pas de photos pour le moment.
             {% endif %}
         </div>
     

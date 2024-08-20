@@ -1452,6 +1452,7 @@ def photos():
         
         # Vérifiez si au moins un commentaire n'a pas été vu par l'utilisateur
         has_unread_comments = any(current_user not in comment.seen_by_users for comment in comments)
+        print(f"Photo {photo.id} has unread comments: {has_unread_comments}")
         
         if has_unread_comments:
             photos_with_unread_comments.append(photo)
@@ -1469,6 +1470,7 @@ def photo_and_messages(photo_id):
     
     # C - Récupérer le projet actuellement sélectionné
     project_in_session(user_id, elements_for_base)
+        
     
     # Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
     ok_gilles = hide_page()
@@ -1546,7 +1548,7 @@ def photo_and_messages(photo_id):
                     
                 
         flash('Votre message a bien été ajouté !', category='success')
-        return redirect(url_for('views.photo_and_messages', photo_id=photo_for_message_id))  # Rediriger vers la photo actuelle
+        return redirect(url_for('views.photo_and_messages', photo_id=photo_for_message_id))
 
 
 
@@ -1619,6 +1621,7 @@ def photo_and_messages(photo_id):
         message = Messages.objects(id=message_id).first()
         if message and current_user.id not in message.seen_by_users:
             message.update(add_to_set__seen_by_users=current_user.id)
+            
     
     return render_template('Photos/photo_and_messages.html', user=current_user, ok_gilles=ok_gilles, photos_datas=photos_datas, photos=photos, **elements_for_base)
 
@@ -1677,6 +1680,7 @@ def add_photos():
             new_photo = Photos(
                 project=project,
                 url_source=wasabi_endpoint_url+"/"+wasabi_bucket_name+"/"+slug_url,
+                slug_url=slug_url,
                 description=description,
                 date=datetime.now(),
             )
@@ -1698,6 +1702,83 @@ def add_photos():
         flash('Vous ne pouvez pas accéder à cette page!', category='error')
         return render_template('Photos/photos.html', **elements_for_base)
 
+@views.route('/delete_photo/<photo_id>', methods=['GET', 'POST'])
+@login_required
+def delete_photo(photo_id):
+    # Récupérer la photo de la base de données
+    photo = Photos.objects(id=photo_id).first()
+    wasabi_bucket_name = 'chouxfleurs.fr'
+    
+    if photo:
+        try:
+            # Configuration pour Wasabi
+            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+            wasabi_bucket_name = 'chouxfleurs.fr'
+            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+
+            # Initialiser le client S3 pour Wasabi
+            s3 = boto3.client(
+                's3',
+                endpoint_url=wasabi_endpoint_url,
+                aws_access_key_id=wasabi_access_key,
+                aws_secret_access_key=wasabi_secret_key,
+                config=Config(signature_version='s3v4')
+            )
+            
+            print(f"Photo URL : {photo.url_source}")
+
+            # Supprimer le fichier de Wasabi
+            s3.delete_object(Bucket=wasabi_bucket_name, Key=photo.slug_url)
+            
+            
+            # Supprimer la photo de la base de données
+            photo.delete()
+            
+            flash('Photo supprimée avec succès.', category='success')
+        except Exception as e:
+            flash(f'Erreur lors de la suppression de la photo : {str(e)}', category='error')
+            print(f'Error deleting photo: {str(e)}')
+    else:
+        flash('Photo introuvable.', category='error')
+    
+    return redirect(url_for('views.photos'))
+
+@views.route('/change_photo_description/<photo_id>', methods=['GET', 'POST'])
+@login_required
+def change_photo_description(photo_id):
+    user_id = current_user.id
+    elements_for_base = elements_for_base_template(user_id)
+    project_in_session(user_id, elements_for_base)
+    
+    photo = Photos.objects(id=photo_id).first()
+
+    if request.method == 'POST':
+        new_description = request.form.get('photo_description')
+        photo.update(set__description=new_description)
+        flash("Description modifiée avec succès !", category='success')
+        return redirect(url_for('views.photo_and_messages', photo_id=photo_id)) 
+        
+    return render_template('Photos/change_photo_description.html', photo=photo, **elements_for_base)
+
+@views.route('/delete_photo_description<photo_id>', methods=['POST'])
+@login_required
+def delete_photo_description(photo_id):
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
+    
+    photo = Photos.objects(id=photo_id).first()
+    
+    # Supprimer l'indice concernant le nom
+    photo.description = None
+    photo.save()
+    
+    flash("Decription supprimée !", category='success')
+    return redirect(url_for('views.photo_and_messages', photo_id=photo_id)) 
 
 #ROUTES "MY PROFIL" -------------------------------------------------------------------------------------------------------------
 @views.route('/my_profil') #Redirection ok

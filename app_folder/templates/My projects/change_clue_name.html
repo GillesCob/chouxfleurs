@@ -21,7 +21,7 @@
             <button type="submit" class="my_btn">Modifier</button>
         </form>
         <form method="post" action="{{ url_for('views.delete_clue_name') }}" style="margin-top: 10px;">
-            <button type="submit" class="my_btn">Supprimer l'indice</button>
+            <button type="submit" class="my_btn red_admin_button">Supprimer l'indice</button>
         </form>
         {% else %}
         <form method="post" action="{{ url_for('views.change_clue_name') }}">

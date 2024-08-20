@@ -14,22 +14,39 @@
 
 
             <div class="multiple_btn_container ">
-                <button id="prevBtn" class="my_btn">Précédent</button>
-                <button id="nextBtn" class="my_btn">Suivant</button>
+                <button id="prevBtn" class="my_btn my_small_btn">Précédent</button>
+                <button id="nextBtn" class="my_btn my_small_btn">Suivant</button>
             </div>
 
 
             <!-- Affichage de l'image -->
             <div class="my_container">
                 <div class="my_image_container">
+                    <div class="photo_options">
+                        <div class="dots_container">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <div class="options_menu">
+                            <button onclick="window.location.href='/change_photo_description/{{ photos_datas[0].photo_id }}'" class="not_btn text_white">Modifier la description</button>
+                            <form action="{{ url_for('views.delete_photo', photo_id=photos_datas[0].photo_id) }}" method="POST" enctype="multipart/form-data">
+                                <button type="submit" class="not_btn text_red">Supprimer la Photo</button>
+                            </form>
+                        </div>
+                    </div>
+
                     <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo" style="cursor: pointer;" onclick="openFullscreen(this);">
-                    {% if photos_datas[0].description != None %}
-                        <div class="photo_description">
+                    {% if photos_datas[0].description %}
+                        <div class="text_white">
                             {{ photos_datas[0].description }}
                         </div>
+                    {%else%}
+                        <div class="">'</div>
                     {% endif %}
                 </div>
             </div>
+
         </div>
 
         <div id="fullscreen" style="display: none;">

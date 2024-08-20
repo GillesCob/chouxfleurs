@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Modifier la Description
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
+    <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+</a>
+
+<div class="my_container">
+    <div class="my_card inert_card">
+        <h3>Modifier la description</h3>
+
+        {% if photo.description %}
+            <form method="post" action="{{ url_for('views.change_photo_description', photo_id=photo.id) }}">
+                <input type="text" class="form-control text-center" name="photo_description" value="{{ photo.description }}" maxlength="50" required>
+                <button type="submit" class="my_btn">Modifier</button>
+            </form>
+            <form method="post" action="{{ url_for('views.delete_photo_description', photo_id=photo.id) }}" style="margin-top: 10px;">
+                <button type="submit" class="my_btn red_admin_button">Supprimer</button>
+            </form>
+        {% else %}
+            <form method="post" action="{{ url_for('views.change_photo_description', photo_id=photo.id) }}">
+                <input type="text" class="form-control text-center" name="photo_description" placeholder="Description" maxlength="50" required>
+                <button type="submit" class="my_btn">Modifier</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
