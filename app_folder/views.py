@@ -19,6 +19,8 @@ import os
 from dotenv import load_dotenv, find_dotenv
 from botocore.client import Config
 
+from PIL import Image
+import io
 
 
 #CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
@@ -1637,26 +1639,38 @@ def add_photos():
     # C - Récupérer le projet actuellement sélectionné
     project_in_session(user_id, elements_for_base)
     
-    # Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
-    ok_gilles = hide_page()
-    
     # Récupérer le projet sélectionné dans la session
     selected_project_id = session['selected_project']['id']
     project = Project.objects(id=selected_project_id).first()
     if not project:
         return "Project not found", 404
         
-    if project:  # Si le user actuel est l'admin d'un projet
+    if project:
         file = request.files.get('photo')
         description = request.form.get('description')
         if file:
+            # Traitement de l'image
+            image = Image.open(file)
+            max_width = 800
+            width_percent = (max_width / float(image.size[0]))
+            height_size = int((float(image.size[1]) * float(width_percent)))
+            image = image.resize((max_width, height_size), Image.Resampling.LANCZOS)
+
+            # Sauvegarder l'image dans un objet BytesIO
+            output = io.BytesIO()
+            image.save(output, format=image.format)
+            output.seek(0)
+
             # Générer un slug pour l'URL de la photo
             brut_slug = f'{project.id}-photo-{datetime.now().strftime("%Y%m%d%H%M%S")}'
             slug_url = brut_slug.replace(" ", "-")
 
             # Sauvegarder le fichier localement dans un répertoire temporaire
             local_file_path = f'/tmp/{slug_url}'
-            file.save(local_file_path)
+
+            # Écrire les données de l'image dans le fichier temporaire
+            with open(local_file_path, 'wb') as f:
+                f.write(output.read())
 
             # Configuration pour Wasabi
             wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
@@ -1701,6 +1715,7 @@ def add_photos():
     else:
         flash('Vous ne pouvez pas accéder à cette page!', category='error')
         return render_template('Photos/photos.html', **elements_for_base)
+
 
 @views.route('/delete_photo/<photo_id>', methods=['GET', 'POST'])
 @login_required
