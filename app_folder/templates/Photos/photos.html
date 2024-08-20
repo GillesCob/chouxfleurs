@@ -22,6 +22,13 @@
                             </a>
                         </div>
                 {% endfor %}
+            {% else %}
+                {%if user_is_admin == True %}
+                    <div class="my_container">
+                        <h1>Aucune photo n'a été ajoutée</h1>
+                    </div>
+                {% endif %}
+
             {% endif %}
         </div>
     
