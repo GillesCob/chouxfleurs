@@ -436,7 +436,7 @@ def get_admin_pronostic_answers():
 
 def hide_page():
     ok_gilles = False
-    mails_ok = ["gilles@gilles.com", "bielmann.maxime@gmail.com", "gilles2@gilles.com"]
+    mails_ok = ["gilles@gilles.com", "bielmann.maxime@gmail.com"]
     if current_user.email in mails_ok:
         ok_gilles = True
     return ok_gilles
