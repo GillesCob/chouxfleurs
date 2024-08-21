@@ -18,7 +18,7 @@
                 {% for photo in photos %}
                         <div class="photo_galery_container {% if photo in photos_with_unread_comments %}has_unread_comments{% endif %}">
                             <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
-                                <img src="{{ photo.url_source }}" alt="photo" class="photo_item">
+                                <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_item">
                             </a>
                         </div>
                 {% endfor %}

@@ -19,9 +19,10 @@ import os
 from dotenv import load_dotenv, find_dotenv
 from botocore.client import Config
 
-from PIL import Image
+from PIL import Image, ExifTags
 import io
 
+from io import BytesIO
 
 #CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
 load_dotenv(find_dotenv())
@@ -1589,7 +1590,6 @@ def photo_and_messages(photo_id):
                 }
                 
                 
-                
                 # Ajouter le message avec ses réponses à la liste des messages pour cette photo
                 photo_messages.append(message_data)
         
@@ -1597,8 +1597,9 @@ def photo_and_messages(photo_id):
         
         photo_data = {
             'photo_id': photo.id,
-            'photo_url': photo.url_source,
-            'description': photo.description,
+            'photo_url': photo.url_photo,
+            'thumbnail_url': photo.url_thumbnail,
+            'photo_description': photo.description,
             'messages': photo_messages
         }
         photos_datas.append(photo_data)
@@ -1644,35 +1645,52 @@ def add_photos():
     project = Project.objects(id=selected_project_id).first()
     if not project:
         return "Project not found", 404
-        
+    
     if project:
         file = request.files.get('photo')
         description = request.form.get('description')
         if file:
-            # Traitement de l'image
+            
+            # --- Traitement de l'image originale ---
+            # Ouvrir l'image
             image = Image.open(file)
-            max_width = 800
-            width_percent = (max_width / float(image.size[0]))
-            height_size = int((float(image.size[1]) * float(width_percent)))
-            image = image.resize((max_width, height_size), Image.Resampling.LANCZOS)
+            
+            # Correction de l'orientation de l'image si nécessaire
+            try:
+                exif = image._getexif()
+                if exif:
+                    for orientation in ExifTags.TAGS.keys():
+                        if ExifTags.TAGS[orientation] == 'Orientation':
+                            break
+                    orientation = exif.get(orientation, None)
+                    if orientation == 3:
+                        image = image.rotate(180, expand=True)
+                    elif orientation == 6:
+                        image = image.rotate(270, expand=True)
+                    elif orientation == 8:
+                        image = image.rotate(90, expand=True)
+            except Exception as e:
+                print(f"Error processing EXIF data: {e}")
 
-            # Sauvegarder l'image dans un objet BytesIO
-            output = io.BytesIO()
-            image.save(output, format=image.format)
-            output.seek(0)
+            # Vérifier et appliquer le redimensionnement si nécessaire
+            max_width = 2000
+            if image.size[0] > max_width:
+                width_percent = (max_width / float(image.size[0]))
+                height_size = int((float(image.size[1]) * float(width_percent)))
+                image = image.resize((max_width, height_size), Image.Resampling.LANCZOS)
 
             # Générer un slug pour l'URL de la photo
             brut_slug = f'{project.id}-photo-{datetime.now().strftime("%Y%m%d%H%M%S")}'
-            slug_url = brut_slug.replace(" ", "-")
+            slug_photo = brut_slug.replace(" ", "-")
 
             # Sauvegarder le fichier localement dans un répertoire temporaire
-            local_file_path = f'/tmp/{slug_url}'
+            local_file_path = f'/tmp/{slug_photo}'
 
-            # Écrire les données de l'image dans le fichier temporaire
+            # Écrire les données de l'image originale dans le fichier temporaire
             with open(local_file_path, 'wb') as f:
-                f.write(output.read())
+                image.save(f, format='JPEG')
 
-            # Configuration pour Wasabi
+            # --- Téléchargement de l'image originale sur Wasabi ---
             wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
             wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
             wasabi_bucket_name = 'chouxfleurs.fr'
@@ -1688,13 +1706,46 @@ def add_photos():
             )
 
             # Uploader le fichier vers Wasabi
-            s3.upload_file(local_file_path, wasabi_bucket_name, slug_url)
+            s3.upload_file(local_file_path, wasabi_bucket_name, slug_photo)
+
+            # URL de l'image originale
+            url_photo = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_photo}"
+
+            # --- Traitement de l'image redimensionnée ---
+
+            # Redimensionner l'image
+            max_width_thumbnail = 600
+            width_percent = (max_width_thumbnail / float(image.size[0]))
+            height_size = int((float(image.size[1]) * float(width_percent)))
+            resized_image = image.resize((max_width_thumbnail, height_size), Image.Resampling.LANCZOS)
+
+            # Sauvegarder l'image redimensionnée dans un objet BytesIO
+            output = io.BytesIO()
+            resized_image.save(output, format='JPEG')
+            output.seek(0)
+
+            # Générer un slug pour l'URL de la photo redimensionnée
+            slug_thumbnail = f'{project.id}-thumbnail-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+            slug_thumbnail = slug_thumbnail.replace(" ", "-")
+
+            # Sauvegarder le fichier redimensionné localement
+            thumbnail_file_path = f'/tmp/{slug_thumbnail}'
+            with open(thumbnail_file_path, 'wb') as f:
+                f.write(output.read())
+
+            # Uploader le fichier redimensionné vers Wasabi
+            s3.upload_file(thumbnail_file_path, wasabi_bucket_name, slug_thumbnail)
+
+            # URL de l'image redimensionnée
+            thumbnail_url = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_thumbnail}"
 
             # Créer une nouvelle instance de photo et sauvegarder dans la base de données
             new_photo = Photos(
                 project=project,
-                url_source=wasabi_endpoint_url+"/"+wasabi_bucket_name+"/"+slug_url,
-                slug_url=slug_url,
+                url_photo=url_photo,
+                slug_photo=slug_photo,
+                url_thumbnail=thumbnail_url,
+                slug_thumbnail=slug_thumbnail,
                 description=description,
                 date=datetime.now(),
             )
@@ -1704,8 +1755,9 @@ def add_photos():
             project.photos.append(new_photo)
             project.save()
 
-            # Supprimer le fichier temporaire local
+            # Supprimer les fichiers temporaires locaux
             os.remove(local_file_path)
+            os.remove(thumbnail_file_path)
 
             flash('Votre photo a bien été ajoutée !', category='success')
             return redirect(url_for('views.photos'))
@@ -1715,6 +1767,8 @@ def add_photos():
     else:
         flash('Vous ne pouvez pas accéder à cette page!', category='error')
         return render_template('Photos/photos.html', **elements_for_base)
+
+
 
 
 @views.route('/delete_photo/<photo_id>', methods=['GET', 'POST'])
@@ -1741,10 +1795,10 @@ def delete_photo(photo_id):
                 config=Config(signature_version='s3v4')
             )
             
-            print(f"Photo URL : {photo.url_source}")
 
             # Supprimer le fichier de Wasabi
-            s3.delete_object(Bucket=wasabi_bucket_name, Key=photo.slug_url)
+            s3.delete_object(Bucket=wasabi_bucket_name, Key=photo.slug_photo)
+            s3.delete_object(Bucket=wasabi_bucket_name, Key=photo.slug_thumbnail)
             
             
             # Supprimer la photo de la base de données

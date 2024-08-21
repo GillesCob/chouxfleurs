@@ -39,14 +39,17 @@
                     <div class="specific_photo">
                         <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo" style="cursor: pointer;" onclick="openFullscreen(this);">
                     </div>
+                    
 
-                    {% if photos_datas[0].description %}
+                    {% if photos_datas[0].photo_description %}
                         <div class="text_white">
-                            {{ photos_datas[0].description }}
+                            
+                            {{ photos_datas[0].photo_description }}
                         </div>
                     {%else%}
                         <div class="">'</div>
                     {% endif %}
+                    
                 </div>
             </div>
 
@@ -64,7 +67,6 @@
                 <button type="submit" class="my_btn my_small_btn">Envoyer</button>
             </form>
         </div>
-        
 
         <!-- Affichage des messages associés à l'image -->
         <div class="my_messages_container">
@@ -86,7 +88,7 @@
             <p>Il faudra avoir un peu de patience avant l'ouverture de cet environnement !</p>
         </div>
     {% endif %}
-
+    
 
     
     <script>

@@ -82,9 +82,10 @@ class Photos(Document):
     meta = {'collection': 'Photos_collection'}
     
     project = ReferenceField('Project', reverse_delete_rule=CASCADE)
-    url_source = StringField(max_length=150)
-    slug_url = StringField(max_length=150)
-    thumbnail_url = StringField(max_length=150)
+    url_photo = StringField(max_length=150)
+    slug_photo = StringField(max_length=150)
+    url_thumbnail = StringField(max_length=150)
+    slug_thumbnail = StringField(max_length=150)
     description = StringField(max_length=50)
     date = DateTimeField()
 
