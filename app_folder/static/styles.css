@@ -596,6 +596,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 
 
 /* --------------------------------------------------------------- Les images/photos -------------------------------------------------------------- */
+/* Les éléments ici concernent uniquement la page photos */
 .photo_mosaic {
     display: flex;
     justify-content: space-evenly;
@@ -603,8 +604,6 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     gap: 10px; 
     margin: 0 20px;
 }
-
-
 
 .photo_galery_container {
     overflow: hidden;
@@ -625,23 +624,28 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     margin-bottom: 15px;
 }
 
-
 .photo_item:hover {
     transform: scale(1.05); /* Effet de zoom au survol */
 }
 
+/* Les éléments ici concernent uniquement la page photo_and_messages */
 .my_image_container {
     width: 100%;
     text-align: center;
     position: relative;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3498db;
 }
 
-.my_image_container img {
-    width: auto;
-    height: 500px;
-    display: inline-block;
+.specific_photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 500px;
 }
-
 
 /* -------------------------------------------------------------- Les boutons -------------------------------------------------------------- */
 
@@ -776,7 +780,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 }
 
 
-/* Bouton pour les paramres des photos ------------------------------------------------------ */
+/* Bouton pour les parametres des photos ------------------------------------------------------ */
 .photo_options {
     position: absolute;
     top: 10px;
@@ -785,9 +789,11 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 }
 
 .dots_container {
-    right: 0px;
-    width: 20px;
+    width: 40px;
+    height: 40px;
     display: flex;
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
 }
 
@@ -832,17 +838,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     display: block;
 }
 
-.specific_photo{
-    display: flex;
-    justify-content: center;
-}
 
-.specific_photo img {
-    width: auto;
-    height: auto;
-    display: block; /* Supprime l'espace en bas de l'image si elle est utilisée en ligne */
-    max-height: 400px;
-}
 
 
 
