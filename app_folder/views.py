@@ -1429,31 +1429,23 @@ def photos():
     elements_for_base = elements_for_base_template(user_id)
     # C - Récupérer le projet actuellement sélectionné
     project_in_session(user_id, elements_for_base)
-    
     #D - je récupe l'info pour savoir su le user est l'admin du projet
     user_is_admin = user_is_admin_project()
     
-    #Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
     ok_gilles = hide_page()
     
-    # Récupérer le projet sélectionné dans la session
     selected_project_id = session['selected_project']['id']
     project = Project.objects(id=selected_project_id).first()
     if not project:
         return "Project not found", 404
     
-    photos = Photos.objects(project=project).order_by('-date')  # Ordre inversé basé sur la date
+    photos = Photos.objects(project=project).order_by('-date')
     
-    #Partie du code afin d'identifier les photos qui ont des commentaires encore non lus
-    # Liste pour stocker les photos avec des commentaires non lus
     photos_with_unread_comments = []
 
-    # Parcourez chaque photo pour vérifier les commentaires non lus
     for photo in photos:
-        # Récupérez tous les commentaires pour cette photo
         comments = Messages.objects(photo=photo)
         
-        # Vérifiez si au moins un commentaire n'a pas été vu par l'utilisateur
         has_unread_comments = any(current_user not in comment.seen_by_users for comment in comments)
         print(f"Photo {photo.id} has unread comments: {has_unread_comments}")
         
@@ -1767,9 +1759,6 @@ def add_photos():
     else:
         flash('Vous ne pouvez pas accéder à cette page!', category='error')
         return render_template('Photos/photos.html', **elements_for_base)
-
-
-
 
 @views.route('/delete_photo/<photo_id>', methods=['GET', 'POST'])
 @login_required
@@ -2460,74 +2449,4 @@ def admin():
 
     # Rendre le template base.html avec les données spécifiques
     return render_template('admin.html', **elements_for_base)
-
-
-# #Ajouter un commentaire
-# if request.method == 'POST':
-#     # Récupérer les données du formulaire
-#     message_content = request.form.get('message')
-    
-#     # Créer un nouvel objet message
-#     new_message = Messages(
-#         user = user_id,
-#         project=project,
-#         # photo=photo,
-#         message=message_content,
-#         date=datetime.now()
-#     )
-    
-#     # Sauvegarder le message dans la base de données
-#     new_message.save()
-    
-#     flash('Votre message a bien été ajouté !', category='success')
-#     return redirect(url_for('views.photos'))  # Rediriger vers une page appropriée
-
-
-
-# return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, **elements_for_base)
-
-
-
-
-
-
-# if request.method == 'POST':
-#         # Récupérer les données du formulaire
-#         message_content = request.form.get('message')
-#         photo_id = request.form.get('photo_id')
-#         parent_message_id = request.form.get('parent_message_id')
-
-#         # Trouver l'objet photo
-#         photo = Photos.objects(id=photo_id).first()
-
-#         # Créer un nouvel objet message
-#         new_message = Messages(
-#             user=current_user,
-#             project=project,
-#             photo=photo,
-#             message=message_content,
-#             date=datetime.now(),
-#             type_message='Message'
-#         )
-
-#         # Si un message parent est spécifié, ajouter la référence au message parent
-#         if parent_message_id:
-#             parent_message = Messages.objects(id=parent_message_id).first()
-
-#             new_message.parent_message = parent_message
-#             new_message.type_message = 'Answer'
-#             new_message.save()
-                            
-#             parent_message.child_message.append(new_message.id)
-#             parent_message.save()
-
-#         # Sauvegarder le message dans la base de données
-#         new_message.save()
-
-#         flash('Votre message a bien été ajouté !', category='success')
-#         return redirect(url_for('views.photos', **elements_for_base))
-    
-
-
-
     
