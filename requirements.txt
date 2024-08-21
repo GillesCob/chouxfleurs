@@ -28,6 +28,7 @@ MarkupSafe==2.1.5
 mongoengine==0.28.2
 packaging==24.0
 parse==1.20.2
+pillow==10.4.0
 pyee==11.1.0
 pymongo==4.7.2
 pyparsing==3.1.2
@@ -40,6 +41,7 @@ requests-html==0.10.0
 requests-toolbelt==1.0.0
 s3transfer==0.10.2
 six==1.16.0
+slugify==0.0.1
 soupsieve==2.5
 tqdm==4.66.4
 typing_extensions==4.12.2
