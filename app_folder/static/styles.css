@@ -604,6 +604,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     flex-wrap: wrap;
     gap: 10px; 
     margin: 0 20px;
+    margin-top: 20px;
 }
 
 .photo_galery_container {
