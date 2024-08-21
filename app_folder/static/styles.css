@@ -637,7 +637,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #3498db;
+    /* background-color: #3498db; */
 }
 
 .specific_photo img {
