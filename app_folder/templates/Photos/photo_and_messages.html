@@ -39,18 +39,15 @@
                     <div class="specific_photo">
                         <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo" style="cursor: pointer;" onclick="openFullscreen(this);">
                     </div>
-                    
-
-                    {% if photos_datas[0].photo_description %}
-                        <div class="text_white">
-                            
-                            {{ photos_datas[0].photo_description }}
-                        </div>
-                    {%else%}
-                        <div class="">'</div>
-                    {% endif %}
-                    
                 </div>
+                
+                {% if photos_datas[0].photo_description %}
+                    <div class="text_white">
+                        {{ photos_datas[0].photo_description }}
+                    </div>
+                {%else%}
+                    <div class="">'</div>
+                {% endif %}
             </div>
 
         </div>
