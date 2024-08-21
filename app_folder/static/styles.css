@@ -615,13 +615,24 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 /* --------------------------------------------------------------- Les images/photos -------------------------------------------------------------- */
 
 .photo_item {
-    width: 300px;
+    width: auto;
     height: 100%;
     max-height: 400px;
     object-fit: cover;
     cursor: pointer;
     transition: transform 0.3s ease;
 }
+
+/* .photo_item {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+} */
+
 
 .photo_item:hover {
     transform: scale(1.05); /* Effet de zoom au survol */
