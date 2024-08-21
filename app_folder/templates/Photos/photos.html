@@ -6,33 +6,32 @@
 
 {% block content %}
 <body>
-    {% if ok_gilles == True %}
-        {%if user_is_admin == True %}
-            <div class="my_container">
-                <a href="{{ url_for('views.add_photos') }}" class="my_btn">Ajouter une Photo</a>
-            </div>
-        {% endif %}
-
-        <div class="photo_mosaic">
-            {% if photos %}
-                {% for photo in photos %}
-                        <div class="photo_galery_container {% if photo in photos_with_unread_comments %}has_unread_comments{% endif %}">
-                            <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
-                                <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_item">
-                            </a>
-                        </div>
-                {% endfor %}
-            {% else %}
-                {%if user_is_admin == False %}
-                    <div class="my_container">
-                        <h1>Aucune photo n'a été ajoutée</h1>
-                    </div>
-                {% endif %}
-
-            {% endif %}
+    {%if user_is_admin == True %}
+        <div class="my_container">
+            <a href="{{ url_for('views.add_photos') }}" class="my_btn">Ajouter une Photo</a>
         </div>
+    {% endif %}
+
+    <div class="photo_mosaic">
+        {% if photos %}
+            {% for photo in photos %}
+                    <div class="photo_galery_container {% if photo in photos_with_unread_comments %}has_unread_comments{% endif %}">
+                        <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
+                            <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_item">
+                        </a>
+                    </div>
+            {% endfor %}
+        {% else %}
+            {%if user_is_admin == False %}
+                <div class="my_container">
+                    <h1>Aucune photo n'a été ajoutée</h1>
+                </div>
+            {% endif %}
+
+        {% endif %}
+    </div>
     
-    {% else %}
+    <!-- {% else %}
         <style>
             body {
                 background-color: #000000;
@@ -43,6 +42,6 @@
             <h1>Coming Soon</h1>
             <p>Il faudra avoir un peu de patience avant l'ouverture de cet environnement !</p>
         </div>
-    {% endif %}
+    {% endif %} -->
 </body>
 {% endblock %}

@@ -15,7 +15,7 @@
 
         {% if photo.description %}
             <form method="post" action="{{ url_for('views.change_photo_description', photo_id=photo.id) }}">
-                <input type="text" class="form-control text-center" name="photo_description" value="{{ photo.description }}" maxlength="50" required>
+                <input type="text" class="form-control text-center " name="photo_description" value="{{ photo.description }}" maxlength="50" required>
                 <button type="submit" class="my_btn">Modifier</button>
             </form>
             <form method="post" action="{{ url_for('views.delete_photo_description', photo_id=photo.id) }}" style="margin-top: 10px;">

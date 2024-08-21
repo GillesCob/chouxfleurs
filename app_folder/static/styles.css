@@ -476,6 +476,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     transition: transform 0.3s ease;
 
     margin: 0px auto 10px auto;
+
 }
 
 .my_card:hover {
@@ -1358,7 +1359,6 @@ main {
 
 
 /* --------------------------------------------------------- En vrac pendant le dev --------------------------------------------------------- */
-
 
 
 
