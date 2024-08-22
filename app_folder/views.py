@@ -23,7 +23,16 @@ from botocore.client import Config
 from PIL import Image, ExifTags
 import io
 
-from io import BytesIO
+#Eléments ajoutés
+#Eléments pour le scrapping
+# import cloudscraper
+# import requests
+
+# from requests_html import HTMLSession
+# from bs4 import BeautifulSoup
+
+
+# from io import BytesIO
 
 #CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
 load_dotenv(find_dotenv())
@@ -43,13 +52,6 @@ s3_client = boto3.client(
 )
 
 
-#Eléments ajoutés
-#Eléments pour le scrapping
-# import cloudscraper
-# import requests
-
-# from requests_html import HTMLSession
-# from bs4 import BeautifulSoup
 
 
 
@@ -1452,17 +1454,21 @@ def photos():
     photos = Photos.objects(project=project).order_by('-date')
     
     photos_with_unread_comments = []
-
+    photos_to_use = []
     for photo in photos:
-        comments = Messages.objects(photo=photo)
-        
-        has_unread_comments = any(current_user not in comment.seen_by_users for comment in comments)
-        
-        if has_unread_comments:
-            photos_with_unread_comments.append(photo)
+        if photo.utility == 'Gallery':
+            photos_to_use.append(photo)
+            comments = Messages.objects(photo=photo)
+            
+            has_unread_comments = any(current_user not in comment.seen_by_users for comment in comments)
+            
+            if has_unread_comments:
+                photos_with_unread_comments.append(photo)
+        else:
+            pass
             
 
-    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos=photos, photos_with_unread_comments=photos_with_unread_comments, user_is_admin=user_is_admin, **elements_for_base)
+    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos_to_use=photos_to_use, photos_with_unread_comments=photos_with_unread_comments, user_is_admin=user_is_admin, **elements_for_base)
     
 @views.route('/photo_and_messages/<photo_id>', methods=['GET', 'POST'])
 @login_required
@@ -1745,6 +1751,7 @@ def add_photos():
             new_photo = Photos(
                 project=project,
                 url_photo=url_photo,
+                utility="Gallery",
                 slug_photo=slug_photo,
                 url_thumbnail=thumbnail_url,
                 slug_thumbnail=slug_thumbnail,

@@ -611,8 +611,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 
     width: 90%;
     max-width: 900px;
-    margin: 0 auto;
-    margin-top: 30px;
+    margin: 30px auto;
     gap: 10px;
 }
 
