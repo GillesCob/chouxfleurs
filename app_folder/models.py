@@ -104,4 +104,13 @@ class Messages(Document):
     seen_by_users = ListField(ReferenceField(User))
 
 
-        
+class Tracking_food(Document):
+    meta = {'collection': 'Tracking_collection'}
+    
+    user = ReferenceField('User', reverse_delete_rule=CASCADE)
+    project = ReferenceField('Project', reverse_delete_rule=CASCADE)
+    type = StringField(max_length=150)
+    quantity = StringField(max_length=150)
+    date = DateTimeField()
+
+

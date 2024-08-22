@@ -116,6 +116,11 @@
                                             {% endif %}
                                         </li>
                                     </div>
+                                    {% if hide_page == True %}
+                                    <li>
+                                        <a class="nav-link " href="{{url_for('views.suivi')}}">Suivi</a>
+                                    </li>
+                                    {% endif %}
                                     
                                 </ul>
                             {% endif%}

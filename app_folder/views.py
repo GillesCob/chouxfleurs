@@ -1,8 +1,9 @@
 from flask import render_template, Blueprint, redirect, url_for, flash, request, session, jsonify
 from flask_login import current_user, login_required, logout_user
-from .models import Pronostic, User, Project, Product, Participation, Photos, Messages
+from .models import Pronostic, User, Project, Product, Participation, Photos, Messages, Tracking_food
 
-from datetime import datetime
+from datetime import datetime, timedelta
+
 
 from bson import ObjectId
 
@@ -113,7 +114,6 @@ def new_pronostic(user, current_project_id, current_project, pronostics_for_curr
         date =  f"{jour}/{mois}/{annee}"
         
         name = capitalize_name(name)
-        print(name)
         
         if re.search(r'(-.*-)|(\s.*\s)', name):
             name = "Proposer un nom valide"
@@ -199,6 +199,7 @@ def elements_for_base_template(user_id):
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
     has_unread_comments = messages_notifications(user_id)
+    hide_page_bool = hide_page()
 
     
     return {
@@ -206,6 +207,7 @@ def elements_for_base_template(user_id):
         'projects_dict' : projects_dict,
         'project_name_in_session' : project_in_session,
         'unread_comments' :has_unread_comments,
+        'hide_page' : hide_page_bool
             }
 
 #Fonctions appelées par elements_for_base_template()
@@ -433,6 +435,14 @@ def get_admin_pronostic_answers():
             
     return admin_results
 
+#Fonction pour formater le temps
+def format_time(timedelta_obj):
+    if not isinstance(timedelta_obj, timedelta):
+        return ''
+    total_seconds = int(timedelta_obj.total_seconds())
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours}h {minutes}m {seconds}s"
 
 def hide_page():
     ok_gilles = False
@@ -1422,7 +1432,7 @@ def pronostic_all_answers():
 #ROUTES "PHOTOS" -------------------------------------------------------------------------------------------------------------
 @views.route('/photos', methods=['GET', 'POST'])
 @login_required
-def photos():   
+def photos():
    # A - Récupérer l'id du user connecté
     user_id = current_user.id
     # B - Récupérer les éléments de base pour la navbar
@@ -1447,10 +1457,10 @@ def photos():
         comments = Messages.objects(photo=photo)
         
         has_unread_comments = any(current_user not in comment.seen_by_users for comment in comments)
-        print(f"Photo {photo.id} has unread comments: {has_unread_comments}")
         
         if has_unread_comments:
             photos_with_unread_comments.append(photo)
+            
 
     return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos=photos, photos_with_unread_comments=photos_with_unread_comments, user_is_admin=user_is_admin, **elements_for_base)
     
@@ -1665,7 +1675,7 @@ def add_photos():
                 print(f"Error processing EXIF data: {e}")
 
             # Vérifier et appliquer le redimensionnement si nécessaire
-            max_width = 2000
+            max_width = 1000
             if image.size[0] > max_width:
                 width_percent = (max_width / float(image.size[0]))
                 height_size = int((float(image.size[1]) * float(width_percent)))
@@ -1706,7 +1716,7 @@ def add_photos():
             # --- Traitement de l'image redimensionnée ---
 
             # Redimensionner l'image
-            max_width_thumbnail = 600
+            max_width_thumbnail = 400
             width_percent = (max_width_thumbnail / float(image.size[0]))
             height_size = int((float(image.size[1]) * float(width_percent)))
             resized_image = image.resize((max_width_thumbnail, height_size), Image.Resampling.LANCZOS)
@@ -1837,6 +1847,113 @@ def delete_photo_description(photo_id):
     
     flash("Decription supprimée !", category='success')
     return redirect(url_for('views.photo_and_messages', photo_id=photo_id)) 
+
+#ROUTES "SUIVI" -------------------------------------------------------------------------------------------------------------
+@views.route('/suivi')
+def suivi():
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project_in_session(user_id, elements_for_base)
+    return render_template('Suivi/suivi.html', **elements_for_base)
+
+@views.route('/alimentation', methods=['GET', 'POST'])
+def alimentation():
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_base_template(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    project = project_in_session(user_id, elements_for_base)
+
+    if request.method == 'POST':
+        # Récupérer les données du formulaire
+        feeding_type = request.form.get('feeding_type')
+        quantity = request.form.get('quantity') or request.form.get('aliment')
+        
+        # Créer un nouvel enregistrement pour le suivi de l'alimentation
+        tracking = Tracking_food(
+            user=user_id,
+            project=project,
+            type=feeding_type,
+            quantity=quantity,
+            date=datetime.utcnow()
+        )
+        
+        # Sauvegarder l'enregistrement dans la base de données
+        tracking.save()
+
+        # Optionnel : message flash pour confirmer la sauvegarde
+        flash('Les informations ont été sauvegardées avec succès.', 'success')
+
+        # Rediriger vers la même page ou une autre page
+        return redirect(url_for('views.alimentation'))
+
+    # Récupérer toutes les occurrences concernant la nourriture
+    food_trackings = Tracking_food.objects(user=user_id).all()
+    food_list = [
+        {
+            'type': tracking.type,
+            'quantity': f"{tracking.quantity} ml" if str(tracking.quantity).isdigit() else tracking.quantity,
+            'date': tracking.date.strftime('%d-%m-%Y %H:%M')
+        }
+        for tracking in food_trackings
+    ]
+
+    # Calcul des résumés journalier, hebdomadaire et mensuel
+    today = datetime.utcnow().date()
+    week_start = today - timedelta(days=today.weekday())
+    month_start = today.replace(day=1)
+
+    daily_trackings = Tracking_food.objects(user=user_id, date__gte=today, date__lt=today + timedelta(days=1)).all()
+    weekly_trackings = Tracking_food.objects(user=user_id, date__gte=week_start, date__lt=week_start + timedelta(days=7)).all()
+    monthly_trackings = Tracking_food.objects(user=user_id, date__gte=month_start, date__lt=(month_start + timedelta(days=31)).replace(day=1)).all()
+
+    def calculate_summary(trackings):
+        total_quantity = 0
+        total_feedings = 0
+        times = []
+        for tracking in trackings:
+            if tracking.type == 'biberon':
+                total_quantity += int(tracking.quantity)
+                total_feedings += 1
+                times.append(tracking.date.time())
+        
+        avg_time = None
+        if times:
+            avg_time_seconds = sum((t.hour * 3600 + t.minute * 60 + t.second) for t in times) / len(times)
+            avg_time = timedelta(seconds=avg_time_seconds)
+        
+        return {
+            'total_quantity': total_quantity,
+            'feedings_count': total_feedings,
+            'avg_time': format_time(avg_time) if avg_time else 'N/A'
+        }
+
+    daily_summary = [
+        {
+            'type': t.type,
+            'quantity': f"{t.quantity} ml" if str(t.quantity).isdigit() else t.quantity,
+            'date': t.date.strftime('%d-%m-%Y %H:%M')
+        }
+        for t in daily_trackings
+    ]
+    
+    weekly_summary = calculate_summary(weekly_trackings)
+    monthly_summary = calculate_summary(monthly_trackings)
+
+    return render_template('Suivi/alimentation.html',
+                           daily_summary=daily_summary,
+                           weekly_summary=weekly_summary,
+                           monthly_summary=monthly_summary,
+                           food_list=food_list,
+                           **elements_for_base)
+
+
+
+
 
 #ROUTES "MY PROFIL" -------------------------------------------------------------------------------------------------------------
 @views.route('/my_profil') #Redirection ok

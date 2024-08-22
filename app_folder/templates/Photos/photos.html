@@ -6,7 +6,7 @@
 
 {% block content %}
 <body>
-    {%if user_is_admin == True %}
+    {% if user_is_admin %}
         <div class="my_container">
             <a href="{{ url_for('views.add_photos') }}" class="my_btn">Ajouter une Photo</a>
         </div>
@@ -15,19 +15,19 @@
     <div class="photo_mosaic">
         {% if photos %}
             {% for photo in photos %}
-                    <div class="photo_galery_container {% if photo in photos_with_unread_comments %}has_unread_comments{% endif %}">
-                        <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
-                            <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_item">
-                        </a>
-                    </div>
+                {% set photo_index = (loop.index - 1) % 9 + 1 %}
+                {% set photo_tag = 'photo' ~ photo_index %}
+                
+                <{{ photo_tag }} class="photo_item {% if photo in photos_with_unread_comments %}has_unread_comments{% endif %}">
+                    <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
+                        <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_thumbnail">
+                    </a>
+                </{{ photo_tag }}>
             {% endfor %}
         {% else %}
-            {%if user_is_admin == False %}
-                <div class="my_container">
-                    <h1>Aucune photo n'a été ajoutée</h1>
-                </div>
-            {% endif %}
+            <p>Aucune photo disponible.</p>
         {% endif %}
     </div>
+    
 </body>
 {% endblock %}

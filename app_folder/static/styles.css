@@ -598,36 +598,86 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
 
 /* --------------------------------------------------------------- Les images/photos -------------------------------------------------------------- */
 /* Les éléments ici concernent uniquement la page photos */
+
 .photo_mosaic {
-    display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
-    gap: 10px; 
-    margin: 0 20px;
-    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+        "photo1 photo2 photo3"
+        "photo4 photo4 photo5"
+        "photo4 photo4 photo6"
+        "photo7 photo8 photo9"; 
+
+    width: 90%;
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 10px;
 }
 
-.photo_galery_container {
-    overflow: hidden;
+.photo_mosaic > photo1,
+.photo_mosaic > photo2,
+.photo_mosaic > photo3,
+.photo_mosaic > photo4,
+.photo_mosaic > photo5,
+.photo_mosaic > photo6,
+.photo_mosaic > photo7,
+.photo_mosaic > photo8,
+.photo_mosaic > photo9 {
     position: relative;
-    height: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 100%; /* Maintains a square ratio */
+    transition: transform 0.3s ease;
 }
 
-.photo_item {
+.photo_mosaic > photo1 img,
+.photo_mosaic > photo2 img,
+.photo_mosaic > photo3 img,
+.photo_mosaic > photo4 img,
+.photo_mosaic > photo5 img,
+.photo_mosaic > photo6 img,
+.photo_mosaic > photo7 img,
+.photo_mosaic > photo8 img,
+.photo_mosaic > photo9 img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: auto;
-    max-height: 400px;
-    object-fit: contain;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    margin-bottom: 15px;
+    height: 100%;
+    object-fit: cover;
 }
+
+.photo_mosaic > .photo_item {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 100%;
+    transition: transform 0.3s ease;
+}
+
+.photo_mosaic > .photo_item:hover {
+    transform: scale(1.05); /* Zoom effect on hover */
+}
+
+
+.photo_mosaic > .photo_item:nth-child(1) { grid-area: photo1; }
+.photo_mosaic > .photo_item:nth-child(2) { grid-area: photo2; }
+.photo_mosaic > .photo_item:nth-child(3) { grid-area: photo3; }
+.photo_mosaic > .photo_item:nth-child(4) { grid-area: photo4; }
+.photo_mosaic > .photo_item:nth-child(5) { grid-area: photo5; }
+.photo_mosaic > .photo_item:nth-child(6) { grid-area: photo6; }
+.photo_mosaic > .photo_item:nth-child(7) { grid-area: photo7; }
+.photo_mosaic > .photo_item:nth-child(8) { grid-area: photo8; }
+.photo_mosaic > .photo_item:nth-child(9) { grid-area: photo9; }
+
+
+
+
+
 
 .photo_item:hover {
-    transform: scale(1.05); /* Effet de zoom au survol */
+    transform: scale(1.05);
 }
 
 /* Les éléments ici concernent uniquement la page photo_and_messages */
@@ -681,6 +731,7 @@ box-shadow: 0 0 5px var(--my_btn_color); /* Ajouter une légère ombre portée l
     font-weight: bold;
     text-decoration: underline;
     text-decoration-thickness: 2px;
+    filter: brightness(1.2);
     /* border: 3px solid #000000; */
 }
 
@@ -1360,9 +1411,37 @@ main {
 
 
 /* --------------------------------------------------------- En vrac pendant le dev --------------------------------------------------------- */
+.icon_container{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    padding: 20px;
+}
 
+.icon{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 120px;
+    text-align: center;
+}
 
+.icon:hover {
+    transform: scale(1.05);
+}
 
+.icon img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.icon p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: black;
+}
 
 
 
