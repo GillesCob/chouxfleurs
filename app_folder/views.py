@@ -1898,25 +1898,6 @@ def alimentation():
                            food_list=food_list, 
                            **elements_for_base)
 
-@views.route('/delete_alimentation/<event_id>', methods=['POST'])
-def delete_alimentation(event_id):
-    # Récupérer l'id de l'événement à supprimer
-    try:
-        # Trouver l'événement à supprimer
-        event_to_delete = Tracking_food.objects(id=event_id).first()
-        if event_to_delete:
-            # Supprimer l'événement
-            event_to_delete.delete()
-            flash('L\'événement alimentaire a été supprimé avec succès.', 'success')
-        else:
-            flash('L\'événement alimentaire n\'existe pas.', 'error')
-    except Exception as e:
-        flash(f'Erreur lors de la suppression : {str(e)}', 'error')
-
-    # Rediriger vers la même page ou une autre page
-    return redirect(url_for('views.alimentation'))
-
-
 
 #ROUTES "MY PROFIL" -------------------------------------------------------------------------------------------------------------
 @views.route('/my_profil')

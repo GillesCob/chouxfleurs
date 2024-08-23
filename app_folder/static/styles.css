@@ -1448,7 +1448,7 @@ main {
 
 
 
-.hour-zone {
+.hour_zone {
     width: 100%;
     height: 20px; /* Adjust as needed */
     display: flex;

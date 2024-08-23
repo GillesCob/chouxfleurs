@@ -48,7 +48,7 @@
         <div class="my_card inert_card">
             {% for hour in range(24) %}
                 {% set hour_str = '%02d' % hour %}
-                <div class="hour-zone {% if hourly_event_dict[hour_str].has_event %}highlight{% endif %}" id="hour-{{ hour }}">
+                <div class="hour_zone {% if hourly_event_dict[hour_str].has_event %}highlight{% endif %}" id="hour-{{ hour }}">
                     {{ hour }}:00
                     {% if hourly_event_dict[hour_str].has_event %}
                         {{ hourly_event_dict[hour_str].event_type }}
@@ -57,10 +57,6 @@
                         {% elif hourly_event_dict[hour_str].event_type == "solide" %}
                             {{ hourly_event_dict[hour_str].quantity }}
                         {% endif %}
-                        <!-- Formulaire pour supprimer l'événement -->
-                        <form action="{{ url_for('views.delete_alimentation', event_id=hourly_event_dict[hour_str].id) }}" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-danger">Supprimer</button>
-                        </form>
                     {% endif %}
                 </div>
             {% endfor %}
