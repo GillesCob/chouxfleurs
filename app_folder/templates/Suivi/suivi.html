@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Suivi du Bébé
+{% endblock %}
+
+{% block content %}
+<body>
+    <div class="my_container">
+        <h1>Suivi du Bébé</h1>
+        <div class="icon_container">
+            <div class="icon" id="feeding">
+                <a href="{{ url_for('views.alimentation') }}" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='icons/biberon.png') }}" alt="Alimentation">
+                    <p>Alimentation</p>
+                </a>
+            </div>            
+            <div class="icon" id="diapers">
+                <img src="{{ url_for('static', filename='icons/couche.png') }}" alt="Changements de Couches">
+                <p>Changements de Couches</p>
+            </div>
+            <div class="icon" id="sleep">
+                <img src="{{ url_for('static', filename='icons/sommeil.png') }}" alt="Sommeil">
+                <p>Sommeil</p>
+            </div>
+            <div class="icon" id="health">
+                <img src="{{ url_for('static', filename='icons/santé.png') }}" alt="Santé">
+                <p>Santé</p>
+            </div>
+            <div class="icon" id="development">
+                <img src="{{ url_for('static', filename='icons/developpement.png') }}" alt="Développement">
+                <p>Développement</p>
+            </div>
+            <div class="icon" id="hygiene">
+                <img src="{{ url_for('static', filename='icons/hygiène.png') }}" alt="Hygiène">
+                <p>Hygiène</p>
+            </div>
+            <div class="icon" id="activities">
+                <img src="{{ url_for('static', filename='icons/activité.png') }}" alt="Activités">
+                <p>Activités</p>
+            </div>
+            <div class="icon" id="behavior">
+                <img src="{{ url_for('static', filename='icons/comportement.png') }}" alt="Comportement">
+                <p>Comportement</p>
+            </div>
+            <div class="icon" id="notes">
+                <img src="{{ url_for('static', filename='icons/notes.png') }}" alt="Notes et Observations">
+                <p>Notes et Observations</p>
+            </div>
+            <div class="icon" id="goals">
+                <img src="{{ url_for('static', filename='icons/objectifs.png') }}" alt="Objectifs">
+                <p>Objectifs</p>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}

@@ -1448,3 +1448,23 @@ main {
 
 
 
+.hour-zone {
+    width: 100%;
+    height: 20px; /* Adjust as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    text-align: center;
+    overflow: hidden;
+}
+
+
+.highlight {
+    background-color: green;
+    color: white;
+    height: 30px;
+    margin: 10px auto;
+}

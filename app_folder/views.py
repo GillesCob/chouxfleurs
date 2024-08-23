@@ -23,16 +23,7 @@ from botocore.client import Config
 from PIL import Image, ExifTags
 import io
 
-#Eléments ajoutés
-#Eléments pour le scrapping
-# import cloudscraper
-# import requests
-
-# from requests_html import HTMLSession
-# from bs4 import BeautifulSoup
-
-
-# from io import BytesIO
+from collections import defaultdict
 
 #CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
 load_dotenv(find_dotenv())
@@ -52,6 +43,13 @@ s3_client = boto3.client(
 )
 
 
+#Eléments ajoutés
+#Eléments pour le scrapping
+# import cloudscraper
+# import requests
+
+# from requests_html import HTMLSession
+# from bs4 import BeautifulSoup
 
 
 
@@ -622,96 +620,7 @@ def add_product():
         description = request.form.get('product_description')
         price = request.form.get('product_price')
         already_paid = 0
-        url_source = request.form.get('product_url_source')
-        
-        
-        # #Eléments ajoutés
-        # #Scrapping afin d'aller chercher les images du produit
-        # # Vérifier l'origine de l'URL
-        # if 'leboncoin.fr' in url_source or "vinted.fr" in url_source:
-        #     # Créer une instance de cloudscraper
-        #     scraper = cloudscraper.create_scraper()
-
-        #     # Effectuer une requête HTTP pour obtenir le contenu de la page
-        #     response = scraper.get(url_source)
-
-        #     # Vérifier que la requête a réussi
-        #     if response.status_code == 200:
-        #         # Parser le contenu HTML de la page
-        #         soup = BeautifulSoup(response.content, 'html.parser')
-                
-        #         # Trouver la balise <meta> avec property="og:image"
-        #         meta_tag = soup.find('meta', property='og:image')
-                
-        #         # Vérifier si la balise <meta> a été trouvée et extraire la valeur du contenu
-        #         if meta_tag:
-        #             og_image_url = meta_tag.get('content')
-        #             print('URL de l\'image :', og_image_url)
-        #         else:
-        #             print('Balise <meta property="og:image"> non trouvée.')
-        #     else:
-        #         print('Échec de la requête, statut HTTP :', response.status_code)
-                
-        # elif 'aubert.com' in url_source :
-        #     # Créer une instance de cloudscraper
-        #     scraper = cloudscraper.create_scraper()
-
-        #     # Effectuer une requête HTTP pour obtenir le contenu de la page
-        #     response = scraper.get(url_source)
-
-        #     # Vérifier que la requête a réussi
-        #     if response.status_code == 200:
-        #         # Parser le contenu HTML de la page
-        #         soup = BeautifulSoup(response.content, 'html.parser')
-                
-        #         # Trouver la balise <img> avec class="img-responsive product"
-        #         img_tag = soup.find('img', class_='img-responsive product')
-                
-        #         # Vérifier si la balise <meta> a été trouvée et extraire la valeur du contenu
-        #         if img_tag:
-        #             img_url = img_tag.get('src')
-        #             img_url = "https://www.aubert.com/" + img_url
-        #             print('URL de l\'image :', img_url)
-        #         else:
-        #             print('Balise <img class="img-responsive product"> non trouvée.')
-        #     else:
-        #         print('Échec de la requête, statut HTTP :', response.status_code)
-
-                
-        # elif 'amazon.fr' in url_source or 'amazon.com' in url_source :
-            
-        #     # Créer une session HTML
-        #     session = HTMLSession()
-
-        #     # Effectuer une requête HTTP pour obtenir le contenu de la page
-        #     response = session.get(url_source)
-
-        #     # Exécuter le JavaScript pour charger le contenu dynamique
-        #     response.html.render()
-
-        #     # Parser le contenu HTML de la page
-        #     soup = BeautifulSoup(response.html.html, 'html.parser')
-
-        #     # Code pour Amazon
-        #     img_tag_wrapper = soup.find('div', class_='imgTagWrapper')
-            
-        #     # Vérifier si le div avec class 'imgTagWrapper' a été trouvé et extraire l'URL de l'image
-        #     if img_tag_wrapper:
-        #         img_tag = img_tag_wrapper.find('img')
-        #         if img_tag:
-        #             img_url = img_tag.get('src')
-        #             print('URL de l\'image :', img_url)
-        #         else:
-        #             print('Balise <img> non trouvée dans le div imgTagWrapper.')
-        #     else:
-        #         print('Div avec class imgTagWrapper non trouvé.')
-                
-
-        # else:
-        #     print('URL non reconnue.')
-
-        # #Fin du scrapping
-        
+        url_source = request.form.get('product_url_source')     
         
         
         # image_url = img_url
@@ -1855,6 +1764,7 @@ def delete_photo_description(photo_id):
     flash("Decription supprimée !", category='success')
     return redirect(url_for('views.photo_and_messages', photo_id=photo_id)) 
 
+
 #ROUTES "SUIVI" -------------------------------------------------------------------------------------------------------------
 @views.route('/suivi')
 def suivi():
@@ -1880,13 +1790,19 @@ def alimentation():
         feeding_type = request.form.get('feeding_type')
         quantity = request.form.get('quantity') or request.form.get('aliment')
         
+        modified_time = request.form.get('time')
+        if modified_time :
+            time = modified_time
+        else:
+            time = datetime.utcnow()+ timedelta(hours=2)
+        
         # Créer un nouvel enregistrement pour le suivi de l'alimentation
         tracking = Tracking_food(
             user=user_id,
             project=project,
             type=feeding_type,
             quantity=quantity,
-            date=datetime.utcnow()
+            date=time
         )
         
         # Sauvegarder l'enregistrement dans la base de données
@@ -1904,66 +1820,106 @@ def alimentation():
         {
             'type': tracking.type,
             'quantity': f"{tracking.quantity} ml" if str(tracking.quantity).isdigit() else tracking.quantity,
-            'date': tracking.date.strftime('%d-%m-%Y %H:%M')
+            'date': tracking.date.strftime('%d-%m-%Y %H:%M'),
         }
         for tracking in food_trackings
     ]
 
     # Calcul des résumés journalier, hebdomadaire et mensuel
+    
+    
+    # Suivi journalier -----------------------------------------------------
     today = datetime.utcnow().date()
-    week_start = today - timedelta(days=today.weekday())
-    month_start = today.replace(day=1)
+    all_daily_food_events = Tracking_food.objects(user=user_id, date__gte=today, date__lt=today + timedelta(days=1)).all()
+    # Initialiser le dictionnaire avec toutes les heures de la journée, avec `False` pour chaque heure 
+    hourly_event_dict = {}
+    for hour in range(24):
+        hourly_event_dict[f"{hour:02d}"] = {
+            'has_event':False,
+        }
 
-    daily_trackings = Tracking_food.objects(user=user_id, date__gte=today, date__lt=today + timedelta(days=1)).all()
+    daily_food_events_list = []
+
+    for food_event in all_daily_food_events:
+        daily_food_events_list.append({
+            'type': food_event.type,
+            'quantity': f"{food_event.quantity} ml" if str(food_event.quantity).isdigit() else food_event.quantity,
+            'date': food_event.date.strftime('%d-%m-%Y %H:%M'),
+        })
+        
+        event_hour = food_event.date.strftime('%H')
+        hourly_event_dict[event_hour] = {
+            'has_event':True,
+            'event_type':food_event.type,
+            'quantity': f"{food_event.quantity} ml" if str(food_event.quantity).isdigit() else food_event.quantity,
+        }
+
+
+    # Suivi hebdomadaire -----------------------------------------------------
+    week_start = today - timedelta(days=today.weekday())
     weekly_trackings = Tracking_food.objects(user=user_id, date__gte=week_start, date__lt=week_start + timedelta(days=7)).all()
-    monthly_trackings = Tracking_food.objects(user=user_id, date__gte=month_start, date__lt=(month_start + timedelta(days=31)).replace(day=1)).all()
 
     def calculate_summary(trackings):
         total_quantity = 0
         total_feedings = 0
-        times = []
+        solid_foods = defaultdict(int)
+        days_with_feedings = defaultdict(int)
+        
         for tracking in trackings:
+            event_date = tracking.date.date()
             if tracking.type == 'biberon':
                 total_quantity += int(tracking.quantity)
                 total_feedings += 1
-                times.append(tracking.date.time())
+                days_with_feedings[event_date] += 1
+            elif tracking.type == 'solide':
+                solid_foods[tracking.quantity] += 1
+
+        # Calcul du nombre moyen de tétées par jour
+        avg_feedings_per_day = sum(days_with_feedings.values()) / len(days_with_feedings) if days_with_feedings else 0
         
-        avg_time = None
-        if times:
-            avg_time_seconds = sum((t.hour * 3600 + t.minute * 60 + t.second) for t in times) / len(times)
-            avg_time = timedelta(seconds=avg_time_seconds)
+        # Calcul de la quantité moyenne de biberon
+        avg_bottle_quantity = total_quantity / total_feedings if total_feedings > 0 else 0
         
+        # Liste des aliments solides consommés cette semaine
+        solid_foods_list = [food for food, count in solid_foods.items()]
+
         return {
-            'total_quantity': total_quantity,
-            'feedings_count': total_feedings,
-            'avg_time': format_time(avg_time) if avg_time else 'N/A'
+            'avg_feedings_per_day': int(avg_feedings_per_day),
+            'avg_bottle_quantity': int(avg_bottle_quantity),
+            'solid_foods': solid_foods_list
         }
 
-    daily_summary = [
-        {
-            'type': t.type,
-            'quantity': f"{t.quantity} ml" if str(t.quantity).isdigit() else t.quantity,
-            'date': t.date.strftime('%d-%m-%Y %H:%M')
-        }
-        for t in daily_trackings
-    ]
-    
     weekly_summary = calculate_summary(weekly_trackings)
-    monthly_summary = calculate_summary(monthly_trackings)
 
     return render_template('Suivi/alimentation.html',
-                           daily_summary=daily_summary,
+                           daily_food_events_list=daily_food_events_list,
+                           hourly_event_dict=hourly_event_dict,
                            weekly_summary=weekly_summary,
-                           monthly_summary=monthly_summary,
-                           food_list=food_list,
+                           food_list=food_list, 
                            **elements_for_base)
 
+@views.route('/delete_alimentation/<event_id>', methods=['POST'])
+def delete_alimentation(event_id):
+    # Récupérer l'id de l'événement à supprimer
+    try:
+        # Trouver l'événement à supprimer
+        event_to_delete = Tracking_food.objects(id=event_id).first()
+        if event_to_delete:
+            # Supprimer l'événement
+            event_to_delete.delete()
+            flash('L\'événement alimentaire a été supprimé avec succès.', 'success')
+        else:
+            flash('L\'événement alimentaire n\'existe pas.', 'error')
+    except Exception as e:
+        flash(f'Erreur lors de la suppression : {str(e)}', 'error')
 
+    # Rediriger vers la même page ou une autre page
+    return redirect(url_for('views.alimentation'))
 
 
 
 #ROUTES "MY PROFIL" -------------------------------------------------------------------------------------------------------------
-@views.route('/my_profil') #Redirection ok
+@views.route('/my_profil')
 @login_required
 def my_profil():
     # A - Récupérer l'id du user connecté
