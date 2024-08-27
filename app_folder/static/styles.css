@@ -1101,8 +1101,8 @@ tr:hover {
 }
 /* --------------------------------------------------------- Notifications --------------------------------------------------------- */
 
-.photo_galery_container.has_unread_comments::after {
-    content: ''; /* Nécessaire pour afficher le pseudo-élément */
+.has_unread_comments::after {
+    content: '';
     position: absolute;
     top: 10px;
     right: 10px;
@@ -1112,6 +1112,7 @@ tr:hover {
     border-radius: 50%;
     z-index: 10;
 }
+
 
 /* Style pour le conteneur de l'élément de liste */
 .notification {

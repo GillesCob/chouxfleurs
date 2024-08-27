@@ -12,13 +12,28 @@
         </div>
     {% endif %}
 
-    <div class="photo_mosaic">
+    <!-- <div class="photo_mosaic">
         {% if photos_to_use %}
             {% for photo in photos_to_use %}
                 {% set photo_index = (loop.index - 1) % 9 + 1 %}
                 {% set photo_tag = 'photo' ~ photo_index %}
-                
-                <{{ photo_tag }} class="photo_item {% if photo in photos_with_unread_comments %}has_unread_comments{% endif %}">
+                {{photo.id}} est dans {{photos_with_unread_comments}}
+                <{{ photo_tag }} class="photo_item {% if photo.id not in photos_with_unread_comments %}has_unread_comments{% endif %}">
+                    <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
+                        <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_thumbnail">
+                    </a>
+                </{{ photo_tag }}>
+            {% endfor %}
+        {% else %}
+            <p>Aucune photo disponible.</p>
+        {% endif %}
+    </div> -->
+    <div class="photo_mosaic">
+        {% if photos_datas %}
+            {% for photo in photos_datas %}
+                {% set photo_index = (loop.index - 1) % 9 + 1 %}
+                {% set photo_tag = 'photo' ~ photo_index %}
+                <{{ photo_tag }} class="photo_item {% if photo.has_unread_comments==True %}has_unread_comments{% endif %}">
                     <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
                         <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_thumbnail">
                     </a>
@@ -28,6 +43,7 @@
             <p>Aucune photo disponible.</p>
         {% endif %}
     </div>
+
     
 </body>
 {% endblock %}

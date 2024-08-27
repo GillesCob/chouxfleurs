@@ -121,7 +121,7 @@ def new_pronostic(user, current_project_id, current_project, pronostics_for_curr
         new_pronostic = Pronostic(
             user=user,
             sex=sex,
-            name=name,
+            name=name.strip(),
             weight=weight,
             height=height,
             date=date,
@@ -1370,6 +1370,7 @@ def photos():
     photos = Photos.objects(project=project).order_by('-date')
     
     photos_with_unread_comments = []
+    photos_datas = []
     photos_to_use = []
     for photo in photos:
         if photo.utility == 'Gallery':
@@ -1377,14 +1378,21 @@ def photos():
             comments = Messages.objects(photo=photo)
             
             has_unread_comments = any(current_user not in comment.seen_by_users for comment in comments)
+            # if has_unread_comments:
+            #     photos_with_unread_comments.append(photo.id)
+            photo_data = {
+            'id': photo.id,
+            'date': photo.date,
+            'description': photo.description,
+            'utility': photo.utility,
+            'url_thumbnail': photo.url_thumbnail,
+            'has_unread_comments': has_unread_comments,}
+            photos_datas.append(photo_data)
             
-            if has_unread_comments:
-                photos_with_unread_comments.append(photo)
         else:
             pass
-            
 
-    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos_to_use=photos_to_use, photos_with_unread_comments=photos_with_unread_comments, user_is_admin=user_is_admin, **elements_for_base)
+    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos_to_use=photos_to_use, photos_with_unread_comments=photos_with_unread_comments, user_is_admin=user_is_admin,photos_datas=photos_datas, **elements_for_base)
     
 @views.route('/photo_and_messages/<photo_id>', methods=['GET', 'POST'])
 @login_required
