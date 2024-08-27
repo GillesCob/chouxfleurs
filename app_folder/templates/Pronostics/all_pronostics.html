@@ -68,14 +68,16 @@
 
 
             <!-- Les noms ----------------------------------------- -->
-            {% for name, count in names.items() %}
-                {%if count > 1%}
-                    <div class = "pronostic_title">
-                        <label for="date" >Les prénoms</label>
-                        <p class="pronostic_answer">{{ count }} personnes ont choisi {{ name }}</p>
-                    </div>
-                {%endif%}
-            {% endfor %}
+            {%if multiple_names == True%}
+                <div class = "pronostic_title">
+                    <label for="date" >Les prénoms</label>
+                </div>
+                    {% for name, count in names.items() %}
+                        {%if count > 1%}
+                            <p class="prono_multiple_names">{{ count }} personnes ont proposé {{ name }}</p>
+                        {%endif%}
+                    {% endfor %}
+            {%endif%}
         </div>
         
 

@@ -1147,9 +1147,16 @@ def all_pronostics():
     
     #Tris des prénoms avec ceux proposés plusieurs fois en premier
     names = dict(sorted(names.items(), key=lambda item: item[1], reverse=True))
+    # Initialiser la variable multiple_names à False
+    multiple_names = False
 
+    # Vérifier si l'un des noms apparaît plus d'une fois
+    for name, count in names.items():
+        if count > 1:
+            multiple_names = True
+            break
     
-    return render_template('Pronostics/all_pronostics.html', user_is_admin=user_is_admin, average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, number_of_pronostics=number_of_pronostics, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice)
+    return render_template('Pronostics/all_pronostics.html', user_is_admin=user_is_admin, average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, number_of_pronostics=number_of_pronostics, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice, multiple_names=multiple_names)
 
 @views.route('/pronostic_winner', methods=['GET', 'POST'])
 @login_required
