@@ -24,7 +24,9 @@
                 <p>Sommeil</p>
             </div>
             <div class="icon" id="health">
-                <img src="{{ url_for('static', filename='icons/santé.png') }}" alt="Santé">
+                <a href="{{ url_for('views.santé') }}" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='icons/santé.png') }}" alt="Santé">
+                </a>
                 <p>Santé</p>
             </div>
             <div class="icon" id="development">

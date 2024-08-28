@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Ajouter un Second Admin
+{% endblock %}
+
+{% block content %}
+<body>
+    <a href="{{ url_for('views.modify_my_projects') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Retour" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+
+    <div class="my_container">
+        {%if second_admin_username%}
+        <div class="my_container">
+            <h3>2e admin : {{second_admin_username}}</h3>
+        </div>
+        
+        <form action="{{ url_for('views.add_second_admin') }}" method="POST">
+            <div class="form-group">
+                <label for="admin_email">Modifier l'admin ?</label>
+                <input type="email" id="admin_email" name="admin_email" class="form-control text-center" value={{second_admin_mail}} required>
+            </div>
+            <button type="submit" class="my_btn">Modifier</button>
+        </form>
+        {%else%}
+        <form action="{{ url_for('views.add_second_admin') }}" method="POST">
+            <div class="form-group">
+                <label for="admin_email">Email du nouvel admin</label>
+                <input type="email" id="admin_email" name="admin_email" class="form-control" placeholder="Entrez l'email" required>
+            </div>
+            <button type="submit" class="my_btn">Ajouter</button>
+        </form>
+        {%endif%}
+
+    </div>
+</body>
+{% endblock %}

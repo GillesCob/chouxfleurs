@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Suivi de l'Alimentation
+{% endblock %}
+
+{% block content %}
+<body>
+    <a href="{{ url_for('views.suivi') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Logo" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+    <div class="my_container">
+        <h1>Santé</h1>
+        <div class="icon_container">
+          
+            <div class="icon" id="diapers">
+                <a href="{{ url_for('views.health_document') }}" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='icons/documents.png') }}" alt="Changements de Couches">
+                </a>
+                <p>Documents</p>
+            </div>
+            <div class="icon" id="sleep">
+                <img src="{{ url_for('static', filename='icons/height.png') }}" alt="Sommeil">
+                <p>Suivi taille</p>
+            </div>
+            <div class="icon" id="health">
+                <a href="{{ url_for('views.santé') }}" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='icons/weight.png') }}" alt="Santé">
+                </a>
+                <p>Suivi poids</p>
+            </div>
+            <div class="icon" id="development">
+                <img src="{{ url_for('static', filename='icons/contact.png') }}" alt="Développement">
+                <p>Contacts</p>
+            </div>
+            <div class="icon" id="hygiene">
+                <img src="{{ url_for('static', filename='icons/vaccine.png') }}" alt="Hygiène">
+                <p>Vaccins</p>
+            </div>
+        </div>
+    </div>
+    
+        
+    
+</body>
+{% endblock %}

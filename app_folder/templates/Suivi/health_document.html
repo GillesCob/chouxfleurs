@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Documents de Santé
+{% endblock %}
+
+{% block content %}
+<body>
+    <a href="{{ url_for('views.santé') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Retour" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+
+   
+
+    <div class="my_container">
+        <h1>Liste des Documents de Santé</h1>
+        
+        {% if documents %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for document in documents %}
+                        <tr>
+                            <td>
+                                <a href="{{ document.url_document }}" target="_blank">
+                                    {{ document.title }}
+                                </a>
+                            </td>
+                            <td>{{ document.date.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <form action="{{ url_for('views.delete_health_document', doc_id=document.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Aucun document de santé disponible.</p>
+        {% endif %}
+    </div>
+
+    <div class="my_container">
+        <form action="{{ url_for('views.add_health_document') }}" method="POST" enctype="multipart/form-data">
+            <div class="my_container">
+                <h1>Ajouter un document de santé</h1>
+                <!-- Champ de fichier -->
+                <input type="file" id="health_document" name="health_document" accept=".pdf, image/*" required style="display: none;" onchange="displayFileName(event)">
+    
+                <label for="health_document" class="my_btn white_btn">Sélectionner</label>
+    
+                <span id="fileName" style="display: none;"></span>
+                <button type="submit" class="my_btn">Valider</button>
+
+    
+                <!-- Champ caché pour le nom du fichier -->
+                <input type="hidden" id="file_name_hidden" name="file_name">
+    
+                
+            </div>               
+        </form>
+    </div>
+    
+    <script>
+        function displayFileName(event) {
+            const input = event.target;
+            const file = input.files[0];
+            const fileNameSpan = document.getElementById('fileName');
+            const fileNameHidden = document.getElementById('file_name_hidden');
+    
+            if (file) {
+                fileNameSpan.textContent = file.name;  // Afficher le nom du fichier
+                fileNameSpan.style.display = 'block';  // Afficher le span
+                fileNameHidden.value = file.name;       // Mettre à jour le champ caché
+            } else {
+                fileNameSpan.textContent = '';          // Réinitialiser le texte
+                fileNameSpan.style.display = 'none';    // Masquer le span
+                fileNameHidden.value = '';              // Réinitialiser le champ caché
+            }
+        }
+    </script>
+    
+</body>
+{% endblock %}
