@@ -260,8 +260,8 @@ def new_pronostic(current_user, current_project_id, current_project):
         other_participant_name = request.form.get('other_participant_name')
         
         if other_participant_name:
-            # template_user = User.objects(id="66d827a7758bc37b261818b0").first() #En prod
-            template_user = User.objects(id="66d82231758bc37b26181896").first() #En local
+            template_user = User.objects(id="66d827a7758bc37b261818b0").first() #En prod
+            # template_user = User.objects(id="66d82231758bc37b26181896").first() #En local
 
             
             current_user = template_user
