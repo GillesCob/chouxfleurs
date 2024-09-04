@@ -49,9 +49,26 @@
                     {{ photos_datas[0].photo_description }}
                 </div>
             {%else%}
-                <div class="">'</div>
+                <div class=""></div>
+            {% endif %}
+            
+        </div>
+        <div class="like_container">
+            {% if liked == True %}
+                {{number_of_likes}}
+                <a href="{{ url_for('views.unlike_photo', photo_id=photos_datas[0].photo_id) }}">
+                    <img src="{{ url_for('static', filename='icons/like.png') }}" alt="Like" width="25" height="25">
+                </a>
+            {% else %}
+                {{number_of_likes}}
+                <a href="{{ url_for('views.like_photo', photo_id=photos_datas[0].photo_id) }}">
+                    <img src="{{ url_for('static', filename='icons/like - not yet.png') }}" width="25" height="25" alt="Like">
+                </a>
             {% endif %}
         </div>
+        
+
+            
 
     </div>
 

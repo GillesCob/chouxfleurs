@@ -40,6 +40,7 @@
 
 .black_background{
     background-color: black;
+    /* background-color: white; */
 }
 
 /* HOME PAGE ------------------------------------------------------ */
@@ -1477,4 +1478,13 @@ main {
 #inputForm {
     display: none; /* Le formulaire est masqué par défaut */
     margin-top: 10px;
+}
+
+.like_container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    gap: 10px;
+    margin-bottom: 10px;
 }

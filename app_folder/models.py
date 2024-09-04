@@ -91,6 +91,8 @@ class Photos(Document):
     slug_thumbnail = StringField(max_length=150)
     description = StringField(max_length=50)
     date = DateTimeField()
+    likes = ListField(ReferenceField('User', reverse_delete_rule=CASCADE))
+
 
 
 class Messages(Document):

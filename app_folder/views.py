@@ -1670,11 +1670,19 @@ def photo_and_messages(photo_id):
         return redirect(url_for('views.photo_and_messages', photo_id=photo_for_message_id))
     
     for photo in photos:
+        # Récupérer tous les utilisateurs qui ont liké la photo
+        users_who_liked = photo.likes
+        if current_user in users_who_liked:
+            liked = True
+        else:
+            liked = False
+        
+        # Récupérer le nombre de likes pour la photo
+        number_of_likes = len(users_who_liked)
+        
         messages = Messages.objects(photo=photo)
         
-        
         photo_messages = [] #Réinitialiser la liste des messages pour chaque photo
-        
 
         for message in messages:
             child_messages = [] #Réinitialiser des réponses pour chaque message
@@ -1738,6 +1746,8 @@ def photo_and_messages(photo_id):
                            photos_datas=photos_datas, 
                            photos=photos, 
                            user_is_admin=user_is_admin,
+                           liked=liked,
+                           number_of_likes=number_of_likes,
                            
                            **elements_for_base)
 
@@ -1974,290 +1984,315 @@ def delete_photo_description(photo_id):
     return redirect(url_for('views.photo_and_messages', 
                             photo_id=photo_id)) 
 
+@views.route('/like_photo/<photo_id>')
+@login_required
+def like_photo(photo_id):
+    photo = Photos.objects.get(id=photo_id)
+    
+    if current_user not in photo.likes:
+        photo.likes.append(current_user)
+        photo.save()
+    
+    return redirect(url_for('views.photo_and_messages', photo_id=photo_id))
+
+@views.route('/unlike_photo/<photo_id>')
+@login_required
+def unlike_photo(photo_id):
+    photo = Photos.objects.get(id=photo_id)
+    
+    if current_user in photo.likes:
+        photo.likes.remove(current_user)
+        photo.save()
+    
+    return redirect(url_for('views.photo_and_messages', photo_id=photo_id))
+
+
 
 #ROUTES "SUIVI" -------------------------------------------------------------------------------------------------------------
-@views.route('/suivi')
-def suivi():
-    # A - Récupérer l'id du user connecté
-    user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_navbar(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    add_project_in_session(user_id)
-    return render_template('Suivi/suivi.html', **elements_for_base)
+#J'ai tout commenté, fonctionnalitées en sommeil pour le moment
+# def route_en_sommeil ():
+    # @views.route('/suivi')
+    # def suivi():
+    #     # A - Récupérer l'id du user connecté
+    #     user_id = current_user.id
+    #     # B - Récupérer les éléments de base pour la navbar
+    #     elements_for_base = elements_for_navbar(user_id)
+    #     # C - Récupérer le projet actuellement sélectionné
+    #     add_project_in_session(user_id)
+    #     return render_template('Suivi/suivi.html', **elements_for_base)
 
-@views.route('/alimentation', methods=['GET', 'POST'])
-def alimentation():
-    # A - Récupérer l'id du user connecté
-    user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_navbar(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project = add_project_in_session(user_id)
+    # @views.route('/alimentation', methods=['GET', 'POST'])
+    # def alimentation():
+    #     # A - Récupérer l'id du user connecté
+    #     user_id = current_user.id
+    #     # B - Récupérer les éléments de base pour la navbar
+    #     elements_for_base = elements_for_navbar(user_id)
+    #     # C - Récupérer le projet actuellement sélectionné
+    #     project = add_project_in_session(user_id)
 
-    if request.method == 'POST':
-        # Récupérer les données du formulaire
-        feeding_type = request.form.get('feeding_type')
-        quantity = request.form.get('quantity') or request.form.get('aliment')
-        
-        modified_time = request.form.get('time')
-        if modified_time :
-            time = modified_time
-        else:
-            time = datetime.utcnow()+ timedelta(hours=2)
-        
-        # Créer un nouvel enregistrement pour le suivi de l'alimentation
-        tracking = Tracking_food(
-            user=user_id,
-            project=project,
-            type=feeding_type,
-            quantity=quantity,
-            date=time
-        )
-        
-        # Sauvegarder l'enregistrement dans la base de données
-        tracking.save()
-
-        # Optionnel : message flash pour confirmer la sauvegarde
-        flash('Les informations ont été sauvegardées avec succès.', 'success')
-
-        # Rediriger vers la même page ou une autre page
-        return redirect(url_for('views.alimentation'))
-
-    # Récupérer toutes les occurrences concernant la nourriture
-    food_trackings = Tracking_food.objects(user=user_id).all()
-    food_list = [
-        {
-            'type': tracking.type,
-            'quantity': f"{tracking.quantity} ml" if str(tracking.quantity).isdigit() else tracking.quantity,
-            'date': tracking.date.strftime('%d-%m-%Y %H:%M'),
-        }
-        for tracking in food_trackings
-    ]
-
-    # Calcul des résumés journalier, hebdomadaire et mensuel
-    
-    
-    # Suivi journalier -----------------------------------------------------
-    today = datetime.utcnow().date()
-    all_daily_food_events = Tracking_food.objects(user=user_id, date__gte=today, date__lt=today + timedelta(days=1)).all()
-    # Initialiser le dictionnaire avec toutes les heures de la journée, avec `False` pour chaque heure 
-    hourly_event_dict = {}
-    for hour in range(24):
-        hourly_event_dict[f"{hour:02d}"] = {
-            'has_event':False,
-        }
-
-    daily_food_events_list = []
-
-    for food_event in all_daily_food_events:
-        daily_food_events_list.append({
-            'type': food_event.type,
-            'quantity': f"{food_event.quantity} ml" if str(food_event.quantity).isdigit() else food_event.quantity,
-            'date': food_event.date.strftime('%d-%m-%Y %H:%M'),
-        })
-        
-        event_hour = food_event.date.strftime('%H')
-        hourly_event_dict[event_hour] = {
-            'has_event':True,
-            'event_type':food_event.type,
-            'quantity': f"{food_event.quantity} ml" if str(food_event.quantity).isdigit() else food_event.quantity,
-        }
-
-
-    # Suivi hebdomadaire -----------------------------------------------------
-    week_start = today - timedelta(days=today.weekday())
-    weekly_trackings = Tracking_food.objects(user=user_id, date__gte=week_start, date__lt=week_start + timedelta(days=7)).all()
-
-    def calculate_summary(trackings):
-        total_quantity = 0
-        total_feedings = 0
-        solid_foods = defaultdict(int)
-        days_with_feedings = defaultdict(int)
-        
-        for tracking in trackings:
-            event_date = tracking.date.date()
-            if tracking.type == 'biberon':
-                total_quantity += int(tracking.quantity)
-                total_feedings += 1
-                days_with_feedings[event_date] += 1
-            elif tracking.type == 'solide':
-                solid_foods[tracking.quantity] += 1
-
-        # Calcul du nombre moyen de tétées par jour
-        avg_feedings_per_day = sum(days_with_feedings.values()) / len(days_with_feedings) if days_with_feedings else 0
-        
-        # Calcul de la quantité moyenne de biberon
-        avg_bottle_quantity = total_quantity / total_feedings if total_feedings > 0 else 0
-        
-        # Liste des aliments solides consommés cette semaine
-        solid_foods_list = [food for food, count in solid_foods.items()]
-
-        return {
-            'avg_feedings_per_day': int(avg_feedings_per_day),
-            'avg_bottle_quantity': int(avg_bottle_quantity),
-            'solid_foods': solid_foods_list
-        }
-
-    weekly_summary = calculate_summary(weekly_trackings)
-
-    return render_template('Suivi/alimentation.html',
-                           daily_food_events_list=daily_food_events_list,
-                           hourly_event_dict=hourly_event_dict,
-                           weekly_summary=weekly_summary,
-                           food_list=food_list, 
-                           **elements_for_base)
-
-# Santé --------------------------------------
-@views.route('/santé', methods=['GET', 'POST'])
-def santé():
-    # A - Récupérer l'id du user connecté
-    user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_navbar(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    add_project_in_session(user_id)
-    return render_template('Suivi/santé.html', **elements_for_base)
-
-@views.route('/add_health_document', methods=['GET', 'POST'])
-@login_required
-def add_health_document():
-    # A - Récupérer l'id du user connecté
-    user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_navbar(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    add_project_in_session(user_id)
-    
-    # Récupérer le projet sélectionné dans la session
-    selected_project_id = session['selected_project']['id']
-    project = Project.objects(id=selected_project_id).first()
-    if not project:
-        return "Project not found", 404
-    if request.method == 'POST':
-        file = request.files.get('health_document')
-        description = request.form.get('description_health_document')
-        filename = request.form.get('file_name')
-        
-        if file:
-            # Générer un slug pour l'URL du document
-            brut_slug = f'{project.id}-document-{datetime.now().strftime("%Y%m%d%H%M%S")}'
-            slug_document = brut_slug.replace(" ", "-")
-
-            # Sauvegarder le fichier localement dans un répertoire temporaire
-            local_file_path = f'/tmp/{slug_document}'
-
-            # Écrire les données du document dans le fichier temporaire
-            file.save(local_file_path)
-
-            # --- Téléchargement du document sur Wasabi ---
-            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
-            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
-            wasabi_bucket_name = 'chouxfleurs.fr'
-            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
-            # Initialiser le client S3 pour Wasabi
-            s3 = boto3.client(
-                's3',
-                endpoint_url=wasabi_endpoint_url,
-                aws_access_key_id=wasabi_access_key,
-                aws_secret_access_key=wasabi_secret_key,
-                config=Config(signature_version='s3v4')
-            )
+    #     if request.method == 'POST':
+    #         # Récupérer les données du formulaire
+    #         feeding_type = request.form.get('feeding_type')
+    #         quantity = request.form.get('quantity') or request.form.get('aliment')
             
-             # Déterminer le type MIME (Content-Type)
-            content_type = None
-            if file.mimetype:
-                content_type = file.mimetype  # Utilise le MIME type fourni par Flask (basé sur l'extension du fichier)
-
-            # Uploader le fichier vers Wasabi
-            s3.upload_file(local_file_path, wasabi_bucket_name, slug_document, ExtraArgs={'ContentType': content_type})
-
-            # URL du document
-            url_document = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_document}"
-
-            # Créer une nouvelle instance de document de santé et sauvegarder dans la base de données
-            new_document = Healthdocuments(
-                project=project,
-                title=filename,
-                url_document=url_document,
-                slug_document=slug_document,
-                description=description,
-                utility="Health",
-                date=datetime.now(),
-            )
-            new_document.save()
-
-            # Supprimer le fichier temporaire local
-            os.remove(local_file_path)
-
-            flash('Votre document de santé a bien été ajouté !', category='success')
-            return redirect(url_for('views.health_document'))
-
-        else:
-            return render_template('Suivi/add_health_document.html', **elements_for_base)
-    
-    else:
-        return render_template('Suivi/add_health_document.html', **elements_for_base)
-
-@views.route('/health_document', methods=['GET', 'POST'])
-@login_required
-def health_document():
-    # A - Récupérer l'id du user connecté
-    user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_navbar(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    add_project_in_session(user_id)
-    
-    # Récupérer les documents de santé du projet sélectionné
-    selected_project_id = session['selected_project']['id']
-    documents = Healthdocuments.objects(project=selected_project_id).order_by('-date')
-    
-    # Récupérer les éléments de base pour la navbar
-    user_id = current_user.id
-    elements_for_base = elements_for_navbar(user_id)
-    
-    return render_template('Suivi/health_document.html', documents=documents, **elements_for_base)
-
-@views.route('/delete_health_document/<doc_id>', methods=['POST'])
-@login_required
-def delete_health_document(doc_id):
-    # Récupérer le document de santé de la base de données
-    document = Healthdocuments.objects(id=doc_id).first()
-    wasabi_bucket_name = 'chouxfleurs.fr'
-    
-    if document:
-        try:
-            # Configuration pour Wasabi
-            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
-            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
-            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
-
-            # Initialiser le client S3 pour Wasabi
-            s3 = boto3.client(
-                's3',
-                endpoint_url=wasabi_endpoint_url,
-                aws_access_key_id=wasabi_access_key,
-                aws_secret_access_key=wasabi_secret_key,
-                config=Config(signature_version='s3v4')
-            )
-
-            # Supprimer le fichier de Wasabi
-            s3.delete_object(Bucket=wasabi_bucket_name, Key=document.slug_document)
+    #         modified_time = request.form.get('time')
+    #         if modified_time :
+    #             time = modified_time
+    #         else:
+    #             time = datetime.utcnow()+ timedelta(hours=2)
             
-            # Supprimer le document de la base de données
-            document.delete()
+    #         # Créer un nouvel enregistrement pour le suivi de l'alimentation
+    #         tracking = Tracking_food(
+    #             user=user_id,
+    #             project=project,
+    #             type=feeding_type,
+    #             quantity=quantity,
+    #             date=time
+    #         )
             
-            flash('Document supprimé avec succès.', category='success')
-        except Exception as e:
-            flash(f'Erreur lors de la suppression du document : {str(e)}', category='error')
-            print(f'Error deleting document: {str(e)}')
-    else:
-        flash('Document introuvable.', category='error')
-    
-    return redirect(url_for('views.health_document'))
+    #         # Sauvegarder l'enregistrement dans la base de données
+    #         tracking.save()
 
-    
+    #         # Optionnel : message flash pour confirmer la sauvegarde
+    #         flash('Les informations ont été sauvegardées avec succès.', 'success')
+
+    #         # Rediriger vers la même page ou une autre page
+    #         return redirect(url_for('views.alimentation'))
+
+    #     # Récupérer toutes les occurrences concernant la nourriture
+    #     food_trackings = Tracking_food.objects(user=user_id).all()
+    #     food_list = [
+    #         {
+    #             'type': tracking.type,
+    #             'quantity': f"{tracking.quantity} ml" if str(tracking.quantity).isdigit() else tracking.quantity,
+    #             'date': tracking.date.strftime('%d-%m-%Y %H:%M'),
+    #         }
+    #         for tracking in food_trackings
+    #     ]
+
+    #     # Calcul des résumés journalier, hebdomadaire et mensuel
+        
+        
+    #     # Suivi journalier -----------------------------------------------------
+    #     today = datetime.utcnow().date()
+    #     all_daily_food_events = Tracking_food.objects(user=user_id, date__gte=today, date__lt=today + timedelta(days=1)).all()
+    #     # Initialiser le dictionnaire avec toutes les heures de la journée, avec `False` pour chaque heure 
+    #     hourly_event_dict = {}
+    #     for hour in range(24):
+    #         hourly_event_dict[f"{hour:02d}"] = {
+    #             'has_event':False,
+    #         }
+
+    #     daily_food_events_list = []
+
+    #     for food_event in all_daily_food_events:
+    #         daily_food_events_list.append({
+    #             'type': food_event.type,
+    #             'quantity': f"{food_event.quantity} ml" if str(food_event.quantity).isdigit() else food_event.quantity,
+    #             'date': food_event.date.strftime('%d-%m-%Y %H:%M'),
+    #         })
+            
+    #         event_hour = food_event.date.strftime('%H')
+    #         hourly_event_dict[event_hour] = {
+    #             'has_event':True,
+    #             'event_type':food_event.type,
+    #             'quantity': f"{food_event.quantity} ml" if str(food_event.quantity).isdigit() else food_event.quantity,
+    #         }
+
+
+    #     # Suivi hebdomadaire -----------------------------------------------------
+    #     week_start = today - timedelta(days=today.weekday())
+    #     weekly_trackings = Tracking_food.objects(user=user_id, date__gte=week_start, date__lt=week_start + timedelta(days=7)).all()
+
+    #     def calculate_summary(trackings):
+    #         total_quantity = 0
+    #         total_feedings = 0
+    #         solid_foods = defaultdict(int)
+    #         days_with_feedings = defaultdict(int)
+            
+    #         for tracking in trackings:
+    #             event_date = tracking.date.date()
+    #             if tracking.type == 'biberon':
+    #                 total_quantity += int(tracking.quantity)
+    #                 total_feedings += 1
+    #                 days_with_feedings[event_date] += 1
+    #             elif tracking.type == 'solide':
+    #                 solid_foods[tracking.quantity] += 1
+
+    #         # Calcul du nombre moyen de tétées par jour
+    #         avg_feedings_per_day = sum(days_with_feedings.values()) / len(days_with_feedings) if days_with_feedings else 0
+            
+    #         # Calcul de la quantité moyenne de biberon
+    #         avg_bottle_quantity = total_quantity / total_feedings if total_feedings > 0 else 0
+            
+    #         # Liste des aliments solides consommés cette semaine
+    #         solid_foods_list = [food for food, count in solid_foods.items()]
+
+    #         return {
+    #             'avg_feedings_per_day': int(avg_feedings_per_day),
+    #             'avg_bottle_quantity': int(avg_bottle_quantity),
+    #             'solid_foods': solid_foods_list
+    #         }
+
+    #     weekly_summary = calculate_summary(weekly_trackings)
+
+    #     return render_template('Suivi/alimentation.html',
+    #                            daily_food_events_list=daily_food_events_list,
+    #                            hourly_event_dict=hourly_event_dict,
+    #                            weekly_summary=weekly_summary,
+    #                            food_list=food_list, 
+    #                            **elements_for_base)
+
+    # # Santé --------------------------------------
+    # @views.route('/santé', methods=['GET', 'POST'])
+    # def santé():
+    #     # A - Récupérer l'id du user connecté
+    #     user_id = current_user.id
+    #     # B - Récupérer les éléments de base pour la navbar
+    #     elements_for_base = elements_for_navbar(user_id)
+    #     # C - Récupérer le projet actuellement sélectionné
+    #     add_project_in_session(user_id)
+    #     return render_template('Suivi/santé.html', **elements_for_base)
+
+    # @views.route('/add_health_document', methods=['GET', 'POST'])
+    # @login_required
+    # def add_health_document():
+    #     # A - Récupérer l'id du user connecté
+    #     user_id = current_user.id
+    #     # B - Récupérer les éléments de base pour la navbar
+    #     elements_for_base = elements_for_navbar(user_id)
+    #     # C - Récupérer le projet actuellement sélectionné
+    #     add_project_in_session(user_id)
+        
+    #     # Récupérer le projet sélectionné dans la session
+    #     selected_project_id = session['selected_project']['id']
+    #     project = Project.objects(id=selected_project_id).first()
+    #     if not project:
+    #         return "Project not found", 404
+    #     if request.method == 'POST':
+    #         file = request.files.get('health_document')
+    #         description = request.form.get('description_health_document')
+    #         filename = request.form.get('file_name')
+            
+    #         if file:
+    #             # Générer un slug pour l'URL du document
+    #             brut_slug = f'{project.id}-document-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+    #             slug_document = brut_slug.replace(" ", "-")
+
+    #             # Sauvegarder le fichier localement dans un répertoire temporaire
+    #             local_file_path = f'/tmp/{slug_document}'
+
+    #             # Écrire les données du document dans le fichier temporaire
+    #             file.save(local_file_path)
+
+    #             # --- Téléchargement du document sur Wasabi ---
+    #             wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+    #             wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+    #             wasabi_bucket_name = 'chouxfleurs.fr'
+    #             wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+    #             # Initialiser le client S3 pour Wasabi
+    #             s3 = boto3.client(
+    #                 's3',
+    #                 endpoint_url=wasabi_endpoint_url,
+    #                 aws_access_key_id=wasabi_access_key,
+    #                 aws_secret_access_key=wasabi_secret_key,
+    #                 config=Config(signature_version='s3v4')
+    #             )
+                
+    #              # Déterminer le type MIME (Content-Type)
+    #             content_type = None
+    #             if file.mimetype:
+    #                 content_type = file.mimetype  # Utilise le MIME type fourni par Flask (basé sur l'extension du fichier)
+
+    #             # Uploader le fichier vers Wasabi
+    #             s3.upload_file(local_file_path, wasabi_bucket_name, slug_document, ExtraArgs={'ContentType': content_type})
+
+    #             # URL du document
+    #             url_document = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_document}"
+
+    #             # Créer une nouvelle instance de document de santé et sauvegarder dans la base de données
+    #             new_document = Healthdocuments(
+    #                 project=project,
+    #                 title=filename,
+    #                 url_document=url_document,
+    #                 slug_document=slug_document,
+    #                 description=description,
+    #                 utility="Health",
+    #                 date=datetime.now(),
+    #             )
+    #             new_document.save()
+
+    #             # Supprimer le fichier temporaire local
+    #             os.remove(local_file_path)
+
+    #             flash('Votre document de santé a bien été ajouté !', category='success')
+    #             return redirect(url_for('views.health_document'))
+
+    #         else:
+    #             return render_template('Suivi/add_health_document.html', **elements_for_base)
+        
+    #     else:
+    #         return render_template('Suivi/add_health_document.html', **elements_for_base)
+
+    # @views.route('/health_document', methods=['GET', 'POST'])
+    # @login_required
+    # def health_document():
+    #     # A - Récupérer l'id du user connecté
+    #     user_id = current_user.id
+    #     # B - Récupérer les éléments de base pour la navbar
+    #     elements_for_base = elements_for_navbar(user_id)
+    #     # C - Récupérer le projet actuellement sélectionné
+    #     add_project_in_session(user_id)
+        
+    #     # Récupérer les documents de santé du projet sélectionné
+    #     selected_project_id = session['selected_project']['id']
+    #     documents = Healthdocuments.objects(project=selected_project_id).order_by('-date')
+        
+    #     # Récupérer les éléments de base pour la navbar
+    #     user_id = current_user.id
+    #     elements_for_base = elements_for_navbar(user_id)
+        
+    #     return render_template('Suivi/health_document.html', documents=documents, **elements_for_base)
+
+    # @views.route('/delete_health_document/<doc_id>', methods=['POST'])
+    # @login_required
+    # def delete_health_document(doc_id):
+    #     # Récupérer le document de santé de la base de données
+    #     document = Healthdocuments.objects(id=doc_id).first()
+    #     wasabi_bucket_name = 'chouxfleurs.fr'
+        
+    #     if document:
+    #         try:
+    #             # Configuration pour Wasabi
+    #             wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+    #             wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+    #             wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+
+    #             # Initialiser le client S3 pour Wasabi
+    #             s3 = boto3.client(
+    #                 's3',
+    #                 endpoint_url=wasabi_endpoint_url,
+    #                 aws_access_key_id=wasabi_access_key,
+    #                 aws_secret_access_key=wasabi_secret_key,
+    #                 config=Config(signature_version='s3v4')
+    #             )
+
+    #             # Supprimer le fichier de Wasabi
+    #             s3.delete_object(Bucket=wasabi_bucket_name, Key=document.slug_document)
+                
+    #             # Supprimer le document de la base de données
+    #             document.delete()
+                
+    #             flash('Document supprimé avec succès.', category='success')
+    #         except Exception as e:
+    #             flash(f'Erreur lors de la suppression du document : {str(e)}', category='error')
+    #             print(f'Error deleting document: {str(e)}')
+    #     else:
+    #         flash('Document introuvable.', category='error')
+        
+    #     return redirect(url_for('views.health_document'))
+
+
 
 #ROUTES "MY PROFIL" -------------------------------------------------------------------------------------------------------------
 @views.route('/my_profil')
