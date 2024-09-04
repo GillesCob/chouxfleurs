@@ -1676,7 +1676,9 @@ def photo_and_messages(photo_id):
             liked = True
         else:
             liked = False
-        
+            
+        print(liked)
+        print(current_user.username)
         # Récupérer le nombre de likes pour la photo
         number_of_likes = len(users_who_liked)
         
