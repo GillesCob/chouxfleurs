@@ -171,14 +171,17 @@ def user_is_admin_current_project():
 def user_is_2nd_admin_current_project():
     user_id = current_user.id
     current_project = current_project_obj()
-    second_admin_id = current_project.second_admin.id
+    try:
+        second_admin_id = current_project.second_admin.id
+        
+        user_is_2nd_admin = (user_id == second_admin_id)
+        
+        session['id_2nd_admin'] = second_admin_id
+        session['user_is_2nd_admin'] = user_is_2nd_admin
     
-    user_is_2nd_admin = (user_id == second_admin_id)
-    
-    session['id_2nd_admin'] = second_admin_id
-    session['user_is_2nd_admin'] = user_is_2nd_admin
-    
-    return user_is_2nd_admin
+        return user_is_2nd_admin
+    except:
+        pass
 
 def current_project_obj():
     current_project_id = session['selected_project']['id']
