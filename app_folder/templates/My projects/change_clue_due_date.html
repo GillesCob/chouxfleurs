@@ -21,10 +21,11 @@
                     <div class="form-group">
                         <input type="date" class="form-control text-center" name="due_date" value="{{ due_date }}" required>
                     </div>
-                    <!-- Bouton pour supprimer la date d'échéance -->
-                    <button type="button" onclick="window.location.href='/delete_clue_due_date'" class="my_btn">Supprimer la date du terme</button>
                     <!-- Bouton pour modifier la date d'échéance -->
                     <button type="submit" onclick="window.location.href='/change_clue_due_date'" class="my_btn">Modifier</button>
+                    <!-- Bouton pour supprimer la date d'échéance -->
+                    <button type="button" onclick="window.location.href='/delete_clue_due_date'" class="my_btn red_admin_button">Supprimer l'indice</button>
+
                 {% else %}
                     <!-- Formulaire pour ajouter une nouvelle date d'échéance -->
                     <div class="form-group">

@@ -2,7 +2,7 @@ from flask import render_template, Blueprint, session, redirect, url_for, reques
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app_folder.views import elements_for_base_template
+from app_folder.views import elements_for_navbar
 
 from .models import User, Project, Pronostic, Product, Participation
 
@@ -126,7 +126,7 @@ def register():
 @login_required
 def change_password():
     user_id = current_user.id
-    elements_for_base = elements_for_base_template(user_id)
+    elements_for_base = elements_for_navbar(user_id)
 
     user = User.objects(id=user_id).first()
 

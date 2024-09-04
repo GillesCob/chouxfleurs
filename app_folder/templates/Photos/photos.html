@@ -5,45 +5,30 @@
 {% endblock %}
 
 {% block content %}
-<body>
+<div class="my_container">
+    <h1>Photos</h1>
     {% if user_is_admin %}
         <div class="my_container">
             <a href="{{ url_for('views.add_photos') }}" class="my_btn">Ajouter une Photo</a>
         </div>
     {% endif %}
-
-    <!-- <div class="photo_mosaic">
-        {% if photos_to_use %}
-            {% for photo in photos_to_use %}
-                {% set photo_index = (loop.index - 1) % 9 + 1 %}
-                {% set photo_tag = 'photo' ~ photo_index %}
-                {{photo.id}} est dans {{photos_with_unread_comments}}
-                <{{ photo_tag }} class="photo_item {% if photo.id not in photos_with_unread_comments %}has_unread_comments{% endif %}">
-                    <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
-                        <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_thumbnail">
-                    </a>
-                </{{ photo_tag }}>
-            {% endfor %}
-        {% else %}
-            <p>Aucune photo disponible.</p>
-        {% endif %}
-    </div> -->
-    <div class="photo_mosaic">
         {% if photos_datas %}
-            {% for photo in photos_datas %}
-                {% set photo_index = (loop.index - 1) % 9 + 1 %}
-                {% set photo_tag = 'photo' ~ photo_index %}
-                <{{ photo_tag }} class="photo_item {% if photo.has_unread_comments==True %}has_unread_comments{% endif %}">
-                    <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
-                        <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_thumbnail">
-                    </a>
-                </{{ photo_tag }}>
-            {% endfor %}
+            <div class="photo_mosaic">
+                {% for photo in photos_datas %}
+                    {% set photo_index = (loop.index - 1) % 9 + 1 %}
+                    {% set photo_tag = 'photo' ~ photo_index %}
+                    <{{ photo_tag }} class="photo_item {% if photo.has_unread_comments==True %}has_unread_comments{% endif %}">
+                        <a href="{{ url_for('views.photo_and_messages', photo_id=photo.id) }}">
+                            <img src="{{ photo.url_thumbnail }}" alt="photo" class="photo_thumbnail">
+                        </a>
+                    </{{ photo_tag }}>
+                {% endfor %}
+            </div>
         {% else %}
             <p>Aucune photo disponible.</p>
         {% endif %}
     </div>
+</div>
 
     
-</body>
 {% endblock %}

@@ -1,6 +1,6 @@
 from flask import render_template, Blueprint, redirect, url_for, flash, request, session, jsonify
 from flask_login import current_user, login_required, logout_user
-from .models import Pronostic, User, Project, Product, Participation, Photos, Messages, Tracking_food
+from .models import Pronostic, User, Project, Product, Participation, Photos, Messages, Tracking_food, Healthdocuments
 
 from datetime import datetime, timedelta
 
@@ -55,7 +55,9 @@ s3_client = boto3.client(
 
 views = Blueprint("views", __name__)
 
-#VARIABLES INITIALES
+
+#------------------------------------------------ VARIABLES INITIALES -------------------------------------------------------------
+
 #Variables concernant le calcul des points pour les pronostics
 scores_pronostics = {
     'Sex':{
@@ -91,126 +93,26 @@ for key, scores in scores_pronostics.items():
     if isinstance(scores, dict) and 'good' in scores:
         scores_pronostics['Total_possible'] += scores['good']
 
-#FONCTIONS -------------------------------------------------------------------------------------------------------------
-#Fonction pour récupérer l'info si le user est l'admin du projet en cours ou non
-def user_is_admin_project():
-    user_id = current_user.id
-    current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
-    current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
-    admin_id = current_project.admin.id
-    user_is_admin = (user_id == admin_id)
-    
-    return user_is_admin
-
-# Fonction utilisée pour créer un nouveau pronostic dans la route pronostic
-def new_pronostic(user, current_project_id, current_project, pronostics_for_current_project, user_is_admin):
-    if request.method == 'POST':
-        sex = request.form.get('sex')
-        name = request.form.get('name')
-        weight = float(request.form.get('weight'))*1000 #Je multiplie par 1000 pour avoir le poids en grammes
-        height = float(request.form.get('height'))*10 #Je multiplie par 100 pour avoir la taille en mm
-        date = request.form.get('date')
-        annee, mois, jour = date.split("-")
-        date =  f"{jour}/{mois}/{annee}"
-        
-        name = capitalize_name(name)
-        
-        if re.search(r'(-.*-)|(\s.*\s)', name):
-            name = "Proposer un nom valide"
-                
-        new_pronostic = Pronostic(
-            user=user,
-            sex=sex,
-            name=name.strip(),
-            weight=weight,
-            height=height,
-            date=date,
-            project = current_project_id
-        )
-        new_pronostic.save()
-        
-        pronostic_id = new_pronostic.id
-        #J'ajoute l'id du nouveau pronostic dans la class User
-        current_user.pronostic.append(pronostic_id)
-        current_user.save()
-        
-        #J'ajoute l'id du nouveau pronostic dans la class Project
-        current_project.pronostic.append(pronostic_id)
-        current_project.save()
-        
-        pronostic_done = True
-        for pronostic in user.pronostic:
-
-            if pronostic in pronostics_for_current_project:
-                pronostic_utilisateur = Pronostic.objects(id=pronostic).first()
-                prono_sex = pronostic_utilisateur.sex
-                prono_name = pronostic_utilisateur.name
-                prono_weight = pronostic_utilisateur.weight
-                prono_height = pronostic_utilisateur.height
-                prono_date = pronostic_utilisateur.date
-                
-                if user_is_admin:
-                   flash("Félicitations pour l'heureux évement !! 🥳 ")    
-                else:
-                    if name == "Proposer un nom valide":
-                        flash('Nom invalide, veuillez mettre à jour votre pronostic', category='error')
-                    else:
-                        flash('Pronostic sauvegardé avec succès !')
-                return {
-                    'pronostic_done': pronostic_done,
-                    'prono_sex': prono_sex,
-                    'prono_name': prono_name,
-                    'prono_weight': prono_weight,
-                    'prono_height': prono_height,
-                    'prono_date': prono_date
-                }
-
-#Fonction pour récupérer les réponses aux pronos des users
-def get_pronostic_answers():
-    current_project_id = session['selected_project']['id']
-    current_project_obj = Project.objects(id=current_project_id).first()
-    
-    pronostics_for_current_project = Pronostic.objects(project=current_project_obj)
-    
-    pronostic_answers = {}
-    for pronostic_obj in pronostics_for_current_project:
-        pronostic_user_id = pronostic_obj.user.id
-        user_username = User.objects(id=pronostic_user_id).first().username
-        
-        if pronostic_user_id != current_user.id:
-            pronostic_answers[pronostic_user_id] = {
-                'username': user_username,
-                'sex': pronostic_obj.sex,
-                'name': pronostic_obj.name,
-                'weight': (pronostic_obj.weight)/1000,
-                'height': (pronostic_obj.height)/10,
-                'date': pronostic_obj.date,
-            }
-            
-     # Inverser l'ordre du dictionnaire
-    pronostic_answers = OrderedDict(reversed(list(pronostic_answers.items())))
-    
-    return pronostic_answers
+#------------------------------------------------ FONCTIONS -------------------------------------------------------------
 
 
-#La navbar est évolutive en fonction de l'utilisateur connecté, des projets. Je dois lui envoyer des données et celles-ci doivent être les mêmes pour chaque route. Je crée donc une fonction qui va me permettre de récupérer ces données et de les envoyer dans chaque route. Je n'ai ainsi pas à modifier chaque route à chaque fois que je veux ajouter des éléments à la navbar.
-def elements_for_base_template(user_id):
+#FONCTIONS GENERALES UTILISABLES SUR TOUTES LES ROUTES
+def elements_for_navbar(user_id):
     count_projects = count_user_in_project(user_id)
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
-    has_unread_comments = messages_notifications(user_id)
-    hide_page_bool = hide_page()
+    # has_unread_comments = messages_notifications(user_id)
+    # hide_page_bool = hide_page()
 
-    
+
     return {
         'count_projects' : count_projects,
         'projects_dict' : projects_dict,
         'project_name_in_session' : project_in_session,
-        'unread_comments' :has_unread_comments,
-        'hide_page' : hide_page_bool
+        # 'unread_comments' :has_unread_comments,
+        # 'hide_page' : hide_page_bool
             }
 
-#Fonctions appelées par elements_for_base_template()
 def count_user_in_project(user_id):
     user_in_project = Project.objects(users__contains=user_id) 
     count_projects = user_in_project.count()
@@ -233,10 +135,51 @@ def create_projects_dict(user_id):
 
     return projects_dict
 
-def project_name_in_session():
-    if 'selected_project' in session:
-        current_project_name = session['selected_project']['name']
-        return current_project_name
+def add_project_in_session(user_id):
+    #Routes qui n'indiqueront pas de message flash si l'utilisateur n'est pas dans un projet
+    excluded_routes = ['/my_projects', '/create_project', '/join_project', '/my_profil', 'change_username', 'change_email', ]
+    if 'selected_project' not in session:
+        user_in_project = Project.objects(users__contains=user_id) #user_id dans la liste users d'un projet ?
+        
+        if user_in_project:
+            first_project = user_in_project.first() 
+            
+            session['selected_project'] = { #Création de la session
+                'id': str(first_project.id),
+                'name': first_project.name,
+            }
+            return True
+            
+        else:
+            # Ne pas afficher le message si l'utilisateur est sur la page "my_projects"
+            if not any(request.path.startswith(route) for route in excluded_routes):
+                flash("Créez ou rejoignez un projet", category='error')
+            return False
+
+def user_is_admin_current_project():
+    user_id = current_user.id
+    current_project = current_project_obj()
+    admin_id = current_project.admin.id
+    
+    user_is_admin = (user_id == admin_id)
+    
+    session['id_admin'] = admin_id
+    session['user_is_admin'] = user_is_admin
+    
+    
+    return user_is_admin
+
+def current_project_obj():
+    current_project_id = session['selected_project']['id']
+    current_project = Project.objects(id=current_project_id).first()
+    return current_project
+
+def hide_page():
+    ok_gilles = False
+    mails_ok = ["gilles@gilles.com", "bielmann.maxime@gmail.com", "coucou@gilles.com"]
+    if current_user.email in mails_ok:
+        ok_gilles = True
+    return ok_gilles
 
 def messages_notifications(user_id):
     actual_user = User.objects(id=user_id).first()
@@ -265,27 +208,265 @@ def messages_notifications(user_id):
                     break  # Pas besoin de continuer si on a trouvé au moins un commentaire non lu
         return has_unread_comments
 
-#Fonction afin d'ajouter un projet à la session
-def project_in_session(user_id, elements_for_base):
-    
-    if 'selected_project' not in session:
-        user_in_project = Project.objects(users__contains=user_id) #user_id dans la liste users d'un projet ?
+def get_gender_choice(current_project):
+    #Permet de récupérer le choix du sexe pour personnaliser la couleur des boutons
+    gender_choice = "no_gender"
         
-        if user_in_project:
-            first_project = user_in_project.first() 
+    #Je récupe le choix du user concernant le sexe afin de personnaliser les boutons
+    #Je dois cependant gérer le cas ou je n'ai pas encore de pronostic pour le projet actuellement sauvegardé dans la session
+    try :
+        actual_project_pronostics_base_list = current_project.pronostic #Je récupère la liste des pronostics pour le projet actuellement sauvegardé dans la session
+        actual_project_pronostics_list = list(actual_project_pronostics_base_list)
+        
+        user_pronostics_base_list = current_user.pronostic #Je récupère la liste des pronostics pour le user actuellement connecté
+        user_pronostics_list = list(user_pronostics_base_list)
+        
+        for project_id in actual_project_pronostics_list:
+            if project_id in user_pronostics_list:
+                pronostic_utilisateur = Pronostic.objects(id=project_id).first()
+                gender_choice = pronostic_utilisateur.sex
+                session['gender_choice'] = gender_choice
+    except:
+        pass
+    
+    return gender_choice
+
+
+# FONCTIONS POUR LA PARTIE PRONOSTICS
+def new_pronostic(current_user, current_project_id, current_project):
+    valid_pronostic = True
+    if request.method == 'POST':
+        sex = request.form.get('sex')
+        name = request.form.get('name')
+        weight = float(request.form.get('weight'))*1000 #Poids en g
+        height = float(request.form.get('height'))*10 #taille en mm
+        date = request.form.get('date')
+        annee, mois, jour = date.split("-")
+        date =  f"{jour}/{mois}/{annee}"
+        other_participant_name = request.form.get('other_participant_name')
+        
+        if other_participant_name:
+            id_template_user = "66d827a7758bc37b261818b0"
+            template_user = User.objects(id=id_template_user).first()
+            current_user = template_user
+        
+        name = capitalize_name(name)
+        
+        if re.search(r'(-.*-)|(\s.*\s)', name):
+            flash('Prénom invalide', category='error')
+            valid_pronostic = False
+            return valid_pronostic
             
-            session['selected_project'] = { #Création de la session
-                'id': str(first_project.id),
-                'name': first_project.name
+        else :        
+            new_pronostic = Pronostic(
+                user=current_user,
+                sex=sex,
+                name=name.strip(),
+                weight=weight,
+                height=height,
+                date=date,
+                other_participant_name=other_participant_name,
+                project = current_project_id,
+                total_score = 0
+            )
+            new_pronostic.save()
+        
+            pronostic_id = new_pronostic.id
+
+            current_user.pronostic.append(pronostic_id)
+            current_user.save()
+            
+            current_project.pronostic.append(pronostic_id)
+            current_project.save()
+            
+            #Le prono a été créé et son id ajouté dans le projet ET le user
+            
+            user_is_admin = user_is_admin_current_project()
+            
+            if other_participant_name : 
+                flash(f'Pronostic pour {other_participant_name} sauvegardé avec succès !')
+                
+            elif user_is_admin:
+                current_project.end_pronostics = True
+                current_project.save()
+                
+                calculate_pronostic_scores()
+                flash("Félicitations pour l'heureux évement !! 🥳 ")
+                
+
+            else:
+                flash('Pronostic sauvegardé avec succès !')
+            return valid_pronostic 
+
+    else:
+        pass
+
+def calculate_pronostic_scores():
+    current_project = current_project_obj()
+    current_project_pronostics_list = current_project.pronostic
+    current_project_admin = current_project.admin
+    current_project_admin_id = current_project_admin.id
+    admin_pronostic = Pronostic.objects(user=current_project_admin).first()
+    
+        
+    for pronostic_id in current_project_pronostics_list: 
+        pronostic = Pronostic.objects(id=pronostic_id).first()
+        if pronostic.user.id != current_project_admin_id : #J'ai le prono d'un user
+            user_prono_sex = pronostic.sex
+            user_prono_name = pronostic.name
+            user_prono_weight = pronostic.weight
+            user_prono_height = pronostic.height
+            user_prono_date = pronostic.date
+            
+            #Je fais le comparatif entre les pronostics de l'admin et ceux des users
+            #Comparatif pour le sexe
+            if user_prono_sex == admin_pronostic.sex:
+                sex_score = scores_pronostics['Sex']['good']
+            else:
+                sex_score = scores_pronostics['Sex']['bad']
+                
+            #Comparatif pour le nom   
+            if user_prono_name == admin_pronostic.name:
+                name_score = scores_pronostics['Name']['good']
+            else:
+                name_score = scores_pronostics['Name']['bad']
+                
+            
+            #Comparatif pour le poids   
+            user_prono_weight = float(user_prono_weight)
+            admin_pronostic.weight = float(admin_pronostic.weight)
+            
+            # Définition des tolérances pour les comparaisons de poids
+            tolerance_middle_1 = 11
+            tolerance_middle_2 = 51
+            ecart_abs_weight = abs(user_prono_weight - admin_pronostic.weight)
+
+            # Comparer les poids avec les différentes tolérances
+            if ecart_abs_weight == 0:
+                weight_score = scores_pronostics['Weight']['good']
+            elif ecart_abs_weight < tolerance_middle_1:
+                weight_score = scores_pronostics['Weight']['middle_1']
+            elif ecart_abs_weight <= tolerance_middle_2:
+                weight_score = scores_pronostics['Weight']['middle_2']
+            else:
+                weight_score = scores_pronostics['Weight']['bad']
+                
+            # Définition des tolérances pour les comparaisons de taille
+            tolerance_middle_1 = 1
+            tolerance_middle_2 = 5
+            ecart_abs_height = abs((user_prono_height) - (admin_pronostic.height))
+
+
+            #Comparatif pour la taille
+            user_prono_height = float(user_prono_height)
+            admin_pronostic.height = float(admin_pronostic.height)
+            
+            if ecart_abs_height == 0:
+                height_score = scores_pronostics['Height']['good']
+            elif ecart_abs_height <= tolerance_middle_1:
+                height_score = scores_pronostics['Height']['middle_1']
+            elif ecart_abs_height <= tolerance_middle_2:
+                height_score = scores_pronostics['Height']['middle_2']
+            else:
+                height_score = scores_pronostics['Height']['bad']
+                
+                
+            #Comparatif pour la date
+            tolerance_middle_1 = 1#jour
+            tolerance_middle_2 = 2#jours
+            
+            user_prono_date = datetime.strptime(user_prono_date, '%d/%m/%Y')
+            admin_result_date = datetime.strptime(admin_pronostic.date, '%d/%m/%Y')
+            
+            difference_days = abs((user_prono_date - admin_result_date).days)
+            
+            if difference_days == 0 :
+                date_score = scores_pronostics['Date']['good']
+            elif difference_days == tolerance_middle_1:
+                date_score = scores_pronostics['Date']['middle_1']
+            elif difference_days <= tolerance_middle_2:
+                date_score = scores_pronostics['Date']['middle_2']
+            else:
+                date_score = scores_pronostics['Date']['bad']
+            
+            
+            #Sauvegarde des résultats dans la BDD
+            pronostic.sex_score = sex_score
+            pronostic.name_score = name_score
+            pronostic.weight_score = weight_score
+            pronostic.height_score = height_score
+            pronostic.date_score = date_score
+            pronostic.total_score = sex_score + name_score + weight_score + height_score + date_score
+            pronostic.save()
+        else:
+            pass
+    
+def get_pronostic_answers():
+    current_project_id = session['selected_project']['id']
+    current_project_obj = Project.objects(id=current_project_id).first()
+    
+    pronostics_for_current_project = Pronostic.objects(project=current_project_obj)
+    
+    pronostic_answers = {}
+    for pronostic_obj in pronostics_for_current_project:
+        pronostic_user_id = pronostic_obj.user.id
+        user_username = User.objects(id=pronostic_user_id).first().username
+        
+        if pronostic_obj.other_participant_name:
+            user_username = pronostic_obj.other_participant_name
+        
+        if pronostic_user_id != current_user.id:
+            pronostic_answers[pronostic_user_id] = {
+                'username': user_username,
+                'sex': pronostic_obj.sex,
+                'name': pronostic_obj.name,
+                'weight': (pronostic_obj.weight)/1000,
+                'height': (pronostic_obj.height)/10,
+                'date': pronostic_obj.date,
             }
             
-        else:
-            flash("Veuillez créer ou rejoindre un projet avant d'accéder à une liste de naissance", category='error')
-            return redirect(url_for('views.my_projects', **elements_for_base))
-            
+     # Inverser l'ordre du dictionnaire
+    pronostic_answers = OrderedDict(reversed(list(pronostic_answers.items())))
+    
+    return pronostic_answers
 
-#Fonction pour récupérer SA participation aux projets
+def get_admin_pronostic_answers():
+    #Fonction appelée
+    current_project = current_project_obj()
+    #Variables déduites de la fonction
+    pronostics_for_current_project = current_project.pronostic
+    project_admin_obj = current_project.admin
+    project_admin_id = project_admin_obj.id
+    
+    admin_results = {}
+    for pronostic_id in pronostics_for_current_project:
+        pronostic_obj = Pronostic.objects(id=pronostic_id).first()
+        if pronostic_obj: #Sécurité au cas ou le pronostic a été supprimé mais pas dans la liste des pronos du projet
+            if pronostic_obj.user.id == project_admin_id :
+                admin_results['prono_sex'] = pronostic_obj.sex
+                admin_results['prono_name'] = pronostic_obj.name
+                admin_results['prono_weight'] = pronostic_obj.weight/1000
+                admin_results['prono_height'] = pronostic_obj.height/10
+                admin_results['prono_date'] = pronostic_obj.date
+        else:
+            pass
+     
+    return admin_results       
+
+def capitalize_name(name):
+    # Diviser le prénom par les tirets et les espaces
+    parts = name.replace('-', ' - ').split()
+    # Capitaliser chaque partie du prénom
+    capitalized_parts = [part.capitalize() for part in parts]
+    # Réassembler les parties avec les tirets et les espaces
+    result = ' '.join(capitalized_parts).replace(' - ', '-')
+    return result
+
+
+# FONCTIONS POUR LA PARTIE LISTE DE NAISSANCE
 def user_participations_side_project_func():
+#Fonction pour récupérer SA participation aux projets
+
     user_participations_side_project = {}
     
     #J'ai dans ma class user la liste des participations
@@ -296,43 +477,50 @@ def user_participations_side_project_func():
             participation_id = ObjectId(participation) #Je récupère l'id de la participation
             participation_obj = Participation.objects(id=participation_id).first() #Je récupère l'objet Participation
             #Je récupère l'id du produit pour lequel la participation a été faite
-            product_id = participation_obj.product.id
             
-            #Je récupère l'id du projet pour lequel la participation a été faite
-            project_id = participation_obj.project.id
-            
-            project_name = Project.objects(id=project_id).first().name #Je récupère le nom du projet
-            
-            product_name = Product.objects(id=product_id).first().name #Je récupère le nom du produit
-            
-            
-            if participation_obj.type == "€":
-                participation_amount = participation_obj.amount #Je récupère le montant de la participation
-                participation_amount = f"{participation_amount}€"
-            elif participation_obj.type  == "donation":
-                participation_amount = "Don"
-            else:
-                participation_amount = "Prêt"
+            if participation_obj :
+                product_id = participation_obj.product.id
+                
+                #Je récupère l'id du projet pour lequel la participation a été faite
+                project_id = participation_obj.project.id
+                
+                project_name = Project.objects(id=project_id).first().name #Je récupère le nom du projet
+                
+                product_name = Product.objects(id=product_id).first().name #Je récupère le nom du produit
+                
+                
+                if participation_obj.type == "€":
+                    participation_amount = participation_obj.amount #Je récupère le montant de la participation
+                    participation_amount = f"{participation_amount}€"
+                elif participation_obj.type  == "donation":
+                    participation_amount = "Don"
+                else:
+                    participation_amount = "Prêt"
 
+                
+                status = participation_obj.status
+                
+                #Je vérifie que la participation n'a pas été faite pour le compte de quelqu'un d'autre sur son propre projet
+                if participation_obj.other_user == None:
+                    if project_name not in user_participations_side_project:
+                        user_participations_side_project[project_name] = []  # Créez une liste vide pour chaque nouvel utilisateur
+                
+                    user_participations_side_project[project_name].append((participation_id, product_name, participation_amount, status))
+            else:
+                print(f'id produit dans la liste du user mais pas de produit en face : Participation "{participation_id}" pour {current_user.username}')
+                pass #J'ai donc un id dans ma liste qui ne conduit vers aucun produit. Pas normal mais je continue et j'évite ainsi une erreur
             
-            status = participation_obj.status
-            
-            #Je vérifie que la participation n'a pas été faite pour le compte de quelqu'un d'autre sur son propre projet
-            if participation_obj.other_user == None:
-                if project_name not in user_participations_side_project:
-                    user_participations_side_project[project_name] = []  # Créez une liste vide pour chaque nouvel utilisateur
-            
-                user_participations_side_project[project_name].append((participation_id, product_name, participation_amount, status))
     else:
         user_participations_side_project = None
             
     return user_participations_side_project
 
-#Fonction pour récupérer LES participations à SON projet
 def my_project_participations():
+#Fonction pour récupérer LES participations à SON projet
+
 
     user_id = current_user.id
-    elements_for_base = elements_for_base_template(user_id)
+    elements_for_base = elements_for_navbar(user_id)
     admin_project = Project.objects(admin=user_id).first()
     
     user_participations = {}
@@ -379,77 +567,35 @@ def my_project_participations():
             
     return user_participations
 
-#Fonction afin de récupérer le choix du sexe fait par l'utilisateur afin de personnaliser les boutons des interfaces
-def get_gender_choice(current_project):
-    gender_choice = "no_gender"
-        
-    #Je récupe le choix du user concernant le sexe afin de personnaliser les boutons
-    #Je dois cependant gérer le cas ou je n'ai pas encore de pronostic pour le projet actuellement sauvegardé dans la session
-    try :
-        actual_project_pronostics_base_list = current_project.pronostic #Je récupère la liste des pronostics pour le projet actuellement sauvegardé dans la session
-        actual_project_pronostics_list = list(actual_project_pronostics_base_list)
-        
-        user_pronostics_base_list = current_user.pronostic #Je récupère la liste des pronostics pour le user actuellement connecté
-        user_pronostics_list = list(user_pronostics_base_list)
-        
-        for project_id in actual_project_pronostics_list:
-            if project_id in user_pronostics_list:
-                pronostic_utilisateur = Pronostic.objects(id=project_id).first()
-                gender_choice = pronostic_utilisateur.sex
-                
-                
-    except:
-        pass
-    
-    return gender_choice
 
-#Fonction permettant d'avoir les noms, même composés, avec les premies lettres en majuscule
-def capitalize_name(name):
-    # Diviser le prénom par les tirets et les espaces
-    parts = name.replace('-', ' - ').split()
-    # Capitaliser chaque partie du prénom
-    capitalized_parts = [part.capitalize() for part in parts]
-    # Réassembler les parties avec les tirets et les espaces
-    result = ' '.join(capitalized_parts).replace(' - ', '-')
-    return result
+#FONCTIONS POUR LA PARTIE MY PROJECTS
+def clue_due_date(current_project):
+    try:
+        due_date = current_project.due_date
+        due_date = due_date.strftime('%d/%m/%Y')
+    except Exception as e:
+        due_date = None
+    return due_date
 
-#Fonction afin de récupérer les résultats du prono de l'admin
-def get_admin_pronostic_answers():
-    current_project_id = session['selected_project']['id']
-    current_project_obj = Project.objects(id=current_project_id).first()
-    pronostics_for_current_project = current_project_obj.pronostic
-    
-    project_admin_obj = current_project_obj.admin
-    project_admin_id = project_admin_obj.id
-    
-    admin_results = {}
-    for pronostic_id in pronostics_for_current_project:
-        pronostic_obj = Pronostic.objects(id=pronostic_id).first()
+def clue_baby_name(current_project):
+    try:
+        clue_name = current_project.clue_name
+    except Exception as e:
+        clue_name = None
+    return clue_name
 
-        if pronostic_obj.user.id == project_admin_id :
-            admin_results['prono_sex'] = pronostic_obj.sex
-            admin_results['prono_name'] = pronostic_obj.name
-            admin_results['prono_weight'] = pronostic_obj.weight/1000
-            admin_results['prono_height'] = pronostic_obj.height/10
-            admin_results['prono_date'] = pronostic_obj.date
-            
-    return admin_results
 
-#Fonction pour formater le temps
-def format_time(timedelta_obj):
-    if not isinstance(timedelta_obj, timedelta):
-        return ''
-    total_seconds = int(timedelta_obj.total_seconds())
-    hours, remainder = divmod(total_seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return f"{hours}h {minutes}m {seconds}s"
 
-def hide_page():
-    ok_gilles = False
-    mails_ok = ["gilles@gilles.com", "bielmann.maxime@gmail.com"]
-    if current_user.email in mails_ok:
-        ok_gilles = True
-    return ok_gilles
+
+
+#Eléments présents dans add_project_in_session() donc à voir si je supprime
+def project_name_in_session():
+    if 'selected_project' in session:
+        current_project_name = session['selected_project']['name']
+        return current_project_name
+
+
+
 
 #ROUTES -------------------------------------------------------------------------------------------------------------
 @views.route('/')
@@ -491,7 +637,7 @@ def home_page():
             'affiliation_link_used': affiliation_link_used_bool
         }
 
-        elements_for_base = elements_for_base_template(user_id)
+        elements_for_base = elements_for_navbar(user_id)
         
         if 'selected_project' not in session:
              #user_id dans la liste users d'un projet ?
@@ -525,44 +671,44 @@ def home_page():
 @views.route('/liste_naissance')
 @login_required
 def liste_naissance():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+    
+    
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions  
+    current_project = current_project_obj()
+    current_project_products = current_project.product
+    #-----------------------------------
+    get_gender_choice(current_project)
+    #-----------------------------------
+    user_is_admin_current_project()
+    
+
+#Initialisation des variables
+    total_money_needed = 0
+    total_money_participations = 0
     
     current_user_18 = current_user.over_18
     if current_user_18 == False:
         flash("Vous devez être majeur pour accéder à cette page", category='error')
         return redirect(url_for('views.home_page', **elements_for_base))
-    
-    #Variables initiales
-    total_money_needed = 0
-    total_money_participations = 0
 
-    
-    try: 
-        current_project_id = session['selected_project']['id']
-        current_project = Project.objects(id=current_project_id).first()
-        
-        gender_choice = get_gender_choice(current_project)
-        session['gender_choice'] = gender_choice
-        
-        user_id = current_user.id
-        admin_id = current_project.admin.id
-        user_is_admin = (user_id == admin_id)
-        session['admin_id'] = admin_id
-        session['user_is_admin'] = user_is_admin
-        
-        products_for_current_project = current_project.product
-        
-        if products_for_current_project:
-            
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "liste_naissance"
+#--------------------------------------------------------------------------------------------------------------------------------------------
+    try:
+        if current_project_products:
             products = []
             
-
-            for product_id in products_for_current_project:
+            for product_id in current_project_products:
                 product = Product.objects(id=product_id).first()
                 products.append({
                     'name': product.name,
@@ -589,41 +735,45 @@ def liste_naissance():
             products = sorted(products, key=lambda x: x['left_to_pay'], reverse=True)
             
             # -----------------
-            if user_is_admin :
-                return render_template('Products/liste_naissance.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
-            else:
-                return render_template('Products/liste_naissance.html', **elements_for_base, total_money_needed=total_money_needed, total_money_participations=total_money_participations, products=products)
+            return render_template('Products/liste_naissance.html', 
+                                   total_money_needed=total_money_needed,
+                                   total_money_participations=total_money_participations, 
+                                   products=products,
+                                   
+                                   **elements_for_base)
             
         else:
-            return render_template('Products/liste_naissance.html', user_is_admin=user_is_admin, total_money_needed=total_money_needed, total_money_participations=total_money_participations, **elements_for_base)
+            return render_template('Products/liste_naissance.html', 
+                                   total_money_needed=total_money_needed,
+                                   total_money_participations=total_money_participations,
+                                   
+                                   **elements_for_base)
     
     except (KeyError, AttributeError):
-        flash("Veuillez créer ou rejoindre un projet avant d'accéder à une liste de naissance", category='error')
+        flash("Erreur dans la route 'liste de naissance'", category='error')
         return redirect(url_for('views.my_projects', **elements_for_base))
     
 @views.route('/add_product', methods=['GET', 'POST'])
 @login_required
 def add_product():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     
-    #Ajout d'un nouveau produit
     if request.method == 'POST':
-       
         current_project_id = session['selected_project']['id']
         name = request.form.get('product_name')
         description = request.form.get('product_description')
         price = request.form.get('product_price')
         already_paid = 0
-        url_source = request.form.get('product_url_source')     
-        
-        
-        # image_url = img_url
+        url_source = request.form.get('product_url_source')
         image_url = request.form.get('product_image_url')
         type = "€"
         
@@ -639,20 +789,22 @@ def add_product():
         current_project.save()
         
         flash(f'Produit créé avec succès !', category='success')
-        
         return redirect(url_for('views.liste_naissance'))
                 
-    return render_template('Products/add_product.html',  **elements_for_base)
+    return render_template('Products/add_product.html', **elements_for_base)
 
 @views.route('/update_product/<product_id>', methods=['GET', 'POST'])
 @login_required
 def update_product(product_id):
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     product = Product.objects(id=product_id).first()
 
@@ -666,9 +818,10 @@ def update_product(product_id):
         
         if name:
             product.name = name
-        product.description = description
+            
         if price:
             product.price = price
+            
         if left_to_pay:
             if left_to_pay > product.price:
                 left_to_pay = product.price
@@ -677,30 +830,40 @@ def update_product(product_id):
             else:
                 already_paid = int(product.price) - int(left_to_pay)
                 product.already_paid = already_paid
+                
         if url_source:
             product.url_source = url_source
+            
         if image_url:
             product.image_url = image_url
+            
+        product.description = description
         
         product.save()
         
         flash('Produit mis à jour avec succès !')
-        return redirect(url_for('views.product_details', product_id=product_id))
+        return redirect(url_for('views.product_details', 
+                                product_id=product_id))
     
-    return render_template('Products/update_product.html', user=current_user, **elements_for_base, product=product)
+    return render_template('Products/update_product.html', 
+                           product=product,
+                           
+                           **elements_for_base)
   
 @views.route('/product_details/<product_id>', methods=['GET','POST'])
 @login_required
 def product_details(product_id):
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     product = Product.objects(id=product_id).first()
-    
     left_to_pay = product.price-product.already_paid
     
     participation_choice = "no_choice"
@@ -716,7 +879,12 @@ def product_details(product_id):
             elif 'lending' in request.form:
                 participation_choice = "lending"
         
-        return render_template('Products/product_details.html', product=product, **elements_for_base, left_to_pay=left_to_pay, participation_choice=participation_choice)
+        return render_template('Products/product_details.html', 
+                               product=product, 
+                               left_to_pay=left_to_pay, 
+                               participation_choice=participation_choice,
+                               
+                               **elements_for_base,)
     else:
         # Si le produit n'est pas trouvé, renvoyer une erreur 404 ou rediriger vers une autre page
         return render_template('Products/liste_naissance.html', **elements_for_base), 404
@@ -724,12 +892,15 @@ def product_details(product_id):
 @views.route('/confirm_participation_loading/<product_id>', methods=['GET','POST'])
 @login_required
 def confirm_participation_loading(product_id):
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
 
     if request.method == 'POST':
         user = User.objects(id=user_id).first()
@@ -782,42 +953,63 @@ def confirm_participation_loading(product_id):
         user.participation.append(new_participation.id)
         user.save()
 
-                
-        return render_template('Products/confirm_participation_loading.html', product=product, **elements_for_base, participation=participation)
+        return render_template('Products/confirm_participation_loading.html', 
+                               product=product, 
+                               participation=participation,
+                               
+                               **elements_for_base)
     
     if product:
-        return render_template('Products/product_participation.html', product=product, **elements_for_base)
+        return render_template('Products/product_participation.html', 
+                               product=product, 
+                               
+                               **elements_for_base)
     else:
         return render_template('Products/liste_naissance.html', **elements_for_base), 404
 
 @views.route('/confirm_participation/<participation>', methods=['GET','POST'])
 @login_required
 def confirm_participation(participation):
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    current_project = current_project_obj()
+    current_project_admin_id = current_project.admin.id
+    admin_iban = User.objects(id=current_project_admin_id).first().iban
     
-    #Récupération du iban de l'admin du projet
-    admin_id = session['admin_id']
-    admin_iban = User.objects(id=admin_id).first().iban
-    
-    #Récupération du nom du user
+#Initialisation des variables
     username = current_user.username
 
-    return render_template('Products/confirm_participation.html', **elements_for_base, admin_iban=admin_iban, participation=participation, username=username)
+    return render_template('Products/confirm_participation.html', 
+                           admin_iban=admin_iban, 
+                           participation=participation, 
+                           username=username,
+                           
+                           **elements_for_base)
 
 @views.route('/delete_product/<product_id>', methods=['GET','POST'])
 @login_required
 def delete_product(product_id):
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    current_project = current_project_obj()
 
     # Je récupère l'objet Product concerné
     product = Product.objects(id=product_id).first()
@@ -828,25 +1020,23 @@ def delete_product(product_id):
     for participation_id in participation_list:
         Participation.objects(id=participation_id).delete()
 
-    # Suppression du produit dans le projet
-    project_id = session['selected_project']['id']
-    project = Project.objects(id=project_id).first()
+    
+
     
     #Je récupère la liste des produits du projet
-    products_in_project = project.product
+    products_in_project = current_project.product
     
     for product_in_project in products_in_project:
         #Je transforme products_in_project en str pour pouvoir comparer
         product_in_project_str = str(product_in_project)
 
         if product_in_project_str == product_id:
-            project.update(pull__product=product_in_project)
-            project.save()
+            current_project.update(pull__product=product_in_project)
+            current_project.save()
                 
     product.delete()
     
     flash('Produit supprimé avec succès !', category='success')
-
     return redirect(url_for('views.liste_naissance'))
 
 
@@ -854,174 +1044,179 @@ def delete_product(product_id):
 @views.route('/pronostic', methods=['GET', 'POST'])
 @login_required
 def pronostic():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+    
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    current_project = current_project_obj()
+    current_project_id = current_project.id
+    current_project_pronostics = current_project.pronostic
+    end_pronostics = current_project.end_pronostics
+    #-----------------------------------
+    due_date = clue_due_date(current_project)
+    #-----------------------------------
+    clue_name = clue_baby_name(current_project)
+    #-----------------------------------
+    user_is_admin = user_is_admin_current_project()
+    #-----------------------------------
 
-    at_least_one_pronostic = False
-    # Si le user est déjà dans un projet et que je n'ai rien dans la session (parce que je viens de me connecter), je récupère le premier projet dans lequel le user est afin d'ouvrir une session et ne pas avoir à choisir un projet à chaque fois que je me connecte.
-    #Si une session est déjà ouverte, je skip cette étape
-    if 'selected_project' not in session:
-        user_in_project = Project.objects(users__contains=user_id)
-        if user_in_project:
-            first_project = user_in_project.first() 
-            first_project_id = first_project.id
+#Initialisation des variables
+    at_least_one_pronostic = False #Va permettre d'afficher ou non certains boutons dans le template
+    go_to_pronostic = False
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "pronostic"
+#--------------------------------------------------------------------------------------------------------------------------------------------
+
+    if current_project_pronostics :
+        at_least_one_pronostic = True
+        if current_user.pronostic :
+            cu_made_prono_in_cp = bool(set(current_project_pronostics) & set(current_user.pronostic)) #True si le cu a déjà fait son prono pour le cp
             
-            # Ajouter les données du premier projet trouvé dans la session
-            session['selected_project'] = {
-                'id': str(first_project_id),
-                'name': first_project.name
-            }
-    try:
-        current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
-        current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
-        end_pronostics = current_project.end_pronostics
-        admin_id = current_project.admin.id
-        
-        try:
-            due_date = current_project.due_date
-            due_date = due_date.strftime('%d/%m/%Y')
-
-        except Exception as e:
-            due_date = None
-            
-        try:
-            clue_name = current_project.clue_name
-
-        except Exception as e:
-            clue_name = None
-            
-        user_is_admin = (user_id == admin_id)
-        
-        pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
-
-        if pronostics_for_current_project : #J'ai au moins 1 pronostic pour le projet sélectionné
-            at_least_one_pronostic = True
-            if current_user.pronostic : #Si le user actuel a déjà un pronostic, peut-importe sur quel projet
-
-                current_user_pronostic_bool = bool(set(pronostics_for_current_project) & set(current_user.pronostic))
+            if cu_made_prono_in_cp == True :
+                current_user_pronostic_id = (set(current_project_pronostics) & set(current_user.pronostic)).pop() #Je récupère l'id du pronostic du cu pour le cp
+                current_user_pronostic = Pronostic.objects(id=current_user_pronostic_id).first()
                 
-                if current_user_pronostic_bool == True : #Le user a déjà fait son prono pour le projet actuel
-                    current_user_pronostic = (set(pronostics_for_current_project) & set(current_user.pronostic)).pop()
-                    pronostic_utilisateur = Pronostic.objects(id=current_user_pronostic).first() #J'ai l'objet Pronostic actuellement sauvegardé dans la session
+                prono_sex = current_user_pronostic.sex
+                prono_name = current_user_pronostic.name
+                prono_weight = float(current_user_pronostic.weight) /1000 #en kg
+                prono_height = float(current_user_pronostic.height)/10 #en cm
+                prono_date = current_user_pronostic.date
+                
+                pronostic_done=True #Des conditions dans la page vont afficher des éléments en fonction de cette variable
+                prono_sex_btn = prono_sex #Je récupère le sexe du bébé du user afin de maj les boutons en conséquence
+                
+                if end_pronostics == True :
+                    admin_results = get_admin_pronostic_answers()
+                    prono_sex_btn = admin_results['prono_sex'] #Je récupère le sexe du bébé de l'admin afin de maj les boutons en conséquence
                     
-                    prono_sex = pronostic_utilisateur.sex
-                    prono_name = pronostic_utilisateur.name
-                    prono_weight = float(pronostic_utilisateur.weight) /1000 #Je divise par 1000 pour avoir le poids en kg
-                    prono_height = float(pronostic_utilisateur.height)/10 #Je divise par 10 pour avoir la taille en cm
-                    prono_date = pronostic_utilisateur.date
-                    
-                    pronostic_done=True
-                    
-                    prono_sex_btn = prono_sex
-                    
-                    #Petite astuce ici permettant d'afficher les infos du gagnant en 1er en arrivant sur pronostic
-                    go_to_pronostic = False
-
-                    if end_pronostics == True :
-                        admin_results = get_admin_pronostic_answers()
-                        prono_sex_btn = admin_results['prono_sex']
+                    if request.method == 'POST':
+                        go_to_pronostic = request.form.get('go_to_pronostic') #J'ai cliqué sur un bouton me demandant spécifiquement d'aller sur la page pronostic. Je passe donc "go_to_pronostic" en True
                         
-                        if request.method == 'POST':
-                            go_to_pronostic = request.form.get('go_to_pronostic')
-                            
-                        if go_to_pronostic == False :
-                            return redirect(url_for('views.pronostic_winner', **elements_for_base))
+                    if go_to_pronostic == False :
+                        print("Passage 5")
+                        return redirect(url_for('views.pronostic_winner')) #Route empruntée quand je clic sur Pronostic dans la navbar
                         
-                        else:
-                            score_prono_user = {
-                                'Sex' : pronostic_utilisateur.sex_score,
-                                'Name' : pronostic_utilisateur.name_score,
-                                'Weight' : pronostic_utilisateur.weight_score,
-                                'Height' : pronostic_utilisateur.height_score,
-                                'Date' : pronostic_utilisateur.date_score,
-                                'Total' : pronostic_utilisateur.total_score
-                            }
-                            
-                            total_possible = (scores_pronostics['Total_possible'])
-                            
-                            return render_template('Pronostics/pronostic.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_pronostic=go_to_pronostic, score_prono_user=score_prono_user, scores_pronostics=scores_pronostics, total_possible=total_possible, prono_sex_btn=prono_sex_btn, **elements_for_base)
                     
                     else:
-                        return render_template('Pronostics/pronostic.html', user=current_user, user_is_admin=user_is_admin, pronostic_done=pronostic_done, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, go_to_pronostic=go_to_pronostic, prono_sex_btn=prono_sex_btn, **elements_for_base)
+                        score_prono_user = {
+                            'Sex' : current_user_pronostic.sex_score,
+                            'Name' : current_user_pronostic.name_score,
+                            'Weight' : current_user_pronostic.weight_score,
+                            'Height' : current_user_pronostic.height_score,
+                            'Date' : current_user_pronostic.date_score,
+                            'Total' : current_user_pronostic.total_score
+                        }
+                        total_possible = (scores_pronostics['Total_possible'])
+                        print("Passage 4")
+                        return render_template('Pronostics/pronostic.html', #Cette page récupe les scores des pronostics
+                                               user_is_admin=user_is_admin,
+                                               at_least_one_pronostic=at_least_one_pronostic,
+                                               end_pronostics=end_pronostics,
+                                               pronostic_done=pronostic_done,
+                                               
+                                               prono_sex=prono_sex, 
+                                               prono_name=prono_name, 
+                                               prono_weight=prono_weight, 
+                                               prono_height=prono_height, 
+                                               prono_date=prono_date,
+                                               
+                                               go_to_pronostic=go_to_pronostic,
+                                               prono_sex_btn=prono_sex_btn,
+                                               
+                                               #Eléments spécifiques à cette page ci-dessous
+                                               score_prono_user=score_prono_user, 
+                                               scores_pronostics=scores_pronostics, 
+                                               total_possible=total_possible, 
+                                               
+                                               **elements_for_base
+                                               )
+                else:
+                    print("Passage 3")
+                    return render_template('Pronostics/pronostic.html', 
+                                           user_is_admin=user_is_admin,
+                                           at_least_one_pronostic=at_least_one_pronostic,
+                                           end_pronostics=end_pronostics,
+                                           pronostic_done=pronostic_done,
+                                            
+                                           prono_sex=prono_sex, 
+                                           prono_name=prono_name, 
+                                           prono_weight=prono_weight, 
+                                           prono_height=prono_height, 
+                                           prono_date=prono_date,
+                                           
+                                           prono_sex_btn=prono_sex_btn,
+                                           
+                                           **elements_for_base
+                                           )
 
-                else : #
-                    result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
-                    if result:
-                        if user_is_admin :
-                            current_project.end_pronostics = True
-                            end_pronostics = current_project.end_pronostics
-                            current_project.save()
+        #Le user n'a pas de prono et ceux dans le projet rejoint sont terminés
+        else:
+            if end_pronostics == True :
+                return render_template('Pronostics/pronostic.html', 
+                            user_is_admin=user_is_admin, 
+                            end_pronostics=end_pronostics,
                             
-                        return redirect(url_for('views.pronostic'))
-            
-            else : #J'arrive ici si le user n'a JAMAIS fait de pronostic sur aucun projet ET n'est pas le 1er à pronostiquer pour le projet en cours
-                try:
-                    result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
-                except:
-                    return redirect(url_for('views.pronostic'))
-                if result:
-                    if user_is_admin :
-                        current_project.end_pronostics = True
-                        end_pronostics = current_project.end_pronostics
-                        current_project.save()
-                    return redirect(url_for('views.pronostic'))
-
-        else : #C'est ici que va s'enregistrer le 1er prono de mon projet
-            result = new_pronostic(current_user, current_project_id, current_project, pronostics_for_current_project, user_is_admin)
-            
-            if result:
-                if user_is_admin :
-                    current_project.end_pronostics = True
-                    end_pronostics = current_project.end_pronostics
-                    current_project.save()
-
-                return redirect(url_for('views.pronostic'))
-            
-    except (KeyError, AttributeError):
-        flash("Veuillez créer ou rejoindre un projet avant d'accéder aux pronostics", category='error')
-        return redirect(url_for('views.my_projects', user=current_user, **elements_for_base))
-    
-    #J'arrive ici si je n'ai pas encore fait mon prono pour le projet actuel
-    return render_template('Pronostics/pronostic.html', user_is_admin=user_is_admin, at_least_one_pronostic=at_least_one_pronostic, end_pronostics=end_pronostics, due_date=due_date, clue_name=clue_name, **elements_for_base)
+                            **elements_for_base
+                            )
+                
+                
+        
+        
+    valid_pronostic = new_pronostic(current_user, current_project_id, current_project)
+    if valid_pronostic :
+        print("Passage 2")
+        return redirect(url_for('views.pronostic'))
+        
+    else:
+        print("Passage 1")
+        return render_template('Pronostics/pronostic.html', 
+                            user_is_admin=user_is_admin, 
+                            at_least_one_pronostic=at_least_one_pronostic, 
+                            end_pronostics=end_pronostics,
+                            #Eléments spécifiques à cette page ci-dessous
+                            due_date=due_date, 
+                            clue_name=clue_name,
+                            
+                            **elements_for_base
+                            )
 
 @views.route('/update_pronostic', methods=['GET', 'POST']) 
 @login_required
 def update_pronostic():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
-    
-    user = current_user
-    
-    current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
-    current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session     
-        
-    try:
-        due_date = current_project.due_date
-        due_date = due_date.strftime('%d/%m/%Y')
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
 
-    except Exception as e:
-        due_date = None
-        
-    try:
-        clue_name = current_project.clue_name
 
-    except Exception as e:
-        clue_name = None
-        
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    current_project = current_project_obj()
+    due_date = clue_due_date(current_project)
+    clue_name = clue_baby_name(current_project)
 
-    current_project_id = session['selected_project']['id'] #J'ai l'id du projet actuellement sauvegardé dans la session
-    current_project = Project.objects(id=current_project_id).first() #J'ai l'objet Project actuellement sauvegardé dans la session
-    pronostics_for_current_project = current_project.pronostic #J'ai la liste des pronostics pour le projet actuellement sauvegardé dans la session
     
-    for pronostic in user.pronostic:
+    
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "update_pronostic"
+#--------------------------------------------------------------------------------------------------------------------------------------------       
+
+    pronostics_for_current_project = current_project.pronostic
+    
+    for pronostic in current_user.pronostic:
         if pronostic in pronostics_for_current_project:
             pronostic_utilisateur = Pronostic.objects(id=pronostic).first()
     
@@ -1056,59 +1251,62 @@ def update_pronostic():
                     pronostic_utilisateur.height = height
                 if date:
                     pronostic_utilisateur.date = date
-                    
-                # Enregistrer les modifications
                 pronostic_utilisateur.save()
                 
-                pronostic_done = True
-                prono_sex = pronostic_utilisateur.sex
-                prono_name = pronostic_utilisateur.name
-                prono_weight = (pronostic_utilisateur.weight)/1000
-                prono_height = (pronostic_utilisateur.height)/10
-                prono_date = pronostic_utilisateur.date
-                
+                if current_project.admin == current_user:
+                   calculate_pronostic_scores()
                 
                 flash('Pronostic mis à jour avec succès !')
                 return redirect(url_for('views.pronostic'))
     
-    return render_template('Pronostics/update_pronostic.html', user=current_user, prono_sex=prono_sex, prono_name=prono_name, prono_weight=prono_weight, prono_height=prono_height, prono_date=prono_date, due_date=due_date, clue_name=clue_name, **elements_for_base)
+    return render_template('Pronostics/update_pronostic.html', 
+                           user=current_user, 
+                           prono_sex=prono_sex, 
+                           prono_name=prono_name, 
+                           prono_weight=prono_weight, 
+                           prono_height=prono_height, 
+                           prono_date=prono_date, 
+                           due_date=due_date, 
+                           clue_name=clue_name, 
+                           
+                           **elements_for_base)
 
 @views.route('/all_pronostics', methods=['GET', 'POST'])
 @login_required
 def all_pronostics():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
-    
-    current_project_id = session['selected_project']['id']
-    current_project = Project.objects(id=current_project_id).first()
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
 
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    current_project = current_project_obj()
     end_pronostics = current_project.end_pronostics
-    
-    pronostic_ids = current_project.pronostic  # Cette liste contient les IDs des pronostics
+    pronostic_ids = current_project.pronostic
     pronostics = Pronostic.objects(id__in=pronostic_ids)
-    
-    user_id = current_user.id
-    
-    user_is_admin = user_is_admin_project()
-    
-    #Je récupère le choix du sexe fait par le user afin de personnaliser les boutons des interfaces
+    #-----------------------------------
+    user_is_admin = user_is_admin_current_project()
+    #-----------------------------------
     gender_choice = get_gender_choice(current_project)
     
-    
+#Initialisation des variables
     number_of_pronostics = len(pronostics)
     sex_girl = 0
     weight_values = []
     height_values = []
     timestamps = []
     names = {}
+    multiple_names = False
     
-    
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "all_pronostics"
+#--------------------------------------------------------------------------------------------------------------------------------------------    
     for pronostic in pronostics:
-         
         weight_value = (pronostic.weight)
         weight_values.append(weight_value)
         
@@ -1130,11 +1328,11 @@ def all_pronostics():
 
     #Poids moyen
     average_weight = sum(weight_values) / len(weight_values)
-    average_weight = (round(average_weight/1000, 2)) #Je divise par 1000 pour avoir le poids en kg
+    average_weight = (round(average_weight/1000, 2)) #poids en kg
 
     #Taille moyenne
     average_height = sum(height_values) / len(height_values)
-    average_height = (round(average_height/10, 1)) #Je divise par 100 pour avoir la taille en cm
+    average_height = (round(average_height/10, 1)) #taille en cm
     
     #Date moyenne
     average_timestamp = sum(timestamps) / len(timestamps)
@@ -1148,202 +1346,173 @@ def all_pronostics():
     #Tris des prénoms avec ceux proposés plusieurs fois en premier
     names = dict(sorted(names.items(), key=lambda item: item[1], reverse=True))
     # Initialiser la variable multiple_names à False
-    multiple_names = False
-
+    
     # Vérifier si l'un des noms apparaît plus d'une fois
     for name, count in names.items():
         if count > 1:
             multiple_names = True
             break
     
-    return render_template('Pronostics/all_pronostics.html', user_is_admin=user_is_admin, average_weight=average_weight, average_height=average_height, average_date=average_date, percentage_girl=percentage_girl, percentage_boy=percentage_boy, names=names, number_of_pronostics=number_of_pronostics, end_pronostics=end_pronostics, **elements_for_base, gender_choice=gender_choice, multiple_names=multiple_names)
+    return render_template('Pronostics/all_pronostics.html', 
+                           user_is_admin=user_is_admin, 
+                           average_weight=average_weight, 
+                           average_height=average_height, 
+                           average_date=average_date, 
+                           percentage_girl=percentage_girl, 
+                           percentage_boy=percentage_boy, 
+                           names=names, 
+                           number_of_pronostics=number_of_pronostics, 
+                           end_pronostics=end_pronostics, 
+                           gender_choice=gender_choice, 
+                           multiple_names=multiple_names,
+                           
+                           **elements_for_base)
 
 @views.route('/pronostic_winner', methods=['GET', 'POST'])
 @login_required
 def pronostic_winner():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
-    
-    #Récupération des éléments afin de pouvoir récupérer les infos
-    current_project_id = session['selected_project']['id']
-    current_project = Project.objects(id=current_project_id).first()
-    pronostics_for_current_project = current_project.pronostic
-    
-    #Je mets ici toute la mécanique de calcul des points afin de déterminer le gagnant
-    project_admin = current_project.admin
-    project_admin_id = project_admin.id
-    
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects', **elements_for_base))
+    #-----------------------------------
+
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    #-----------------------------------
+    current_project = current_project_obj()
+    current_project_pronostics_list = current_project.pronostic
+    #-----------------------------------
+    user_is_admin = user_is_admin_current_project()
+    #-----------------------------------
     admin_results = get_admin_pronostic_answers()
+
+#Initialisation des variables
     prono_sex_btn = admin_results['prono_sex']
-    
-    admin_id = current_project.admin.id
-    user_is_admin = (user_id == admin_id)
-       
-    #Je récupere ensuite les infos des users
     number_of_winners = 0
+    best_score = 1 #Comme ça je n'ajoute pas tout le monde si je n'ai que des 0 (peu probable mais bon...)
+    best_pronostics_list = []
     
-    for pronostic_id in pronostics_for_current_project:                                        
-        pronostic_user = Pronostic.objects(id=pronostic_id).first()
-        
-        if pronostic_user.user.id != project_admin_id :
-            user_prono_sex = pronostic_user.sex
-            user_prono_name = pronostic_user.name
-            user_prono_weight = pronostic_user.weight
-            user_prono_height = pronostic_user.height
-            user_prono_date = pronostic_user.date
-
-            
-            #Je fais le comparatif entre les pronostics de l'admin et ceux des users
-            
-            #Comparatif pour le sexe
-            if user_prono_sex == admin_results['prono_sex']:
-                sex_score = scores_pronostics['Sex']['good']
-            else:
-                sex_score = scores_pronostics['Sex']['bad']
-             
-            #Comparatif pour le nom   
-            if user_prono_name == admin_results['prono_name']:
-                name_score = scores_pronostics['Name']['good']
-            else:
-                name_score = scores_pronostics['Name']['bad']
-            
-            #Comparatif pour le poids   
-            user_prono_weight = float(user_prono_weight)
-            admin_results['prono_weight'] = float(admin_results['prono_weight'])
-            
-            # Définition des tolérances pour les comparaisons de poids
-            tolerance_middle_1 = 11
-            tolerance_middle_2 = 51
-            ecart_abs_weight = abs(user_prono_weight - admin_results['prono_weight'])
-
-            # Comparer les poids avec les différentes tolérances
-            if ecart_abs_weight == 0:
-                weight_score = scores_pronostics['Weight']['good']
-            elif ecart_abs_weight < tolerance_middle_1:
-                weight_score = scores_pronostics['Weight']['middle_1']
-            elif ecart_abs_weight <= tolerance_middle_2:
-                weight_score = scores_pronostics['Weight']['middle_2']
-            else:
-                weight_score = scores_pronostics['Weight']['bad']
-                
-                
-            # Définition des tolérances pour les comparaisons de taille
-            tolerance_middle_1 = 1
-            tolerance_middle_2 = 5
-            ecart_abs_height = abs((user_prono_height) - (admin_results['prono_height']))
-            
-            #Comparatif pour la taille
-            user_prono_height = float(user_prono_height)
-            admin_results['prono_height'] = float(admin_results['prono_height'])
-            
-            if ecart_abs_height == 0:
-                height_score = scores_pronostics['Height']['good']
-            elif ecart_abs_height <= tolerance_middle_1:
-                height_score = scores_pronostics['Height']['middle_1']
-            elif ecart_abs_height <= tolerance_middle_2:
-                height_score = scores_pronostics['Height']['middle_2']
-            else:
-                height_score = scores_pronostics['Height']['bad']
-            
-            #Comparatif pour la date
-            
-            tolerance_middle_1 = 1#jour
-            tolerance_middle_2 = 2#jours
-            
-            user_prono_date = datetime.strptime(user_prono_date, '%d/%m/%Y')
-            admin_result_date = datetime.strptime(admin_results['prono_date'], '%d/%m/%Y')
-            
-            difference_days = abs((user_prono_date - admin_result_date).days)
-            
-            if difference_days == 0 :
-                date_score = scores_pronostics['Date']['good']
-            elif difference_days == tolerance_middle_1:
-                date_score = scores_pronostics['Date']['middle_1']
-            elif difference_days <= tolerance_middle_2:
-                date_score = scores_pronostics['Date']['middle_2']
-            else:
-                date_score = scores_pronostics['Date']['bad']
-            
-            
-            pronostic_user.sex_score = sex_score
-            pronostic_user.name_score = name_score
-            pronostic_user.weight_score = weight_score
-            pronostic_user.height_score = height_score
-            pronostic_user.date_score = date_score
-            pronostic_user.total_score = sex_score + name_score + weight_score + height_score + date_score
-            pronostic_user.save()
-    
-    
-    max_total_score = float('-inf')  # Initialisation à un nombre très bas
-    pronostics_with_max_score = []
-    for pronostic_id in pronostics_for_current_project:
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "pronostic_winner"
+#--------------------------------------------------------------------------------------------------------------------------------------------   
+    for pronostic_id in current_project_pronostics_list :
         pronostic = Pronostic.objects(id=pronostic_id).first()
-        
-        if pronostic.user.id != project_admin_id :            
-            total_score = pronostic.total_score
-            if total_score > max_total_score:
-                max_total_score=total_score
-                pronostics_with_max_score = [pronostic]
-            elif total_score == max_total_score:
-                pronostics_with_max_score.append(pronostic)
-    
-    high_score_pronostics = []          
-    for high_pronostic in pronostics_with_max_score:
-        high_score_pronostic = {
-            'username' : high_pronostic.user.username,
-            'sex' : high_pronostic.sex,
-            'name' : high_pronostic.name,
-            'weight' : high_pronostic.weight/1000,
-            'height' : high_pronostic.height/10,
-            'date' : high_pronostic.date,
-            'sex_score' : high_pronostic.sex_score,
-            'name_score' : high_pronostic.name_score,
-            'weight_score' : high_pronostic.weight_score,
-            'height_score' : high_pronostic.height_score,
-            'date_score' : high_pronostic.date_score,
-            'total_score' : high_pronostic.total_score,
-        }
-        number_of_winners += 1
-        high_score_pronostics.append(high_score_pronostic)
-        
-    print(f"Nombre de gagnants : {number_of_winners}")
 
-    return render_template('Pronostics/pronostic_winner.html', scores_pronostics=scores_pronostics, number_of_winners=number_of_winners, high_score_pronostics=high_score_pronostics, prono_sex_btn=prono_sex_btn, user_is_admin=user_is_admin, **elements_for_base)
+        if pronostic.total_score == best_score:
+            best_pronostics_list.append(pronostic)
+            number_of_winners += 1
+        elif pronostic.total_score > best_score:
+            best_score = pronostic.total_score
+            best_pronostics_list = [pronostic]
+            number_of_winners = 1
+        else:
+            pass
+        
+    high_score_pronostics_list = []
+    
+    best_score_possible = {
+        "sex_max" : scores_pronostics['Sex']['good'],
+        "name_max" : scores_pronostics['Name']['good'],
+        "weight_max" : scores_pronostics['Weight']['good'],
+        "height_max" : scores_pronostics['Height']['good'],
+        "date_max" : scores_pronostics['Date']['good'],
+        "total_max" : scores_pronostics['Sex']['good']+scores_pronostics['Name']['good']+scores_pronostics['Weight']['good']+scores_pronostics['Height']['good']+scores_pronostics['Date']['good'],
+        }
+    
+    
+    for pronostic in best_pronostics_list:
+        
+        #If afin de prendre en compte les pronos réalisés par l'admin pour qqun de non inscrit
+        if pronostic.other_participant_name:
+            username = pronostic.other_participant_name
+        else:
+            username = pronostic.user.username
+        
+        high_score_pronostic = {
+            'username' : username,
+            
+            'sex' : pronostic.sex,
+            'sex_score' : pronostic.sex_score,
+            
+            'name' : pronostic.name,
+            'name_score' : pronostic.name_score,
+            
+            'weight' : pronostic.weight/1000,
+            'weight_score' : pronostic.weight_score,
+            
+            'height' : pronostic.height/10,
+            'height_score' : pronostic.height_score,
+            
+            'date' : pronostic.date,
+            'date_score' : pronostic.date_score,
+            
+            'total_score' : pronostic.total_score,
+        }
+        high_score_pronostics_list.append(high_score_pronostic)
+    
+    return render_template('Pronostics/pronostic_winner.html', 
+                           number_of_winners=number_of_winners,
+                           high_score_pronostics_list=high_score_pronostics_list, 
+                           prono_sex_btn=prono_sex_btn, 
+                           user_is_admin=user_is_admin,
+                           best_score_possible=best_score_possible,
+                           
+                           **elements_for_base)
 
 @views.route('/pronostic_answers', methods=['GET', 'POST'])
 @login_required
 def pronostic_answers():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects', **elements_for_base))
+    #-----------------------------------
     
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    #-----------------------------------
     admin_results = get_admin_pronostic_answers()
+    
+#Initialisation des variables
     prono_sex_btn = admin_results['prono_sex']
     
-    return render_template('Pronostics/pronostic_answers.html', admin_results=admin_results, prono_sex_btn=prono_sex_btn, **elements_for_base)
+    return render_template('Pronostics/pronostic_answers.html', 
+                           admin_results=admin_results, 
+                           prono_sex_btn=prono_sex_btn, 
+                           
+                           **elements_for_base)
 
 @views.route('/pronostic_all_answers', methods=['GET', 'POST'])
 @login_required
 def pronostic_all_answers():
-    #A -----------------
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    #B -----------------
-    elements_for_base = elements_for_base_template(user_id)
-    #C -----------------
-    project_in_session(user_id, elements_for_base)
-    
-    user_is_admin = user_is_admin_project()
-    
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects', **elements_for_base))
+    #-----------------------------------
+
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    #-----------------------------------
+    user_is_admin = user_is_admin_current_project()
+    #-----------------------------------
     all_pronostics = get_pronostic_answers()
         
-    return render_template('Pronostics/pronostic_all_answers.html',user_is_admin=user_is_admin, all_pronostics=all_pronostics, **elements_for_base)
+    return render_template('Pronostics/pronostic_all_answers.html',
+                           user_is_admin=user_is_admin, 
+                           all_pronostics=all_pronostics, 
+                           
+                           **elements_for_base)
 
 
 
@@ -1351,35 +1520,41 @@ def pronostic_all_answers():
 @views.route('/photos', methods=['GET', 'POST'])
 @login_required
 def photos():
-   # A - Récupérer l'id du user connecté
+    #Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
-    #D - je récupe l'info pour savoir su le user est l'admin du projet
-    user_is_admin = user_is_admin_project()
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
+    
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    #-----------------------------------
+    user_is_admin = user_is_admin_current_project()
+    #-----------------------------------
     ok_gilles = hide_page()
+    #-----------------------------------
+    current_project = current_project_obj()
     
-    selected_project_id = session['selected_project']['id']
-    project = Project.objects(id=selected_project_id).first()
-    if not project:
-        return "Project not found", 404
-    
-    photos = Photos.objects(project=project).order_by('-date')
-    
+#Initialisation des variables
     photos_with_unread_comments = []
     photos_datas = []
     photos_to_use = []
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "photos"
+#--------------------------------------------------------------------------------------------------------------------------------------------   
+    photos = Photos.objects(project=current_project).order_by('-date')
+    
     for photo in photos:
         if photo.utility == 'Gallery':
             photos_to_use.append(photo)
             comments = Messages.objects(photo=photo)
             
             has_unread_comments = any(current_user not in comment.seen_by_users for comment in comments)
-            # if has_unread_comments:
-            #     photos_with_unread_comments.append(photo.id)
             photo_data = {
             'id': photo.id,
             'date': photo.date,
@@ -1392,44 +1567,52 @@ def photos():
         else:
             pass
 
-    return render_template('Photos/photos.html', user=current_user, ok_gilles=ok_gilles, photos_to_use=photos_to_use, photos_with_unread_comments=photos_with_unread_comments, user_is_admin=user_is_admin,photos_datas=photos_datas, **elements_for_base)
+    return render_template('Photos/photos.html', 
+                           ok_gilles=ok_gilles, 
+                           photos_to_use=photos_to_use, 
+                           photos_with_unread_comments=photos_with_unread_comments, 
+                           user_is_admin=user_is_admin,
+                           photos_datas=photos_datas, 
+                           
+                           **elements_for_base)
     
 @views.route('/photo_and_messages/<photo_id>', methods=['GET', 'POST'])
 @login_required
 def photo_and_messages(photo_id):
-    # A - Récupérer l'id du user connecté
+    #Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
-        
-    
-    # Permet de masquer la page tant que la fonctionnalité n'est pas 100% fonctionnelle
-    ok_gilles = hide_page()
-    
-    # Récupérer le projet sélectionné dans la session
-    selected_project_id = session['selected_project']['id']
-    project = Project.objects(id=selected_project_id).first()
-    if not project:
-        return "Project not found", 404
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
 
-    # Récupérer la photo spécifique à partir de l'ID
-    photo_selected = Photos.objects(id=photo_id, project=project).first()
-    if not photo_selected:
-        return "Photo not found", 404
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    #-----------------------------------
+    current_project = current_project_obj()
+    #-----------------------------------
+    user_is_admin = user_is_admin_current_project()
+
+#Initialisation des variables
+    photos_datas = []
+
     
-    # Récupérer toutes les photos du projet pour le carrousel
-    photos = Photos.objects(project=project).order_by('-date')
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "photo_and_messages"
+#--------------------------------------------------------------------------------------------------------------------------------------------  
+    photo_selected = Photos.objects(id=photo_id, project=current_project).first()
+    if not photo_selected:
+        flash('Photo non trouvée. Elle a peut-être été modifiée ou supprimée.', category='error')
+        return redirect(url_for('views.photos'))
+    
+    # Récupérer toutes les photos du projet
+    photos = Photos.objects(project=current_project).order_by('-date')
     
     #Ajouter un commentaire
     if request.method == 'POST':
-        
-        #Je récupe d'abord l'info concernant la photo concernée
         photo_for_message_id = request.form.get('photo_id')
-        print(f"ID de la photo pour lequel je veux ajouter un message : {photo_for_message_id}")
         photo_for_message_obj = Photos.objects(id=photo_for_message_id).first()
         
         message_content = request.form.get('message')
@@ -1454,14 +1637,14 @@ def photo_and_messages(photo_id):
             #Créer une réponse à un message
             new_message = Messages(
             user = user_id,
-            project=project,
+            project=current_project,
             photo=photo_for_message_obj,
             message=answer_content,
             date=datetime.now(),
             type_message= 'Answer',
             parent_message = parent_message,
             seen_by_users = [user_id],
-        )
+            )
 
             new_message.save()
             
@@ -1472,37 +1655,33 @@ def photo_and_messages(photo_id):
             # Créer un nouvel objet message
             new_message = Messages(
             user = user_id,
-            project=project,
+            project=current_project,
             photo=photo_for_message_obj,
             message=message_content,
             date=datetime.now(),
             type_message= 'Message',
             seen_by_users = [user_id],
-        )
+            )
+            
             new_message.save()
                     
                 
         flash('Votre message a bien été ajouté !', category='success')
         return redirect(url_for('views.photo_and_messages', photo_id=photo_for_message_id))
-
-
-
-    photos_datas = []
+    
     for photo in photos:
-        # Récupérer les messages associés à la photo
         messages = Messages.objects(photo=photo)
         
-        # Liste pour stocker les messages et leurs réponses pour cette photo
-        photo_messages = []
+        
+        photo_messages = [] #Réinitialiser la liste des messages pour chaque photo
+        
 
         for message in messages:
+            child_messages = [] #Réinitialiser des réponses pour chaque message
             if message.type_message == 'Answer':
                 pass
-            else:
-                # Récupérer les messages enfants avec leurs détails
-                child_messages = []
-                if message.child_message:
-                    # Récupérer les objets messages enfants à partir des IDs
+            else:                
+                if message.child_message: #Si réponse à message principal
                     child_message_objs = Messages.objects(id__in=[child.id for child in message.child_message])
                     for child_message_obj in child_message_objs:
                         child_message_data = {
@@ -1520,9 +1699,7 @@ def photo_and_messages(photo_id):
                     'user': message.user.username if message.user else None,
                     'child_messages': child_messages
                 }
-                
-                
-                # Ajouter le message avec ses réponses à la liste des messages pour cette photo
+
                 photo_messages.append(message_data)
         
         photo_messages.reverse()
@@ -1556,150 +1733,155 @@ def photo_and_messages(photo_id):
         message = Messages.objects(id=message_id).first()
         if message and current_user.id not in message.seen_by_users:
             message.update(add_to_set__seen_by_users=current_user.id)
-            
-    
-    return render_template('Photos/photo_and_messages.html', user=current_user, ok_gilles=ok_gilles, photos_datas=photos_datas, photos=photos, **elements_for_base)
+           
+    return render_template('Photos/photo_and_messages.html', 
+                           photos_datas=photos_datas, 
+                           photos=photos, 
+                           user_is_admin=user_is_admin,
+                           
+                           **elements_for_base)
 
 @views.route('/add_photos', methods=['GET', 'POST'])
 @login_required
 def add_photos():
-    # A - Récupérer l'id du user connecté
+    #Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    #-----------------------------------
+    current_project = current_project_obj()
     
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "add_photos"
+#--------------------------------------------------------------------------------------------------------------------------------------------    
     
-    # Récupérer le projet sélectionné dans la session
-    selected_project_id = session['selected_project']['id']
-    project = Project.objects(id=selected_project_id).first()
-    if not project:
-        return "Project not found", 404
-    
-    if project:
-        file = request.files.get('photo')
-        description = request.form.get('description')
-        if file:
-            
-            # --- Traitement de l'image originale ---
-            # Ouvrir l'image
-            image = Image.open(file)
-            
-            # Correction de l'orientation de l'image si nécessaire
-            try:
-                exif = image._getexif()
-                if exif:
-                    for orientation in ExifTags.TAGS.keys():
-                        if ExifTags.TAGS[orientation] == 'Orientation':
-                            break
-                    orientation = exif.get(orientation, None)
-                    if orientation == 3:
-                        image = image.rotate(180, expand=True)
-                    elif orientation == 6:
-                        image = image.rotate(270, expand=True)
-                    elif orientation == 8:
-                        image = image.rotate(90, expand=True)
-            except Exception as e:
-                print(f"Error processing EXIF data: {e}")
+    file = request.files.get('photo')
+    description = request.form.get('description')
+    if file:
+        
+        # --- Traitement de l'image originale ---
+        # Ouvrir l'image
+        image = Image.open(file)
+        
+        # Correction de l'orientation de l'image si nécessaire
+        try:
+            exif = image._getexif()
+            if exif:
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation] == 'Orientation':
+                        break
+                orientation = exif.get(orientation, None)
+                if orientation == 3:
+                    image = image.rotate(180, expand=True)
+                elif orientation == 6:
+                    image = image.rotate(270, expand=True)
+                elif orientation == 8:
+                    image = image.rotate(90, expand=True)
+        except Exception as e:
+            print(f"Error processing EXIF data: {e}")
 
-            # Vérifier et appliquer le redimensionnement si nécessaire
-            max_width = 1000
-            if image.size[0] > max_width:
-                width_percent = (max_width / float(image.size[0]))
-                height_size = int((float(image.size[1]) * float(width_percent)))
-                image = image.resize((max_width, height_size), Image.Resampling.LANCZOS)
-
-            # Générer un slug pour l'URL de la photo
-            brut_slug = f'{project.id}-photo-{datetime.now().strftime("%Y%m%d%H%M%S")}'
-            slug_photo = brut_slug.replace(" ", "-")
-
-            # Sauvegarder le fichier localement dans un répertoire temporaire
-            local_file_path = f'/tmp/{slug_photo}'
-
-            # Écrire les données de l'image originale dans le fichier temporaire
-            with open(local_file_path, 'wb') as f:
-                image.save(f, format='JPEG')
-
-            # --- Téléchargement de l'image originale sur Wasabi ---
-            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
-            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
-            wasabi_bucket_name = 'chouxfleurs.fr'
-            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
-
-            # Initialiser le client S3 pour Wasabi
-            s3 = boto3.client(
-                's3',
-                endpoint_url=wasabi_endpoint_url,
-                aws_access_key_id=wasabi_access_key,
-                aws_secret_access_key=wasabi_secret_key,
-                config=Config(signature_version='s3v4')
-            )
-
-            # Uploader le fichier vers Wasabi
-            s3.upload_file(local_file_path, wasabi_bucket_name, slug_photo)
-
-            # URL de l'image originale
-            url_photo = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_photo}"
-
-            # --- Traitement de l'image redimensionnée ---
-
-            # Redimensionner l'image
-            max_width_thumbnail = 400
-            width_percent = (max_width_thumbnail / float(image.size[0]))
+        # Vérifier et appliquer le redimensionnement si nécessaire
+        max_width = 1000
+        if image.size[0] > max_width:
+            width_percent = (max_width / float(image.size[0]))
             height_size = int((float(image.size[1]) * float(width_percent)))
-            resized_image = image.resize((max_width_thumbnail, height_size), Image.Resampling.LANCZOS)
+            image = image.resize((max_width, height_size), Image.Resampling.LANCZOS)
 
-            # Sauvegarder l'image redimensionnée dans un objet BytesIO
-            output = io.BytesIO()
-            resized_image.save(output, format='JPEG')
-            output.seek(0)
+        # Générer un slug pour l'URL de la photo
+        brut_slug = f'{current_project.id}-photo-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+        slug_photo = brut_slug.replace(" ", "-")
 
-            # Générer un slug pour l'URL de la photo redimensionnée
-            slug_thumbnail = f'{project.id}-thumbnail-{datetime.now().strftime("%Y%m%d%H%M%S")}'
-            slug_thumbnail = slug_thumbnail.replace(" ", "-")
+        # Sauvegarder le fichier localement dans un répertoire temporaire
+        local_file_path = f'/tmp/{slug_photo}'
 
-            # Sauvegarder le fichier redimensionné localement
-            thumbnail_file_path = f'/tmp/{slug_thumbnail}'
-            with open(thumbnail_file_path, 'wb') as f:
-                f.write(output.read())
+        # Écrire les données de l'image originale dans le fichier temporaire
+        with open(local_file_path, 'wb') as f:
+            image.save(f, format='JPEG')
 
-            # Uploader le fichier redimensionné vers Wasabi
-            s3.upload_file(thumbnail_file_path, wasabi_bucket_name, slug_thumbnail)
+        # --- Téléchargement de l'image originale sur Wasabi ---
+        wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+        wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+        wasabi_bucket_name = 'chouxfleurs.fr'
+        wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
 
-            # URL de l'image redimensionnée
-            thumbnail_url = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_thumbnail}"
+        # Initialiser le client S3 pour Wasabi
+        s3 = boto3.client(
+            's3',
+            endpoint_url=wasabi_endpoint_url,
+            aws_access_key_id=wasabi_access_key,
+            aws_secret_access_key=wasabi_secret_key,
+            config=Config(signature_version='s3v4')
+        )
 
-            # Créer une nouvelle instance de photo et sauvegarder dans la base de données
-            new_photo = Photos(
-                project=project,
-                url_photo=url_photo,
-                utility="Gallery",
-                slug_photo=slug_photo,
-                url_thumbnail=thumbnail_url,
-                slug_thumbnail=slug_thumbnail,
-                description=description,
-                date=datetime.now(),
-            )
-            new_photo.save()
+        # Uploader le fichier vers Wasabi
+        s3.upload_file(local_file_path, wasabi_bucket_name, slug_photo)
 
-            # Mettre à jour la liste des photos du projet
-            project.photos.append(new_photo)
-            project.save()
+        # URL de l'image originale
+        url_photo = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_photo}"
 
-            # Supprimer les fichiers temporaires locaux
-            os.remove(local_file_path)
-            os.remove(thumbnail_file_path)
+        # --- Traitement de l'image redimensionnée ---
 
-            flash('Votre photo a bien été ajoutée !', category='success')
-            return redirect(url_for('views.photos'))
+        # Redimensionner l'image
+        max_width_thumbnail = 400
+        width_percent = (max_width_thumbnail / float(image.size[0]))
+        height_size = int((float(image.size[1]) * float(width_percent)))
+        resized_image = image.resize((max_width_thumbnail, height_size), Image.Resampling.LANCZOS)
 
-        else:
-            return render_template('Photos/add_photo.html', **elements_for_base)
+        # Sauvegarder l'image redimensionnée dans un objet BytesIO
+        output = io.BytesIO()
+        resized_image.save(output, format='JPEG')
+        output.seek(0)
+
+        # Générer un slug pour l'URL de la photo redimensionnée
+        slug_thumbnail = f'{current_project.id}-thumbnail-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+        slug_thumbnail = slug_thumbnail.replace(" ", "-")
+
+        # Sauvegarder le fichier redimensionné localement
+        thumbnail_file_path = f'/tmp/{slug_thumbnail}'
+        with open(thumbnail_file_path, 'wb') as f:
+            f.write(output.read())
+
+        # Uploader le fichier redimensionné vers Wasabi
+        s3.upload_file(thumbnail_file_path, wasabi_bucket_name, slug_thumbnail)
+
+        # URL de l'image redimensionnée
+        thumbnail_url = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_thumbnail}"
+
+        # Créer une nouvelle instance de photo et sauvegarder dans la base de données
+        new_photo = Photos(
+            project=current_project,
+            url_photo=url_photo,
+            utility="Gallery",
+            slug_photo=slug_photo,
+            url_thumbnail=thumbnail_url,
+            slug_thumbnail=slug_thumbnail,
+            description=description,
+            date=datetime.now(),
+        )
+        new_photo.save()
+
+        #J'ai mis en com les lignes dessous. Utile ? plus rapide pour chercher les photos d'un projet par la suite ?
+        # Mettre à jour la liste des photos du projet
+        # project.photos.append(new_photo)
+        # project.save()
+
+        # Supprimer les fichiers temporaires locaux
+        os.remove(local_file_path)
+        os.remove(thumbnail_file_path)
+
+        flash('Votre photo a bien été ajoutée !', category='success')
+        return redirect(url_for('views.photos'))
+
     else:
-        flash('Vous ne pouvez pas accéder à cette page!', category='error')
-        return render_template('Photos/photos.html', **elements_for_base)
+        return render_template('Photos/add_photo.html', **elements_for_base)
 
 @views.route('/delete_photo/<photo_id>', methods=['GET', 'POST'])
 @login_required
@@ -1746,9 +1928,15 @@ def delete_photo(photo_id):
 @views.route('/change_photo_description/<photo_id>', methods=['GET', 'POST'])
 @login_required
 def change_photo_description(photo_id):
+    #Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    elements_for_base = elements_for_base_template(user_id)
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     photo = Photos.objects(id=photo_id).first()
 
@@ -1758,17 +1946,23 @@ def change_photo_description(photo_id):
         flash("Description modifiée avec succès !", category='success')
         return redirect(url_for('views.photo_and_messages', photo_id=photo_id)) 
         
-    return render_template('Photos/change_photo_description.html', photo=photo, **elements_for_base)
+    return render_template('Photos/change_photo_description.html', 
+                           photo=photo, 
+                           
+                           **elements_for_base)
 
 @views.route('/delete_photo_description<photo_id>', methods=['POST'])
 @login_required
 def delete_photo_description(photo_id):
-    # A - Récupérer l'id du user connecté
+    #Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     photo = Photos.objects(id=photo_id).first()
     
@@ -1777,7 +1971,8 @@ def delete_photo_description(photo_id):
     photo.save()
     
     flash("Decription supprimée !", category='success')
-    return redirect(url_for('views.photo_and_messages', photo_id=photo_id)) 
+    return redirect(url_for('views.photo_and_messages', 
+                            photo_id=photo_id)) 
 
 
 #ROUTES "SUIVI" -------------------------------------------------------------------------------------------------------------
@@ -1786,9 +1981,9 @@ def suivi():
     # A - Récupérer l'id du user connecté
     user_id = current_user.id
     # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
+    elements_for_base = elements_for_navbar(user_id)
     # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    add_project_in_session(user_id)
     return render_template('Suivi/suivi.html', **elements_for_base)
 
 @views.route('/alimentation', methods=['GET', 'POST'])
@@ -1796,9 +1991,9 @@ def alimentation():
     # A - Récupérer l'id du user connecté
     user_id = current_user.id
     # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
+    elements_for_base = elements_for_navbar(user_id)
     # C - Récupérer le projet actuellement sélectionné
-    project = project_in_session(user_id, elements_for_base)
+    project = add_project_in_session(user_id)
 
     if request.method == 'POST':
         # Récupérer les données du formulaire
@@ -1913,69 +2108,236 @@ def alimentation():
                            food_list=food_list, 
                            **elements_for_base)
 
+# Santé --------------------------------------
+@views.route('/santé', methods=['GET', 'POST'])
+def santé():
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_navbar(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    add_project_in_session(user_id)
+    return render_template('Suivi/santé.html', **elements_for_base)
+
+@views.route('/add_health_document', methods=['GET', 'POST'])
+@login_required
+def add_health_document():
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_navbar(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    add_project_in_session(user_id)
+    
+    # Récupérer le projet sélectionné dans la session
+    selected_project_id = session['selected_project']['id']
+    project = Project.objects(id=selected_project_id).first()
+    if not project:
+        return "Project not found", 404
+    if request.method == 'POST':
+        file = request.files.get('health_document')
+        description = request.form.get('description_health_document')
+        filename = request.form.get('file_name')
+        
+        if file:
+            # Générer un slug pour l'URL du document
+            brut_slug = f'{project.id}-document-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+            slug_document = brut_slug.replace(" ", "-")
+
+            # Sauvegarder le fichier localement dans un répertoire temporaire
+            local_file_path = f'/tmp/{slug_document}'
+
+            # Écrire les données du document dans le fichier temporaire
+            file.save(local_file_path)
+
+            # --- Téléchargement du document sur Wasabi ---
+            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+            wasabi_bucket_name = 'chouxfleurs.fr'
+            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+            # Initialiser le client S3 pour Wasabi
+            s3 = boto3.client(
+                's3',
+                endpoint_url=wasabi_endpoint_url,
+                aws_access_key_id=wasabi_access_key,
+                aws_secret_access_key=wasabi_secret_key,
+                config=Config(signature_version='s3v4')
+            )
+            
+             # Déterminer le type MIME (Content-Type)
+            content_type = None
+            if file.mimetype:
+                content_type = file.mimetype  # Utilise le MIME type fourni par Flask (basé sur l'extension du fichier)
+
+            # Uploader le fichier vers Wasabi
+            s3.upload_file(local_file_path, wasabi_bucket_name, slug_document, ExtraArgs={'ContentType': content_type})
+
+            # URL du document
+            url_document = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_document}"
+
+            # Créer une nouvelle instance de document de santé et sauvegarder dans la base de données
+            new_document = Healthdocuments(
+                project=project,
+                title=filename,
+                url_document=url_document,
+                slug_document=slug_document,
+                description=description,
+                utility="Health",
+                date=datetime.now(),
+            )
+            new_document.save()
+
+            # Supprimer le fichier temporaire local
+            os.remove(local_file_path)
+
+            flash('Votre document de santé a bien été ajouté !', category='success')
+            return redirect(url_for('views.health_document'))
+
+        else:
+            return render_template('Suivi/add_health_document.html', **elements_for_base)
+    
+    else:
+        return render_template('Suivi/add_health_document.html', **elements_for_base)
+
+@views.route('/health_document', methods=['GET', 'POST'])
+@login_required
+def health_document():
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_navbar(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    add_project_in_session(user_id)
+    
+    # Récupérer les documents de santé du projet sélectionné
+    selected_project_id = session['selected_project']['id']
+    documents = Healthdocuments.objects(project=selected_project_id).order_by('-date')
+    
+    # Récupérer les éléments de base pour la navbar
+    user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id)
+    
+    return render_template('Suivi/health_document.html', documents=documents, **elements_for_base)
+
+@views.route('/delete_health_document/<doc_id>', methods=['POST'])
+@login_required
+def delete_health_document(doc_id):
+    # Récupérer le document de santé de la base de données
+    document = Healthdocuments.objects(id=doc_id).first()
+    wasabi_bucket_name = 'chouxfleurs.fr'
+    
+    if document:
+        try:
+            # Configuration pour Wasabi
+            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+
+            # Initialiser le client S3 pour Wasabi
+            s3 = boto3.client(
+                's3',
+                endpoint_url=wasabi_endpoint_url,
+                aws_access_key_id=wasabi_access_key,
+                aws_secret_access_key=wasabi_secret_key,
+                config=Config(signature_version='s3v4')
+            )
+
+            # Supprimer le fichier de Wasabi
+            s3.delete_object(Bucket=wasabi_bucket_name, Key=document.slug_document)
+            
+            # Supprimer le document de la base de données
+            document.delete()
+            
+            flash('Document supprimé avec succès.', category='success')
+        except Exception as e:
+            flash(f'Erreur lors de la suppression du document : {str(e)}', category='error')
+            print(f'Error deleting document: {str(e)}')
+    else:
+        flash('Document introuvable.', category='error')
+    
+    return redirect(url_for('views.health_document'))
+
+    
 
 #ROUTES "MY PROFIL" -------------------------------------------------------------------------------------------------------------
 @views.route('/my_profil')
 @login_required
 def my_profil():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+
+    
+    #-----------------------------------
 
     user_email = current_user.email
 
-    return render_template('My profil/my_profil.html', user=current_user, **elements_for_base, user_email=user_email)
+    return render_template('My profil/my_profil.html', 
+                           user_email=user_email,
+                           
+                           **elements_for_base, 
+)
 
 @views.route('/change_username', methods=['GET', 'POST'])
 @login_required
 def change_username():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+
+    
+    #-----------------------------------
 
     user_username = current_user.username
-    user = User.objects(id=user_id).first()
 
     if request.method == 'POST':
         new_username = request.form.get('new_username')
 
-        user.username = new_username
-        user.save()
+        current_user.username = new_username
+        current_user.save()
         
         flash(f"Nom d'utilisateur modifié avec succès !", category='success')
         return redirect(url_for('views.my_profil'))
         
-    return render_template('My profil/change_username.html', user=current_user, user_username=user_username, **elements_for_base)
+    return render_template('My profil/change_username.html', 
+                           user_username=user_username, 
+                           
+                           **elements_for_base)
 
 @views.route('/change_email', methods=['GET', 'POST'])
 @login_required
 def change_email():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+
+    
+    #-----------------------------------
 
     user_email = current_user.email
-    user = User.objects(id=user_id).first()
 
     if request.method == 'POST':
         new_email = request.form.get('new_email')
 
-        user.email = new_email
-        user.save()
+        current_user.email = new_email
+        current_user.save()
         
         flash(f"Adresse mail modifiée avec succès !", category='success')
         return redirect(url_for('views.my_profil'))
         
-    return render_template('My profil/change_email.html', user=current_user, user_email=user_email, **elements_for_base)
+    return render_template('My profil/change_email.html', 
+                           user_email=user_email, 
+                           
+                           **elements_for_base)
 
 @views.route('/change_notification', methods=['GET', 'POST'])
 @login_required
@@ -1993,12 +2355,12 @@ def change_notification():
 @views.route('/my_projects', methods=['GET', 'POST'])
 @login_required
 def my_projects():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    #-----------------------------------
     
     current_user_18 = current_user.over_18
     user_email = current_user.email
@@ -2029,24 +2391,48 @@ def my_projects():
             modify_project = request.form.get('modify_project_open')
             
                 
-        return render_template('My projects/my_projects.html', user=current_user, project_id=project_id, project_name=project_name, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations=user_participations, user_participations_side_project=user_participations_side_project, admin_iban=admin_iban, modify_project=modify_project, current_user_18=current_user_18)
+        return render_template('My projects/my_projects.html', 
+                               project_id=project_id, 
+                               project_name=project_name, 
+                               user_is_admin=user_is_admin, 
+                               user_email=user_email, 
+                               projects_dict_special=projects_dict_special, 
+                               user_participations=user_participations, 
+                               user_participations_side_project=user_participations_side_project, 
+                               admin_iban=admin_iban, 
+                               modify_project=modify_project, 
+                               current_user_18=current_user_18,
+                               
+                               **elements_for_base, 
+)
 
     else: #Si le user actuel n'est pas l'admin d'un projet
         user_is_admin = False
         projects_dict_special = elements_for_base['projects_dict']
         
         
-        return render_template('My projects/my_projects.html', user=current_user, user_is_admin=user_is_admin, **elements_for_base, user_email=user_email, projects_dict_special=projects_dict_special, user_participations_side_project=user_participations_side_project, current_user_18=current_user_18)
+        return render_template('My projects/my_projects.html', 
+                               user_is_admin=user_is_admin, 
+                               user_email=user_email, 
+                               projects_dict_special=projects_dict_special, 
+                               user_participations_side_project=user_participations_side_project, 
+                               current_user_18=current_user_18,
+                               
+                               **elements_for_base,
+                               )
 
 @views.route('/modify_my_projects')
 @login_required
 def modify_my_projects():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     admin_project = Project.objects(admin=user_id).first() #J'ai l'objet project pour lequel le user actuel est l'admin
     
@@ -2054,18 +2440,27 @@ def modify_my_projects():
         
         admin_iban = User.objects(id=user_id).first().iban
 
-    return render_template('My projects/modify_my_projects.html', admin_iban=admin_iban, **elements_for_base)
+    return render_template('My projects/modify_my_projects.html', 
+                           admin_iban=admin_iban, 
+                           
+                           **elements_for_base)
 
 @views.route('/participation_details', methods=['GET', 'POST'])
 @login_required
 def participation_details():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)   
-
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+    
+    
+#Initialisation des variables
+    other_user_name = None
     
     # Récupération de l'id depuis l'url ou bien depuis le formulaire (utile quand je change le statut d'une participation) par ex
     participation_id = request.args.get('participation_id')
@@ -2083,6 +2478,9 @@ def participation_details():
     user_participant_username = user_participant.username
     participation_project = participation_obj.project
     project_obj = Project.objects(id=participation_project.id).first()
+    
+    if participation_obj.other_user:
+        user_participant_username = participation_obj.other_user
     
     admin_id = project_obj.admin.id
     
@@ -2114,6 +2512,10 @@ def participation_details():
             participation_obj.save()
             flash('Vous avez confirmé avoir envoyé votre participation')
             return redirect(url_for('views.participation_details', participation_id=participation_id))
+    
+    
+    if participation_obj.other_user : 
+        other_user_name = participation_obj.other_user
         
     user_username = participation_obj.user.username
     user_email = participation_obj.user.email
@@ -2129,45 +2531,64 @@ def participation_details():
     project_obj = participation_obj.project
     project_name = project_obj.name
 
-    return render_template('My projects/participation_details.html', **elements_for_base, type=type, montant=montant, date=date, user_username=user_username, user_email=user_email, status=status, product_name=product_name, project_name=project_name, participation_id=participation_id, user_is_admin=user_is_admin)
+    return render_template('My projects/participation_details.html', 
+                           type=type, 
+                           montant=montant, 
+                           date=date,
+                           other_user_name=other_user_name,
+                           user_username=user_username, 
+                           user_email=user_email, 
+                           status=status, 
+                           product_name=product_name, 
+                           project_name=project_name, 
+                           participation_id=participation_id, 
+                           user_is_admin=user_is_admin,
+                           
+                           **elements_for_base
+                           )
 
 @views.route('/iban', methods=['GET', 'POST'])
 @login_required
 def iban():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
-    
-    user = User.objects(id=user_id).first()
-    
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+
     admin_project = Project.objects(admin=user_id).first()
     project_name = admin_project.name
     
     if request.method == 'POST':
         iban = request.form.get('iban')
-        
-        user.iban = iban
-        user.save()
+        current_user.iban = iban
+        current_user.save()
         
         flash('iban enregistré avec succès !')
         return redirect(url_for('views.modify_my_projects', **elements_for_base))
     
     
-    return render_template('My projects/iban.html', user=current_user, **elements_for_base, project_name=project_name, actual_iban=user.iban)
+    return render_template('My projects/iban.html', 
+                           project_name=project_name, 
+                           actual_iban=current_user.iban,
+                           
+                           **elements_for_base,)
    
 @views.route('/create_project', methods=['GET', 'POST'])
 @login_required
 def create_project():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
 
+
+    #-----------------------------------
     
     if request.method == 'POST':
         project_name = request.form.get('project_name')
@@ -2188,21 +2609,25 @@ def create_project():
                 'id': str(new_project_id),
                 'name': new_project_name
             }
-        
         flash(f'Projet "{new_project.name}" créé avec succès !', category='success')
-        return redirect(url_for('views.modify_my_projects', **elements_for_base))
+        return redirect(url_for('views.my_projects'))
         
-    return render_template('My projects/create_project.html', user=current_user, **elements_for_base)
+    return render_template('My projects/create_project.html', 
+                           **elements_for_base)
 
 @views.route('/join_project', methods=['GET', 'POST'])
 @login_required
 def join_project():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    
+    
+    
+    #-----------------------------------
     
 
     if request.method == 'POST':
@@ -2211,12 +2636,12 @@ def join_project():
         try:
             project_to_join_id = project_to_join_link.split('=')[1].strip()[:24]
             project_exist = Project.objects(id__contains=project_to_join_id) #Je vérifie si l'id fourni fait partie des id projets existants
-
             admin_user_project = Project.objects(admin=user_id).first()
             
-            if project_to_join_id == str(admin_user_project.id):
-                flash('Vous êtes déjà l\'admin de ce projet', category='error')
-                return redirect(url_for('views.join_project', **elements_for_base))
+            if admin_user_project :
+                if project_to_join_id == str(admin_user_project.id):
+                    flash('Vous êtes déjà l\'admin de ce projet', category='error')
+                    return redirect(url_for('views.join_project', **elements_for_base))
 
             if project_exist :
                 project_to_join = Project.objects(id=project_to_join_id).first()
@@ -2231,9 +2656,9 @@ def join_project():
                 print(f"Liste des users : {users_in_project}")
                 print(f"Mon id : {user_id}")
                 if str(user_id) in users_in_project:
-                    print('Je suis déjà dans le projet')
+                    
                     flash(f'Vous avez déjà rejoint le projet "{project_to_join_name}"', category='error')
-                    return redirect(url_for('views.join_project', **elements_for_base))
+                    return redirect(url_for('views.join_project'))
                 
                 else:
                     project_to_join.users.append(current_user.id)
@@ -2245,29 +2670,31 @@ def join_project():
                     session['selected_project'] = {'id': project_to_join_id, 'name': project_to_join_name}
 
                     flash(f'Vous avez rejoint le projet "{project_to_join_name}"', category='success')
-                    return redirect(url_for('views.home_page', **elements_for_base))
+                    return redirect(url_for('views.home_page'))
 
             else:
-                print("coucou2")
                 flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
-                return redirect(url_for('views.join_project', **elements_for_base))
+                return redirect(url_for('views.join_project'))
             
         except (IndexError, ValueError, ValidationError):
             flash('Le projet que vous souhaitez rejoindre n\'existe pas', category='error')
-            return redirect(url_for('views.join_project', **elements_for_base))
+            return redirect(url_for('views.join_project'))
         
     else:
-        return render_template('My projects/join_project.html', user=current_user, **elements_for_base)
+        return render_template('My projects/join_project.html', **elements_for_base)
 
 @views.route('/rename_project', methods=['GET', 'POST'])
 @login_required
 def rename_project():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
 
     project = Project.objects(admin=user_id).first()
 
@@ -2284,19 +2711,69 @@ def rename_project():
         session['selected_project'] = {'id': new_project_id, 'name': new_project_name}
         
         flash(f'Nom du projet modifié avec succès !', category='success')
-        return redirect(url_for('views.my_projects', **elements_for_base))
+        return redirect(url_for('views.my_projects'))
         
-    return render_template('My projects/rename_project.html', user=current_user, actual_name=actual_name, **elements_for_base)
+    return render_template('My projects/rename_project.html', 
+                           actual_name=actual_name, 
+                           
+                           **elements_for_base)
+
+@views.route('/add_second_admin', methods=['GET', 'POST'])
+@login_required
+def add_second_admin():
+    # A - Récupérer l'id du user connecté
+    user_id = current_user.id
+    # B - Récupérer les éléments de base pour la navbar
+    elements_for_base = elements_for_navbar(user_id)
+    # C - Récupérer le projet actuellement sélectionné
+    add_project_in_session(user_id)
+    
+    user_id = current_user.id
+    project = Project.objects(admin=user_id).first()  # Assurez-vous que vous récupérez le bon projet
+
+    if not project:
+        flash('Vous n\'avez pas les droits pour ajouter un second admin.', category='error')
+        return redirect(url_for('views.my_projects'))
+    
+    if request.method == 'POST':
+        admin_email = request.form.get('admin_email')
+
+        # Vérifier si l'email est valide et si l'utilisateur existe
+        new_admin = User.objects(email=admin_email).first()
+        if new_admin:
+            # Ajouter le nouvel admin au projet
+            project.second_admin = new_admin
+            project.save()
+            flash('Le second admin a été ajouté avec succès.', category='success')
+            return render_template('My projects/add_second_admin.html', username=new_admin.username, **elements_for_base)
+
+        else:
+            flash('Aucun utilisateur trouvé avec cet email.', category='error')
+            return render_template('My projects/add_second_admin.html', **elements_for_base)
+        
+    else:
+        second_admin = project.second_admin
+        if second_admin:
+            second_admin_username = second_admin.username
+            print
+        second_admin_username = second_admin.username if second_admin else None
+        print(f"Second admin : {second_admin_username}")
+
+    return render_template('My projects/add_second_admin.html', **elements_for_base, second_admin_username=second_admin_username)
+
 
 @views.route('/change_clue_due_date', methods=['GET', 'POST'])
 @login_required
 def change_clue_due_date():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     project = Project.objects(admin=user_id).first()
     try:
@@ -2314,21 +2791,26 @@ def change_clue_due_date():
         flash(f"Date du terme mise à jour !", category='success')
         return redirect(url_for('views.change_clue_due_date'))
         
-    return render_template('My projects/change_clue_due_date.html', due_date=due_date, **elements_for_base)
+    return render_template('My projects/change_clue_due_date.html', 
+                           due_date=due_date, 
+                           
+                           **elements_for_base)
 
 @views.route('/delete_clue_due_date', methods=['GET', 'POST'])
 @login_required
 def delete_clue_due_date():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     project = Project.objects(admin=user_id).first()
     
-    # Supprimer la date du terme
     project.update(unset__due_date=True)
     flash("Date du terme supprimée avec succès !", category='success')
     return redirect(url_for('views.change_clue_due_date'))
@@ -2336,12 +2818,15 @@ def delete_clue_due_date():
 @views.route('/change_clue_name', methods=['GET', 'POST'])
 @login_required
 def change_clue_name():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     project = Project.objects(admin=user_id).first()
     try:
@@ -2357,17 +2842,23 @@ def change_clue_name():
         flash("Indice concernant le prénom modifié avec succès !", category='success')
         return redirect(url_for('views.change_clue_name'))
         
-    return render_template('My projects/change_clue_name.html', clue_name=clue_name, **elements_for_base)
+    return render_template('My projects/change_clue_name.html', 
+                           clue_name=clue_name, 
+                           
+                           **elements_for_base)
 
 @views.route('/delete_clue_name', methods=['POST'])
 @login_required
 def delete_clue_name():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     project = Project.objects(admin=user_id).first()
     
@@ -2381,12 +2872,15 @@ def delete_clue_name():
 @views.route('/delete_project', methods=['POST'])
 @login_required
 def delete_project():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
 
     project = Project.objects(admin=user_id).first()
     products_in_project = project.product
@@ -2441,23 +2935,25 @@ def delete_project():
             }
     else:
         flash('Projet supprimé avec succès !')
-        return redirect(url_for('views.my_projects', user=current_user, **elements_for_base))
+        return redirect(url_for('views.my_projects'))
     
     flash('Projet supprimé avec succès !')
-    return redirect(url_for('views.home_page', **elements_for_base))
+    return redirect(url_for('views.home_page'))
 
 
-#ROUTES AUTRES -------------------------------------------------------------------------------------------------------------
+# #ROUTES AUTRES -------------------------------------------------------------------------------------------------------------
 @views.route('/select_project', methods=['GET', 'POST'])
 @login_required
 def select_project():
-    # A - Récupérer l'id du user connecté
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
     user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
-    
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
     
     projects = Project.objects(users__contains=current_user.id)
     
@@ -2473,56 +2969,56 @@ def select_project():
             flash(f'Vous êtes maintenant connecté à "{project_name}" !')
             return redirect(url_for('views.home_page', **elements_for_base))
             
-    return render_template('select_project.html', user=current_user, **elements_for_base)
+    return render_template('select_project.html', **elements_for_base)
 
-@views.route('/other_data')
-def other_data():
-    # A - Récupérer l'id du user connecté
-    user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+# @views.route('/other_data')
+# def other_data():
+#     # A - Récupérer l'id du user connecté
+#     user_id = current_user.id
+#     # B - Récupérer les éléments de base pour la navbar
+#     elements_for_base = elements_for_navbar(user_id)
+#     # C - Récupérer le projet actuellement sélectionné
+#     add_project_in_session(user_id)
 
     
-    # Rendre le template base.html avec les données spécifiques
-    return render_template('base.html', **elements_for_base)
+#     # Rendre le template base.html avec les données spécifiques
+#     return render_template('base.html', **elements_for_base)
 
-@views.route('/admin', methods=['GET', 'POST'])
-def admin():
-    # A - Récupérer l'id du user connecté
-    user_id = current_user.id
-    # B - Récupérer les éléments de base pour la navbar
-    elements_for_base = elements_for_base_template(user_id)
-    # C - Récupérer le projet actuellement sélectionné
-    project_in_session(user_id, elements_for_base)
+# @views.route('/admin', methods=['GET', 'POST'])
+# def admin():
+#     # A - Récupérer l'id du user connecté
+#     user_id = current_user.id
+#     # B - Récupérer les éléments de base pour la navbar
+#     elements_for_base = elements_for_navbar(user_id)
+#     # C - Récupérer le projet actuellement sélectionné
+#     add_project_in_session(user_id)
     
-    if request.method == 'POST':
-        pronostics = Pronostic.objects()
-        for pronostic in pronostics:
-            modified = False
+#     if request.method == 'POST':
+#         pronostics = Pronostic.objects()
+#         for pronostic in pronostics:
+#             modified = False
 
-            if isinstance(pronostic.weight, str):
-                try:
-                    # Conversion de la valeur en entier
-                    pronostic.weight = int(pronostic.weight)
-                    modified = True
-                except ValueError:
-                    print(f"Erreur de conversion pour le poids du pronostic {pronostic.id} avec la valeur {pronostic.weight}")
+#             if isinstance(pronostic.weight, str):
+#                 try:
+#                     # Conversion de la valeur en entier
+#                     pronostic.weight = int(pronostic.weight)
+#                     modified = True
+#                 except ValueError:
+#                     print(f"Erreur de conversion pour le poids du pronostic {pronostic.id} avec la valeur {pronostic.weight}")
 
-            if isinstance(pronostic.height, str):
-                try:
-                    # Conversion de la valeur en entier
-                    pronostic.height = int(pronostic.height)
-                    modified = True
-                except ValueError:
-                    print(f"Erreur de conversion pour la taille du pronostic {pronostic.id} avec la valeur {pronostic.height}")
+#             if isinstance(pronostic.height, str):
+#                 try:
+#                     # Conversion de la valeur en entier
+#                     pronostic.height = int(pronostic.height)
+#                     modified = True
+#                 except ValueError:
+#                     print(f"Erreur de conversion pour la taille du pronostic {pronostic.id} avec la valeur {pronostic.height}")
 
-            if modified:
-                pronostic.save()
-                print(f"Mis à jour le pronostic {pronostic.id}: weight={pronostic.weight}, height={pronostic.height}")
+#             if modified:
+#                 pronostic.save()
+#                 print(f"Mis à jour le pronostic {pronostic.id}: weight={pronostic.weight}, height={pronostic.height}")
 
 
-    # Rendre le template base.html avec les données spécifiques
-    return render_template('admin.html', **elements_for_base)
+#     # Rendre le template base.html avec les données spécifiques
+#     return render_template('admin.html', **elements_for_base)
     

@@ -189,14 +189,26 @@
                     
                                 <!-- Validation du pronostic ----------------------------------------- -->
                                 {% if user_is_admin %}
-                                    <button type="submit" class="my_btn mb-1" id="validate_prono">Donner les réponses</button>
+                                    <div>
+                                        <button type="submit" class="my_btn" id="validate_prono">Donner les réponses</button>
+                                    </div>
+
+                                    <div>
+                                        <button type="button" class="my_btn" id="other_participant_btn">Participer pour quelqu'un d'autre</button>
+                                    </div>
+
+                                    <div id="inputForm">
+                                        <label for="nameInput">Nom de la personne :</label>
+                                        <input type="text" id="nameInput" name="other_participant_name" placeholder="Entrez le nom">
+                                        <button type="submit" class="my_btn" id="validate_other_participant">Valider</button>
+                                    </div>
                                     
                                     {%if at_least_one_pronostic == True %}
                                     <div>
-                                        <button type="button" class="my_btn mt-1" onclick="window.location.href='/all_pronostics'">Voir la tendance</button>
+                                        <button type="button" class="my_btn" onclick="window.location.href='/all_pronostics'">Voir la tendance</button>
                                     </div>
                                     <div>
-                                        <button type="button" class="my_btn mt-1" onclick="window.location.href='/pronostic_all_answers'">Voir les réponses</button>
+                                        <button type="button" class="my_btn" onclick="window.location.href='/pronostic_all_answers'">Voir les réponses</button>
                                     </div>
                                     {%endif%}
                                     
@@ -323,6 +335,23 @@
     function updateHeightRangeValue(value) {
         document.getElementById('heightRange').value = value;
     }
+
+
+    // Sélection du bouton et du formulaire
+    const other_participant_btn = document.getElementById('other_participant_btn');
+    const inputForm = document.getElementById('inputForm');
+
+    // Affiche le formulaire lorsque le bouton est cliqué
+    other_participant_btn.addEventListener('click', function() {
+        inputForm.style.display = 'block';
+    });
+
+    // Gestion du bouton "Valider"
+    document.getElementById('validerBtn').addEventListener('click', function() {
+        const name = document.getElementById('nameInput').value;
+        alert(`Vous avez participé pour : ${name}`);
+        // Ici vous pouvez ajouter du code pour envoyer le nom au serveur ou réaliser une autre action.
+    });
 </script>
     
 

@@ -21,19 +21,23 @@
         <!-- Affichage de l'image -->
         <div class="my_container">
             <div class="my_image_container">
-                <div class="photo_options">
-                    <div class="dots_container">
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                        <div class="dot"></div>
+                {%if user_is_admin == True%}
+                    <div class="photo_options">
+                        <div class="dots_container">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        
+                        <div class="options_menu">
+                            <button onclick="window.location.href='/change_photo_description/{{ photos_datas[0].photo_id }}'" class="not_btn text_white">Modifier la description</button>
+                            <form action="{{ url_for('views.delete_photo', photo_id=photos_datas[0].photo_id) }}" method="POST" enctype="multipart/form-data">
+                                <button type="submit" class="not_btn text_red">Supprimer la Photo</button>
+                            </form>
+                        </div>
+                        
                     </div>
-                    <div class="options_menu">
-                        <button onclick="window.location.href='/change_photo_description/{{ photos_datas[0].photo_id }}'" class="not_btn text_white">Modifier la description</button>
-                        <form action="{{ url_for('views.delete_photo', photo_id=photos_datas[0].photo_id) }}" method="POST" enctype="multipart/form-data">
-                            <button type="submit" class="not_btn text_red">Supprimer la Photo</button>
-                        </form>
-                    </div>
-                </div>
+                {%endif%}
 
                 <div class="specific_photo">
                     <img id="photoDisplay" src="{{ photos_datas[0].photo_url }}" alt="Photo" style="cursor: pointer;" onclick="openFullscreen(this);">
@@ -68,6 +72,8 @@
     <div class="my_messages_container">
         <div id="messagesDisplay"></div>
     </div>
+
+
     
     <script>
         // Convertit les données Python en JSON pour être utilisées dans JavaScript

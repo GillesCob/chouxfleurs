@@ -1471,3 +1471,10 @@ main {
     font-weight: bold;
     margin-bottom: 0px;
 }
+
+
+
+#inputForm {
+    display: none; /* Le formulaire est masqué par défaut */
+    margin-top: 10px;
+}

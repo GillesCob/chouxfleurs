@@ -18,7 +18,11 @@
     <div class="my_card inert_card" id="product_card">
 
         <h1 class="product_detail_title">Participant</h1>
-        <div class="product_detail_info">{{user_username}}</div>
+        {%if other_user_name%}
+            <div class="product_detail_info">{{other_user_name}}</div>
+        {%else%}
+            <div class="product_detail_info">{{user_username}}</div>
+        {%endif%}
 
         <h1 class="product_detail_title">Produit</h1>
         <div class="product_detail_info">{{product_name}}</div>

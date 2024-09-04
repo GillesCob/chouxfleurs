@@ -24,6 +24,7 @@ class Project(Document):
     
     name = StringField(max_length=20)
     admin = ReferenceField('User', reverse_delete_rule=CASCADE)
+    second_admin = ReferenceField('User', reverse_delete_rule=CASCADE)
     users = ListField()
     due_date = DateTimeField()
     pronostic = ListField()
@@ -43,6 +44,7 @@ class Pronostic(Document):
     weight = IntField(required=True)
     height = IntField(required=True)
     date = StringField(max_length=150, required=True)
+    other_participant_name = StringField(max_length=150)
     sex_score = IntField()
     name_score = IntField()
     weight_score = IntField()
@@ -112,6 +114,16 @@ class Tracking_food(Document):
     project = ReferenceField('Project', reverse_delete_rule=CASCADE)
     type = StringField(max_length=150)
     quantity = StringField(max_length=150)
+    date = DateTimeField()
+
+
+class Healthdocuments(Document):
+    meta = {'collection': 'Healthdocuments_collection'}
+    
+    project = ReferenceField('Project', reverse_delete_rule=CASCADE)
+    title = StringField(max_length=150)
+    type = StringField(max_length=150)
+    url = StringField(max_length=150)
     date = DateTimeField()
 
 
