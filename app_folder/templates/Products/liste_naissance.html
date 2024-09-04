@@ -15,7 +15,7 @@
         <div class="my_container">
             <h1>Liste de naissance</h1>
 
-            {% if session['user_is_admin'] %}
+            {% if session['user_is_admin'] or session['user_is_2nd_admin'] %}
                 <div class="my_container">
                     <button onclick="window.location.href='/add_product'" id="my_button" class="my_btn">Ajouter un produit</button>
                 </div>

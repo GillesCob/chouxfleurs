@@ -7,7 +7,7 @@
 {% block content %}
 <div class="my_container">
     <h1>Photos</h1>
-    {% if user_is_admin %}
+    {% if session['user_is_admin'] or session['user_is_2nd_admin'] %}
         <div class="my_container">
             <a href="{{ url_for('views.add_photos') }}" class="my_btn">Ajouter une Photo</a>
         </div>

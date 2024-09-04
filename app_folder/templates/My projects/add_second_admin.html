@@ -11,27 +11,32 @@
     </a>
 
     <div class="my_container">
-        {%if second_admin_username%}
-        <div class="my_container">
-            <h3>2e admin : {{second_admin_username}}</h3>
+        <div class="my_card inert_card">
+            {%if second_admin_username%}
+
+                <div class="my_container">
+                    <h1>Modifier le 2nd admin</h1>
+                </div>
+                
+                <form action="{{ url_for('views.add_second_admin') }}" method="POST">
+                    <div class="form-group">
+                        <input type="email" id="admin_email" name="admin_email" class="form-control text-center" value={{second_admin_email}} required>
+                    </div>
+                    <button type="submit" class="my_btn">Modifier</button>
+                    <button type="button" onclick="window.location.href='/delete_second_admin'" class="my_btn red_admin_button">Supprimer l'admin</button>
+                </form>
+            {%else%}
+                <h1>Ajouter un 2nd admin</h1>
+                <p>Il pourra accéder aux réponses des pronostics, ajouter des produits à la liste de naissance ainsi que des photos à la galerie</p>
+                <form action="{{ url_for('views.add_second_admin') }}" method="POST">
+                    <div class="form-group">
+                        <input type="email" id="admin_email" name="admin_email" class="form-control text-center" placeholder="Entrez l'email" required>
+                    </div>
+                    <button type="submit" class="my_btn">Ajouter</button>
+                </form>
+            {%endif%}
         </div>
         
-        <form action="{{ url_for('views.add_second_admin') }}" method="POST">
-            <div class="form-group">
-                <label for="admin_email">Modifier l'admin ?</label>
-                <input type="email" id="admin_email" name="admin_email" class="form-control text-center" value={{second_admin_mail}} required>
-            </div>
-            <button type="submit" class="my_btn">Modifier</button>
-        </form>
-        {%else%}
-        <form action="{{ url_for('views.add_second_admin') }}" method="POST">
-            <div class="form-group">
-                <label for="admin_email">Email du nouvel admin</label>
-                <input type="email" id="admin_email" name="admin_email" class="form-control" placeholder="Entrez l'email" required>
-            </div>
-            <button type="submit" class="my_btn">Ajouter</button>
-        </form>
-        {%endif%}
 
     </div>
 </body>

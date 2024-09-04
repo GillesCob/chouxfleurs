@@ -7,25 +7,25 @@
 
 {% block content %}
 <div class="my_container">
-    {% if user_is_admin %}
-    <div class="multiple_btn_container">
-        {%if end_pronostics == True%}
-            <form action="{{ url_for('views.pronostic_winner')}}" method="post">
-                <input type="hidden" name="go_to_pronostic" value=false>
-                <button type="submit" class="my_btn white_btn">Le gagnant</button>
-            </form>
-            {% if user_is_admin %}
+    {% if session['user_is_admin'] or session['user_is_2nd_admin'] %}
+        <div class="multiple_btn_container">
+            {%if end_pronostics == True%}
+                <form action="{{ url_for('views.pronostic_winner')}}" method="post">
+                    <input type="hidden" name="go_to_pronostic" value=false>
+                    <button type="submit" class="my_btn white_btn">Le gagnant</button>
+                </form>
+                {% if session['user_is_admin'] %}
+                {%else%}
+                    <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultat</button>
+                {%endif%}
+                <button type="button" id="btn_my_answers" class="my_btn">Ma proposition</button>
+                <button type="button" id="pronostic_all_answers" class="my_btn">Les réponses</button>
             {%else%}
-                <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultat</button>
+                <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Ma proposition</button>
+                <button type="button" id="pronostic_all_answers" class="my_btn">Les réponses</button>
+                <button type="button" class="my_btn white_btn" onclick="window.location.href='/all_pronostics'">La tendance</button>
             {%endif%}
-            <button type="button" id="btn_my_answers" class="my_btn">Mes réponses</button>
-            <button type="button" id="pronostic_all_answers" class="my_btn">Les réponses</button>
-        {%else%}
-            <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Mes réponses</button>
-            <button type="button" id="pronostic_all_answers" class="my_btn">Les réponses</button>
-            <button type="button" class="my_btn white_btn" onclick="window.location.href='/all_pronostics'">La tendance</button>
-        {%endif%}
-    </div>
+        </div>
 
 {%endif%}
 
@@ -50,6 +50,22 @@
 <!--    JavaScripts-->
 <!-- ===============================================-->
 <script>
+        // Récupérer le bouton par son ID
+        var pronostic_all_answers = document.getElementById('pronostic_all_answers');
+
+        // Récupérer la valeur de gender_choice
+        var gender_choice = "{{gender_choice}}" ;
+
+        // Définir la classe en fonction de la valeur de gender_choice
+        if (gender_choice === "Fille") {
+            pronostic_all_answers.classList.add("gender_girl");
+
+        } else if (gender_choice === "Garçon") {
+            pronostic_all_answers.classList.add("gender_boy");
+            
+        } else {
+            pronostic_all_answers.classList.add("no_gender");
+        }
 
 </script>
     

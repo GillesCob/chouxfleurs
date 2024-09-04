@@ -11,8 +11,8 @@
     <div class="my_container">
 
         <div class="multiple_btn_container">
-                <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Mes réponses</button>
-                {% if user_is_admin %}
+                <button type="button" id="btn_my_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic'">Ma proposition</button>
+                {% if session['user_is_admin'] or session['user_is_2nd_admin'] %}
                     <button type="button" id="pronostic_all_answers" class="my_btn white_btn" onclick="window.location.href='/pronostic_all_answers'">Les réponses</button>
                 {%endif%}
                 <button type="button" id="btn_tendency" class="my_btn">La tendance</button>

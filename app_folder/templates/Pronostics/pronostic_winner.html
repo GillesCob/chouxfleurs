@@ -10,7 +10,7 @@
     <div class="my_container">
         <div class="multiple_btn_container">
                 <button type="button" id="btn_the_winner" class="my_btn">Le gagnant</button>
-                {% if user_is_admin %}
+                {% if session['user_is_admin'] %}
                 {%else%}
                     <button onclick="window.location.href='/pronostic_answers'" class="my_btn white_btn">Résultat</button>
                 {%endif%}

@@ -21,7 +21,7 @@
         <!-- Affichage de l'image -->
         <div class="my_container">
             <div class="my_image_container">
-                {%if user_is_admin == True%}
+                {%if session['user_is_admin'] or session ['user_is_2nd_admin']%}
                     <div class="photo_options">
                         <div class="dots_container">
                             <div class="dot"></div>

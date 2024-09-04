@@ -44,7 +44,7 @@
                 </div>
             </div>
 
-        {% if session['user_is_admin'] %}
+        {% if session['user_is_admin'] or session['user_is_2nd_admin'] %}
             <div class="two_btn_container small_btn_container">
                 <a href="{{ url_for('views.update_product', product_id=product.id) }}" class="btn btn-success">Modifier</a>
                 
