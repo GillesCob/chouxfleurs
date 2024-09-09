@@ -110,12 +110,13 @@ def elements_for_navbar(user_id):
     hide_page_bool = hide_page()
 
 
+
     return {
         'count_projects' : count_projects,
         'projects_dict' : projects_dict,
         'project_name_in_session' : project_in_session,
         'unread_comments' :has_unread_comments,
-        'hide_page' : hide_page_bool
+        'hide_page' : hide_page_bool,
             }
 
 def count_user_in_project(user_id):
@@ -642,6 +643,19 @@ def project_name_in_session():
 @views.route('/')
 @views.route('/home_page',methods=['GET', 'POST'])
 def home_page():
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
+    user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    
+    
+    
     user_identified_bool = False
     user_in_project_bool = False
     user_is_admin_project_bool = False
@@ -718,10 +732,12 @@ def pronostic():
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
+
     
 #Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
     current_project = current_project_obj()
@@ -871,10 +887,11 @@ def update_pronostic():
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
 
 
 #Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
@@ -953,10 +970,11 @@ def all_pronostics():
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
 
 #Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
     current_project = current_project_obj()
@@ -1052,6 +1070,8 @@ def pronostic_winner():
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
     add_project_in_session(user_id) #Ajoute un projet dans la session
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects', **elements_for_base))
@@ -1146,6 +1166,8 @@ def pronostic_answers():
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
     add_project_in_session(user_id) #Ajoute un projet dans la session
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects', **elements_for_base))
@@ -1205,10 +1227,11 @@ def liste_naissance():
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
     
     
 #Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions  
@@ -1292,10 +1315,11 @@ def add_product():
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
     
     
     if request.method == 'POST':
@@ -1332,10 +1356,11 @@ def update_product(product_id):
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
     
     product = Product.objects(id=product_id).first()
 
@@ -1389,10 +1414,11 @@ def product_details(product_id):
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
     
     product = Product.objects(id=product_id).first()
     left_to_pay = product.price-product.already_paid
@@ -1428,10 +1454,11 @@ def confirm_participation_loading(product_id):
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
 
     if request.method == 'POST':
         user = User.objects(id=user_id).first()
@@ -1506,10 +1533,11 @@ def confirm_participation(participation):
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
 
 #Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
     current_project = current_project_obj()
@@ -1534,10 +1562,11 @@ def delete_product(product_id):
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
 
 #Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
     current_project = current_project_obj()
@@ -2085,10 +2114,11 @@ def notes():
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id)
     add_project_in_session(user_id)
+    user_is_admin_current_project()
+    user_is_2nd_admin_current_project()
     project_exist = add_project_in_session(user_id)
     if project_exist == False:
         return redirect(url_for('views.my_projects'))
-    #-----------------------------------
     
 #Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
 
@@ -2207,7 +2237,6 @@ def add_note():
     else:
         return render_template('Notes/add_note.html', **elements_for_base)
 
-
 @views.route('/delete_note/<note_id>', methods=['POST'])
 @login_required
 def delete_note(note_id):
@@ -2255,7 +2284,6 @@ def delete_note(note_id):
     return redirect(url_for('views.notes'))
 
 
-#SOMMEIL ------------------------
 @views.route('/notes_sleep', methods=['GET', 'POST'])
 @login_required
 def notes_sleep():
@@ -2314,7 +2342,6 @@ def notes_sleep():
                            period_translation=period_translation,
                            
                            **elements_for_base)
-
 
 @views.route('/notes_nutrition', methods=['GET', 'POST'])
 @login_required
