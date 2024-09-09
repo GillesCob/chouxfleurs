@@ -650,6 +650,12 @@ def home_page():
     user_did_participation_bool = False
     affiliation_link_used_bool = False
     
+    try:
+        user_is_admin_current_project()
+        user_is_2nd_admin_current_project()
+    except:
+        pass
+    
     if current_user.is_authenticated:
         user_identified_bool = True
         
