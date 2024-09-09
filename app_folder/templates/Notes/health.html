@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Notes organisation
+    Notes santé
 {% endblock %}
 
 {% block content %}
@@ -12,13 +12,14 @@ Notes organisation
 
 
     <div class="icon my_container">
-        <img src="{{ url_for('static', filename='icons/organization.png') }}" alt="organization">
-        <h1>Organisation</h1>
+        <img src="{{ url_for('static', filename='icons/health.png') }}" alt="health">
+        <h1>Santé</h1>
+
     </div>
 
     <div class="filter-container">
 
-        <form action="{{ url_for('views.notes_organization') }}" method="POST">
+        <form action="{{ url_for('views.notes_health') }}" method="POST">
             <label for="note_period">Trier par période :</label>
             <select id="note_period" name="note_period" class="note_period">
                 <option value="all" {% if selected_period == 'all' %}selected{% endif %}>Tout</option>
@@ -61,7 +62,6 @@ Notes organisation
         <span class="close" onclick="closeModal()">&times;</span>
         <img class="modal-content" id="modalImage">
     </div>
-
 
     <script>
         function openModal(imageUrl) {

@@ -596,6 +596,38 @@ def my_project_participations():
     return user_participations
 
 
+# FONCTIONS POUR LA PARTIE NOTES
+def get_notes(specific_category):
+    selected_period = "All"
+    
+    period_translation = {
+        'all': 'Tout',
+        'before_pregnancy': 'Avant la grossesse',
+        'childbirth': 'L\'accouchement',
+        '0_6_months': '0 à 6 mois',
+        '6_12_months': '6 à 12 mois',
+        '1_3_years': '1 à 3 ans',
+        '3_6_years': '3 à 6 ans',
+    }
+
+    # Récupérer toutes les notes de la catégorie "Sommeil"
+    notes = Notes.objects(category=specific_category).order_by('-date')
+
+    # Filtrage des notes par catégorie (période)
+    if request.method == 'POST':
+        selected_period = request.form.get('note_period')
+        
+        if selected_period and selected_period != 'all':
+            filtered_notes = notes.filter(period=selected_period)
+        else:
+            # Si "Tout" est sélectionné ou aucune catégorie spécifique n'est choisie, on affiche toutes les notes
+            filtered_notes = notes
+    else:
+        filtered_notes = notes
+        
+    return filtered_notes, selected_period, period_translation
+
+
 #FONCTIONS POUR LA PARTIE MY PROJECTS
 def clue_due_date(current_project):
     try:
@@ -2473,6 +2505,28 @@ def notes_organization():
                            
                            **elements_for_base)
 
+@views.route('/notes_health', methods=['GET', 'POST'])
+@login_required
+def notes_health():
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
+    user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+    
+    specific_category = "health"
+    filtered_notes, selected_period, period_translation = get_notes(specific_category)
+
+    return render_template('Notes/health.html', 
+                           filtered_notes=filtered_notes,
+                           selected_period=selected_period,
+                           period_translation=period_translation,
+                           
+                           **elements_for_base)
 
 
 
