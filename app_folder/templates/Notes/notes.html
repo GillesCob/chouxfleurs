@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Notes
+{% endblock %}
+
+{% block content %}
+<body>
+    <div class="my_container">
+        <h1>Notes</h1>
+
+        <div class="icon_container">
+            <div class="icon" id="add_note">
+                <a href="{{ url_for('views.add_note') }}" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='icons/add.png') }}" alt="add">
+                    <p>Ajouter une note</p>
+                </a>
+            </div>         
+            
+            <div class="icon" id="organization">
+                <a href="{{ url_for('views.notes_organization') }}" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='icons/organization.png') }}" alt="organization">
+                    <p>Organisation</p>
+                </a>
+            </div>  
+
+            <div class="icon" id="sleep">
+                <a href="{{ url_for('views.notes_sleep') }}" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='icons/sleep.png') }}" alt="sleep">
+                    <p>Sommeil</p>
+                </a>
+            </div>  
+
+            <div class="icon" id="nutrition">
+                <a href="{{ url_for('views.notes_nutrition') }}" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='icons/biberon.png') }}" alt="nutrition">
+                    <p>Nutrition</p>
+                </a>
+            </div>  
+
+        </div>
+    </div>
+
+    <script>
+        function displayFileName(event) {
+            const input = event.target;
+            const file = input.files[0];
+            const fileNameSpan = document.getElementById('fileName');
+            const fileNameHidden = document.getElementById('file_name_hidden');
+    
+            if (file) {
+                fileNameSpan.textContent = file.name;  // Afficher le nom du fichier
+                fileNameSpan.style.display = 'block';  // Afficher le span
+                fileNameHidden.value = file.name;       // Mettre à jour le champ caché
+            } else {
+                fileNameSpan.textContent = '';          // Réinitialiser le texte
+                fileNameSpan.style.display = 'none';    // Masquer le span
+                fileNameHidden.value = '';              // Réinitialiser le champ caché
+            }
+        }
+    </script>
+
+</body>
+{% endblock %}

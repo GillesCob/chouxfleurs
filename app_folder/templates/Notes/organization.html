@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Suivi de l'Alimentation
+{% endblock %}
+
+{% block content %}
+<body>
+    <a href="{{ url_for('views.notes') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Retour" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+
+
+    <div class="icon my_container">
+        <img src="{{ url_for('static', filename='icons/organization.png') }}" alt="organization">
+        <h1>Organisation</h1>
+    </div>
+
+    <div class="filter-container">
+
+        <form action="{{ url_for('views.notes_organization') }}" method="POST">
+            <label for="note_period">Trier par période :</label>
+            <select id="note_period" name="note_period" class="note_period">
+                <option value="all" {% if selected_period == 'all' %}selected{% endif %}>Tout</option>
+                <option value="before_pregnancy" {% if selected_period == 'before_pregnancy' %}selected{% endif %}>Avant la grossesse</option>
+                <option value="childbirth" {% if selected_period == 'childbirth' %}selected{% endif %}>L'accouchement</option>
+                <option value="0_6_months" {% if selected_period == '0_6_months' %}selected{% endif %}>0 à 6 mois</option>
+                <option value="6_12_months" {% if selected_period == '6_12_months' %}selected{% endif %}>6 à 12 mois</option>
+                <option value="1_3_years" {% if selected_period == '1_3_years' %}selected{% endif %}>1 à 3 ans</option>
+                <option value="3_6_years" {% if selected_period == '3_6_years' %}selected{% endif %}>3 à 6 ans</option>
+            </select>
+            <button type="submit" class="my_btn">Trier</button>
+        </form>
+    </div>
+
+    <div class="notes_container">
+        {% for note in notes %}
+            <div class="note_item">
+                <div class="note_image">
+                    <img src="{{ note.url_note }}" alt="Image de la note" class="note-thumbnail" onclick="openModal('{{ note.url_note }}')">
+                </div>
+
+                <div class="note_details">
+                    <h3>{{ note.title }}</h3>
+                    <p>{{ period_translation[note.period] if note.period in period_translation else note.period }}</p>
+                    <p>{{ note.description }}</p>
+                </div>
+
+                <div class="delete-form">
+                    <form action="{{ url_for('views.delete_note', note_id=note.id) }}" method="POST">
+                        <button type="submit" class="delete_btn" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette note ?');">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- Modal for full-screen image -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+
+    <script>
+        function openModal(imageUrl) {
+            var modal = document.getElementById("imageModal");
+            var modalImg = document.getElementById("modalImage");
+            modal.style.display = "block";
+            modalImg.src = imageUrl;
+        }
+
+        function closeModal() {
+            var modal = document.getElementById("imageModal");
+            modal.style.display = "none";
+        }
+
+        // Close the modal if clicked outside the image
+        window.onclick = function(event) {
+            var modal = document.getElementById("imageModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+{% endblock %}

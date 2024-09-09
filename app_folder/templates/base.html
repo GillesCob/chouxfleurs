@@ -117,10 +117,12 @@
                                         </li>
                                     </div>
                                     {% if hide_page == True %}
-                                    <!-- Fonctionnalitées en sommeil pour le moment -->
-                                    <!-- <li>
-                                        <a class="nav-link " href="{{url_for('views.suivi')}}">Suivi</a>
-                                    </li> -->
+                                        {% if session['user_is_admin'] or session['user_is_2nd_admin'] %}
+                                        <li>
+                                            <a class="nav-link " href="{{url_for('views.notes')}}">Notes</a>
+                                        </li>
+
+                                        {% endif %}
                                     {% endif %}
                                     
                                 </ul>

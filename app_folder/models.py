@@ -127,5 +127,17 @@ class Healthdocuments(Document):
     type = StringField(max_length=150)
     url = StringField(max_length=150)
     date = DateTimeField()
+    
+class Notes(Document):
+    meta = {'collection': 'Notes_collection'}
+    
+    project = ReferenceField('Project', reverse_delete_rule=CASCADE)
+    title = StringField(max_length=150)
+    category = StringField(max_length=150)
+    description = StringField(max_length=150)
+    period = StringField(max_length=150)
+    url_note = StringField(max_length=150)
+    slug_note = StringField(max_length=150)
+    date = DateTimeField()
 
 

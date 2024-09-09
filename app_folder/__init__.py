@@ -23,9 +23,13 @@ MONGODB_URL = os.environ.get("MONGODB_URL")
 MONGODB_MODE = os.environ.get("MONGODB_MODE")
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-MAIL_SERVER = os.getenv("MAIL_SERVER")
-MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+# MAIL_SERVER = os.getenv("MAIL_SERVER")
+# MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+# MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+# MAIL_PORT = os.getenv("MAIL_PORT")
+# MAIL_USE_TLS = os.getenv("MAIL_USE_TLS")
+# MAIL_USE_SSL = os.getenv("MAIL_USE_SSL")
+
 
 WASABI_ACCESS_KEY = os.environ.get("WASABI_ACCESS_KEY")
 WASABI_SECRET_KEY = os.environ.get("WASABI_SECRET_KEY")
@@ -44,12 +48,12 @@ def create_app():
     app = Flask(__name__)
     
     #MAIL
-    app.config['MAIL_SERVER'] = MAIL_SERVER
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USERNAME'] = MAIL_USERNAME
-    app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USE_SSL'] = False
+    # app.config['MAIL_SERVER'] = MAIL_SERVER
+    # app.config['MAIL_PORT'] = MAIL_PORT
+    # app.config['MAIL_USERNAME'] = MAIL_USERNAME
+    # app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
+    # app.config['MAIL_USE_TLS'] = MAIL_USE_TLS
+    # app.config['MAIL_USE_SSL'] = MAIL_USE_SSL
     
     #ROUTES
     app.register_blueprint(views, url_prefix="/")    
@@ -65,6 +69,9 @@ def create_app():
 
 
     db.init_app(app)
+
+
+    # mail.init_app(app)
     
 
     #FLASK-LOGIN

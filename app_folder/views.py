@@ -1,6 +1,6 @@
 from flask import render_template, Blueprint, redirect, url_for, flash, request, session, jsonify
 from flask_login import current_user, login_required, logout_user
-from .models import Pronostic, User, Project, Product, Participation, Photos, Messages, Tracking_food, Healthdocuments
+from .models import Pronostic, User, Project, Product, Participation, Photos, Messages, Tracking_food, Notes
 
 from datetime import datetime, timedelta
 
@@ -13,7 +13,6 @@ import re
 
 from collections import OrderedDict
 
-# from slugify import slugify
 import boto3
 from boto3 import s3
 import os
@@ -22,8 +21,14 @@ from botocore.client import Config
 
 from PIL import Image, ExifTags
 import io
+from io import BytesIO
 
 from collections import defaultdict
+
+#MAILS
+from flask_mail import Message
+import logging
+
 
 #CHARGEMENT DES VARIABLES D'ENVIRONNEMENT
 load_dotenv(find_dotenv())
@@ -101,16 +106,16 @@ def elements_for_navbar(user_id):
     count_projects = count_user_in_project(user_id)
     projects_dict = create_projects_dict(user_id)
     project_in_session = project_name_in_session()
-    # has_unread_comments = messages_notifications(user_id)
-    # hide_page_bool = hide_page()
+    has_unread_comments = messages_notifications(user_id)
+    hide_page_bool = hide_page()
 
 
     return {
         'count_projects' : count_projects,
         'projects_dict' : projects_dict,
         'project_name_in_session' : project_in_session,
-        # 'unread_comments' :has_unread_comments,
-        # 'hide_page' : hide_page_bool
+        'unread_comments' :has_unread_comments,
+        'hide_page' : hide_page_bool
             }
 
 def count_user_in_project(user_id):
@@ -617,6 +622,23 @@ def project_name_in_session():
 
 
 #--------------------------------------------------------------------------------ROUTES -----------------------------------------------------------------------------
+
+
+# @views.route('/send_email')
+# def send_email():
+#     from . import mail
+
+#     try:
+#         msg = Message("Test Email", sender="contact@chouxfleurs.fr", recipients=["gilles.cobigo@gmail.com"])
+#         msg.body = "Ceci est un email de test."
+#         mail.send(msg)
+#         logging.info("Email envoyé avec succès !")
+#         return "Email envoyé avec succès !"
+#     except Exception as e:
+#         logging.error(f"Erreur lors de l'envoi de l'email : {e}")
+#         return f"Erreur lors de l'envoi de l'email : {e}"
+    
+    
 @views.route('/')
 @views.route('/home_page',methods=['GET', 'POST'])
 def home_page():
@@ -1837,100 +1859,107 @@ def add_photos():
         except Exception as e:
             print(f"Error processing EXIF data: {e}")
 
-        # Vérifier et appliquer le redimensionnement si nécessaire
-        max_width = 1000
-        if image.size[0] > max_width:
-            width_percent = (max_width / float(image.size[0]))
+        try:
+            # Vérifier et appliquer le redimensionnement si nécessaire
+            max_width = 1000
+            if image.size[0] > max_width:
+                width_percent = (max_width / float(image.size[0]))
+                height_size = int((float(image.size[1]) * float(width_percent)))
+                image = image.resize((max_width, height_size), Image.Resampling.LANCZOS)
+
+            # Générer un slug pour l'URL de la photo
+            brut_slug = f'{current_project.id}-photo-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+            slug_photo = brut_slug.replace(" ", "-")
+
+            # Sauvegarder le fichier localement dans un répertoire temporaire
+            local_file_path = f'/tmp/{slug_photo}'
+
+            # Écrire les données de l'image originale dans le fichier temporaire
+            with open(local_file_path, 'wb') as f:
+                image.save(f, format='JPEG')
+
+            # --- Téléchargement de l'image originale sur Wasabi ---
+            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+            wasabi_bucket_name = 'chouxfleurs.fr'
+            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+
+            # Initialiser le client S3 pour Wasabi
+            s3 = boto3.client(
+                's3',
+                endpoint_url=wasabi_endpoint_url,
+                aws_access_key_id=wasabi_access_key,
+                aws_secret_access_key=wasabi_secret_key,
+                config=Config(signature_version='s3v4')
+            )
+
+            # Uploader le fichier vers Wasabi
+            s3.upload_file(local_file_path, wasabi_bucket_name, slug_photo)
+
+            # URL de l'image originale
+            url_photo = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_photo}"
+
+            # --- Traitement de l'image redimensionnée ---
+
+            # Redimensionner l'image
+            max_width_thumbnail = 400
+            width_percent = (max_width_thumbnail / float(image.size[0]))
             height_size = int((float(image.size[1]) * float(width_percent)))
-            image = image.resize((max_width, height_size), Image.Resampling.LANCZOS)
+            resized_image = image.resize((max_width_thumbnail, height_size), Image.Resampling.LANCZOS)
 
-        # Générer un slug pour l'URL de la photo
-        brut_slug = f'{current_project.id}-photo-{datetime.now().strftime("%Y%m%d%H%M%S")}'
-        slug_photo = brut_slug.replace(" ", "-")
+            # Sauvegarder l'image redimensionnée dans un objet BytesIO
+            output = io.BytesIO()
+            resized_image.save(output, format='JPEG')
+            output.seek(0)
 
-        # Sauvegarder le fichier localement dans un répertoire temporaire
-        local_file_path = f'/tmp/{slug_photo}'
+            # Générer un slug pour l'URL de la photo redimensionnée
+            slug_thumbnail = f'{current_project.id}-thumbnail-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+            slug_thumbnail = slug_thumbnail.replace(" ", "-")
 
-        # Écrire les données de l'image originale dans le fichier temporaire
-        with open(local_file_path, 'wb') as f:
-            image.save(f, format='JPEG')
+            # Sauvegarder le fichier redimensionné localement
+            thumbnail_file_path = f'/tmp/{slug_thumbnail}'
+            with open(thumbnail_file_path, 'wb') as f:
+                f.write(output.read())
 
-        # --- Téléchargement de l'image originale sur Wasabi ---
-        wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
-        wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
-        wasabi_bucket_name = 'chouxfleurs.fr'
-        wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+            # Uploader le fichier redimensionné vers Wasabi
+            s3.upload_file(thumbnail_file_path, wasabi_bucket_name, slug_thumbnail)
 
-        # Initialiser le client S3 pour Wasabi
-        s3 = boto3.client(
-            's3',
-            endpoint_url=wasabi_endpoint_url,
-            aws_access_key_id=wasabi_access_key,
-            aws_secret_access_key=wasabi_secret_key,
-            config=Config(signature_version='s3v4')
-        )
+            # URL de l'image redimensionnée
+            thumbnail_url = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_thumbnail}"
 
-        # Uploader le fichier vers Wasabi
-        s3.upload_file(local_file_path, wasabi_bucket_name, slug_photo)
+            # Créer une nouvelle instance de photo et sauvegarder dans la base de données
+            new_photo = Photos(
+                project=current_project,
+                url_photo=url_photo,
+                utility="Gallery",
+                slug_photo=slug_photo,
+                url_thumbnail=thumbnail_url,
+                slug_thumbnail=slug_thumbnail,
+                description=description,
+                date=datetime.now(),
+            )
+            new_photo.save()
 
-        # URL de l'image originale
-        url_photo = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_photo}"
+            #J'ai mis en com les lignes dessous. Utile ? plus rapide pour chercher les photos d'un projet par la suite ?
+            # Mettre à jour la liste des photos du projet
+            # project.photos.append(new_photo)
+            # project.save()
 
-        # --- Traitement de l'image redimensionnée ---
+            # Supprimer les fichiers temporaires locaux
+            os.remove(local_file_path)
+            os.remove(thumbnail_file_path)
 
-        # Redimensionner l'image
-        max_width_thumbnail = 400
-        width_percent = (max_width_thumbnail / float(image.size[0]))
-        height_size = int((float(image.size[1]) * float(width_percent)))
-        resized_image = image.resize((max_width_thumbnail, height_size), Image.Resampling.LANCZOS)
-
-        # Sauvegarder l'image redimensionnée dans un objet BytesIO
-        output = io.BytesIO()
-        resized_image.save(output, format='JPEG')
-        output.seek(0)
-
-        # Générer un slug pour l'URL de la photo redimensionnée
-        slug_thumbnail = f'{current_project.id}-thumbnail-{datetime.now().strftime("%Y%m%d%H%M%S")}'
-        slug_thumbnail = slug_thumbnail.replace(" ", "-")
-
-        # Sauvegarder le fichier redimensionné localement
-        thumbnail_file_path = f'/tmp/{slug_thumbnail}'
-        with open(thumbnail_file_path, 'wb') as f:
-            f.write(output.read())
-
-        # Uploader le fichier redimensionné vers Wasabi
-        s3.upload_file(thumbnail_file_path, wasabi_bucket_name, slug_thumbnail)
-
-        # URL de l'image redimensionnée
-        thumbnail_url = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_thumbnail}"
-
-        # Créer une nouvelle instance de photo et sauvegarder dans la base de données
-        new_photo = Photos(
-            project=current_project,
-            url_photo=url_photo,
-            utility="Gallery",
-            slug_photo=slug_photo,
-            url_thumbnail=thumbnail_url,
-            slug_thumbnail=slug_thumbnail,
-            description=description,
-            date=datetime.now(),
-        )
-        new_photo.save()
-
-        #J'ai mis en com les lignes dessous. Utile ? plus rapide pour chercher les photos d'un projet par la suite ?
-        # Mettre à jour la liste des photos du projet
-        # project.photos.append(new_photo)
-        # project.save()
-
-        # Supprimer les fichiers temporaires locaux
-        os.remove(local_file_path)
-        os.remove(thumbnail_file_path)
-
-        flash('Votre photo a bien été ajoutée !', category='success')
-        return redirect(url_for('views.photos'))
+            flash('Votre photo a bien été ajoutée !', category='success')
+            return redirect(url_for('views.photos'))
+        
+        except Exception as e:
+            flash(f'Erreur lors de l\'ajout de la photo : {str(e)}', category='error')
+            print(f'Error adding photo: {str(e)}')
+            return render_template('Photos/add_photo.html', **elements_for_base)
 
     else:
         return render_template('Photos/add_photo.html', **elements_for_base)
+
 
 @views.route('/delete_photo/<photo_id>', methods=['GET', 'POST'])
 @login_required
@@ -2044,6 +2073,369 @@ def unlike_photo(photo_id):
         photo.save()
     
     return redirect(url_for('views.photo_and_messages', photo_id=photo_id))
+
+
+#ROUTES "NOTES" -------------------------------------------------------------------------------------------------------------
+
+@views.route('/notes')
+@login_required
+def notes():
+#Fonctions afin d'initialiser la route
+    #-----------------------------------
+    user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+    
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+
+
+#Initialisation des variables
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "new_route"
+#--------------------------------------------------------------------------------------------------------------------------------------------
+
+    return render_template('Notes/notes.html', **elements_for_base)
+
+@views.route('/add_note', methods=['GET', 'POST'])
+@login_required
+def add_note():
+    # Fonctions afin d'initialiser la route
+    # -----------------------------------
+    user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id)
+    add_project_in_session(user_id)
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    # -----------------------------------
+
+    # Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+    current_project = current_project_obj()
+
+    # --------------------------------------------------------------------------------------------------------------------------------------------
+    # Début du code pour la route "Note"
+    # --------------------------------------------------------------------------------------------------------------------------------------------
+
+    if request.method == 'POST':
+        try:
+            file = request.files.get('note')
+            description = request.form.get('write_note')
+            filename = request.form.get('note_title')
+            category = request.form.get('note_category')
+            period = request.form.get('note_period')
+            
+            if file:
+                # Lire le contenu du fichier dans un objet BytesIO
+                file_stream = io.BytesIO(file.read())
+
+                # Ouvrir l'image avec Pillow
+                image = Image.open(file_stream)
+
+                # Vérifier si l'image est en mode RGBA et la convertir en RGB
+                if image.mode == 'RGBA':
+                    image = image.convert('RGB')
+
+                # Vérifier et appliquer le redimensionnement si nécessaire
+                max_width = 1000
+                if image.size[0] > max_width:
+                    width_percent = (max_width / float(image.size[0]))
+                    height_size = int((float(image.size[1]) * float(width_percent)))
+                    image = image.resize((max_width, height_size), Image.Resampling.LANCZOS)
+
+                # Générer un slug pour l'URL du document
+                brut_slug = f'{current_project.id}-note-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+                slug_note = brut_slug.replace(" ", "-")
+
+                # Sauvegarder le fichier localement dans un répertoire temporaire
+                local_file_path = f'/tmp/{slug_note}.jpg'
+
+                # Écrire les données de l'image dans le fichier temporaire
+                image.save(local_file_path, format='JPEG')
+
+                # --- Téléchargement du document sur Wasabi ---
+                wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+                wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+                wasabi_bucket_name = 'chouxfleurs.fr'
+                wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+                # Initialiser le client S3 pour Wasabi
+                s3 = boto3.client(
+                    's3',
+                    endpoint_url=wasabi_endpoint_url,
+                    aws_access_key_id=wasabi_access_key,
+                    aws_secret_access_key=wasabi_secret_key,
+                    config=Config(signature_version='s3v4')
+                )
+                
+                # Déterminer le type MIME (Content-Type)
+                content_type = file.mimetype if file.mimetype else 'image/jpeg'
+
+                # Uploader le fichier vers Wasabi
+                s3.upload_file(local_file_path, wasabi_bucket_name, slug_note, ExtraArgs={'ContentType': content_type})
+
+                # URL du document
+                url_note = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{slug_note}"
+
+                # Créer une nouvelle instance de Note et sauvegarder dans la base de données
+                new_document = Notes(
+                    project=current_project,
+                    title=filename,
+                    category=category,
+                    description=description,
+                    period=period,
+                    url_note=url_note,
+                    slug_note=slug_note,
+                    date=datetime.now(),
+                )
+                new_document.save()
+
+                # Supprimer le fichier temporaire local
+                os.remove(local_file_path)
+
+                flash('Votre note a bien été ajoutée !', category='success')
+                return redirect(url_for('views.notes'))
+
+        except Exception as e:
+            flash(f'Erreur lors de l\'ajout de la note : {str(e)}', category='error')
+            print(f'Error adding note: {str(e)}')
+            return render_template('Notes/add_note.html', **elements_for_base)
+
+    else:
+        return render_template('Notes/add_note.html', **elements_for_base)
+
+
+@views.route('/delete_note/<note_id>', methods=['POST'])
+@login_required
+def delete_note(note_id):
+    # Récupérer la note de la base de données
+    note = Notes.objects(id=note_id).first()
+    wasabi_bucket_name = 'chouxfleurs.fr'
+    note_category = note.category
+    
+    if note:
+        try:
+            # Configuration pour Wasabi
+            wasabi_access_key = os.getenv('WASABI_ACCESS_KEY')
+            wasabi_secret_key = os.getenv('WASABI_SECRET_KEY')
+            wasabi_endpoint_url = 'https://s3.eu-west-2.wasabisys.com'
+
+            # Initialiser le client S3 pour Wasabi
+            s3 = boto3.client(
+                's3',
+                endpoint_url=wasabi_endpoint_url,
+                aws_access_key_id=wasabi_access_key,
+                aws_secret_access_key=wasabi_secret_key,
+                config=Config(signature_version='s3v4')
+            )
+
+            # Supprimer le fichier de Wasabi
+            s3.delete_object(Bucket=wasabi_bucket_name, Key=note.slug_note)
+            
+            # Supprimer la note de la base de données
+            note.delete()
+            
+            flash('Note supprimée avec succès.', category='success')
+            if note_category == "sleep":
+                return redirect(url_for('views.notes_sleep'))
+            if note_category == "nutrition":
+                return redirect(url_for('views.notes_nutrition'))
+            if note_category == "organization":
+                return redirect(url_for('views.notes_organization'))
+            
+        except Exception as e:
+            flash(f'Erreur lors de la suppression de la note : {str(e)}', category='error')
+            print(f'Error deleting note: {str(e)}')
+    else:
+        flash('Note introuvable.', category='error')
+    
+    return redirect(url_for('views.notes'))
+
+
+#SOMMEIL ------------------------
+@views.route('/notes_sleep', methods=['GET', 'POST'])
+@login_required
+def notes_sleep():
+    #Fonctions afin d'initialiser la route
+    #-----------------------------------
+    user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+    
+    
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+
+#Initialisation des variables
+    selected_period = "All"
+    
+    # Mapping des valeurs en anglais aux valeurs en français
+    period_translation = {
+        'all': 'Tout',
+        'before_pregnancy': 'Avant la grossesse',
+        'childbirth': 'L\'accouchement',
+        '0_6_months': '0 à 6 mois',
+        '6_12_months': '6 à 12 mois',
+        '1_3_years': '1 à 3 ans',
+        '3_6_years': '3 à 6 ans',
+    }
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "photos"
+#--------------------------------------------------------------------------------------------------------------------------------------------  
+    
+    # Récupérer toutes les notes de la catégorie "Sommeil"
+    notes_sleep = Notes.objects(category="sleep").order_by('-date')
+
+    # Filtrage des notes par catégorie (période)
+    if request.method == 'POST':
+        selected_period = request.form.get('note_period')
+        
+        if selected_period and selected_period != 'all':
+            filtered_notes = notes_sleep.filter(period=selected_period)
+        else:
+            # Si "Tout" est sélectionné ou aucune catégorie spécifique n'est choisie, on affiche toutes les notes
+            filtered_notes = notes_sleep
+    else:
+        filtered_notes = notes_sleep
+
+
+
+    return render_template('Notes/sleep.html', 
+                           notes=filtered_notes,
+                           selected_period=selected_period,
+                           period_translation=period_translation,
+                           
+                           **elements_for_base)
+
+
+@views.route('/notes_nutrition', methods=['GET', 'POST'])
+@login_required
+def notes_nutrition():
+    #Fonctions afin d'initialiser la route
+    #-----------------------------------
+    user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+    
+    
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+
+#Initialisation des variables
+    selected_period = "All"
+    
+        # Mapping des valeurs en anglais aux valeurs en français
+    period_translation = {
+        'all': 'Tout',
+        'before_pregnancy': 'Avant la grossesse',
+        'childbirth': 'L\'accouchement',
+        '0_6_months': '0 à 6 mois',
+        '6_12_months': '6 à 12 mois',
+        '1_3_years': '1 à 3 ans',
+        '3_6_years': '3 à 6 ans',
+    }
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "notes_nutrition"
+#--------------------------------------------------------------------------------------------------------------------------------------------  
+    
+
+    # Récupérer toutes les notes de la catégorie "Sommeil"
+    notes_nutrition = Notes.objects(category="nutrition").order_by('-date')
+
+    # Filtrage des notes par catégorie (période)
+    if request.method == 'POST':
+        selected_period = request.form.get('note_period')
+        
+        if selected_period and selected_period != 'all':
+            filtered_notes = notes_nutrition.filter(period=selected_period)
+        else:
+            # Si "Tout" est sélectionné ou aucune catégorie spécifique n'est choisie, on affiche toutes les notes
+            filtered_notes = notes_nutrition
+    else:
+        filtered_notes = notes_nutrition
+
+
+
+    return render_template('Notes/nutrition.html', 
+                           notes=filtered_notes,
+                           selected_period=selected_period,
+                           period_translation=period_translation,
+                           
+                           **elements_for_base)
+
+@views.route('/notes_organization', methods=['GET', 'POST'])
+@login_required
+def notes_organization():
+    #Fonctions afin d'initialiser la route
+    #-----------------------------------
+    user_id = current_user.id
+    elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
+    add_project_in_session(user_id) #Ajoute un projet dans la session
+    project_exist = add_project_in_session(user_id)
+    if project_exist == False:
+        return redirect(url_for('views.my_projects'))
+    #-----------------------------------
+    
+    
+#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
+
+#Initialisation des variables
+    selected_period = "All"
+    
+        # Mapping des valeurs en anglais aux valeurs en français
+    period_translation = {
+        'all': 'Tout',
+        'before_pregnancy': 'Avant la grossesse',
+        'childbirth': 'L\'accouchement',
+        '0_6_months': '0 à 6 mois',
+        '6_12_months': '6 à 12 mois',
+        '1_3_years': '1 à 3 ans',
+        '3_6_years': '3 à 6 ans',
+    }
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------
+#Début du code pour la route "notes_organization"
+#--------------------------------------------------------------------------------------------------------------------------------------------  
+    
+
+    # Récupérer toutes les notes de la catégorie "Sommeil"
+    notes_organization = Notes.objects(category="organization").order_by('-date')
+
+    # Filtrage des notes par catégorie (période)
+    if request.method == 'POST':
+        selected_period = request.form.get('note_period')
+        
+        if selected_period and selected_period != 'all':
+            filtered_notes = notes_organization.filter(period=selected_period)
+        else:
+            # Si "Tout" est sélectionné ou aucune catégorie spécifique n'est choisie, on affiche toutes les notes
+            filtered_notes = notes_organization
+    else:
+        filtered_notes = notes_organization
+
+
+
+    return render_template('Notes/organization.html', 
+                           notes=filtered_notes,
+                           selected_period=selected_period,
+                           period_translation=period_translation,
+                           
+                           **elements_for_base)
+
 
 
 
@@ -2424,6 +2816,7 @@ def change_notification():
     flash('Paramètre de notification mis à jour avec succès!', 'success')
 
     return redirect(url_for('views.my_profil'))
+
 
 #ROUTES "MY PROJECTS" -------------------------------------------------------------------------------------------------------------
 @views.route('/my_projects', methods=['GET', 'POST'])

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Documents de Santé
+{% endblock %}
+
+{% block content %}
+<body>
+    <a href="{{ url_for('views.notes') }}">
+        <img src="{{ url_for('static', filename='images/left-arrow.png') }}" alt="Retour" style="max-width: 50px; margin: 0 0 0 10px;">
+    </a>
+
+    <form action="{{ url_for('views.add_note') }}" method="POST" enctype="multipart/form-data">
+        <div class="my_container">
+            <input class="text-center note_title " id="file_name_hidden" name="note_title" placeholder="Titre de la note">
+
+            <select id="note_category" name="note_category" class="note_category">
+                <option value="" disabled selected>Catégorie</option>
+                <option value="organization">Organisation</option>
+                <option value="sleep">Sommeil</option>
+                <option value="nutrition">Nutrition</option>
+
+
+            </select>
+            
+
+            <select id="note_period" name="note_period" class="note_period">
+                <option value="" disabled selected>Période</option>
+                <option value="before_pregnancy">Avant la grossesse</option>
+                <option value="childbirth">L'accouchement</option>
+                <option value="0_6_months">0 à 6 mois</option>
+                <option value="6_12_months">6 à 12 mois</option>
+                <option value="1_3_years">1 à 3 ans</option>
+                <option value="3_6_years">3 à 6 ans</option>
+            </select>
+            
+            <input type="file" id="note" name="note" accept=".jpg, .jpeg" required style="display: none;" onchange="displayFileName(event)">
+
+            </br>
+            <input class="text-center note_title" id="file_name_hidden" name="write_note" placeholder="Plus d'informations">
+
+
+            <label for="note" class="my_btn white_btn">Sélectionner</label>
+
+            <!-- Ajout de la liste déroulante -->
+
+
+            <button type="submit" class="my_btn">Valider</button>         
+
+
+        </div>               
+    </form>
+    
+</body>
+{% endblock %}
