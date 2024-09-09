@@ -2158,6 +2158,23 @@ def add_note():
 
                 # Ouvrir l'image avec Pillow
                 image = Image.open(file_stream)
+                
+                # Correction de l'orientation de l'image si nécessaire
+                try:
+                    exif = image._getexif()
+                    if exif:
+                        for orientation in ExifTags.TAGS.keys():
+                            if ExifTags.TAGS[orientation] == 'Orientation':
+                                break
+                        orientation = exif.get(orientation, None)
+                        if orientation == 3:
+                            image = image.rotate(180, expand=True)
+                        elif orientation == 6:
+                            image = image.rotate(270, expand=True)
+                        elif orientation == 8:
+                            image = image.rotate(90, expand=True)
+                except Exception as e:
+                    print(f"Error processing EXIF data: {e}")
 
                 # Vérifier si l'image est en mode RGBA et la convertir en RGB
                 if image.mode == 'RGBA':
