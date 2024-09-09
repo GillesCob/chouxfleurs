@@ -599,7 +599,6 @@ def my_project_participations():
 # FONCTIONS POUR LA PARTIE NOTES
 def get_notes(specific_category):
     selected_period = "All"
-    
     period_translation = {
         'all': 'Tout',
         'before_pregnancy': 'Avant la grossesse',
@@ -610,23 +609,20 @@ def get_notes(specific_category):
         '3_6_years': '3 à 6 ans',
     }
 
-    # Récupérer toutes les notes de la catégorie "Sommeil"
+    # Récupérer toutes les notes de la catégorie spécifique
     notes = Notes.objects(category=specific_category).order_by('-date')
+    
+    return notes, selected_period, period_translation
 
-    # Filtrage des notes par catégorie (période)
-    if request.method == 'POST':
-        selected_period = request.form.get('note_period')
-        
-        if selected_period and selected_period != 'all':
-            filtered_notes = notes.filter(period=selected_period)
-        else:
-            # Si "Tout" est sélectionné ou aucune catégorie spécifique n'est choisie, on affiche toutes les notes
-            filtered_notes = notes
+
+def filter_notes(filtered_notes, selected_period):
+
+    if selected_period != 'all':
+        filtered_notes = filtered_notes.filter(period=selected_period)
     else:
-        filtered_notes = notes
+        filtered_notes = filtered_notes
         
-    return filtered_notes, selected_period, period_translation
-
+    return filtered_notes
 
 #FONCTIONS POUR LA PARTIE MY PROJECTS
 def clue_due_date(current_project):
@@ -2269,7 +2265,14 @@ def add_note():
                 os.remove(local_file_path)
 
                 flash('Votre note a bien été ajoutée !', category='success')
-                return redirect(url_for('views.notes'))
+                if category == "sleep":
+                    return redirect(url_for('views.notes_sleep'))
+                if category == "nutrition":
+                    return redirect(url_for('views.notes_nutrition'))
+                if category == "organization":
+                    return redirect(url_for('views.notes_organization'))
+                if category == "health":
+                    return redirect(url_for('views.notes_health'))
 
         except Exception as e:
             flash(f'Erreur lors de l\'ajout de la note : {str(e)}', category='error')
@@ -2316,6 +2319,8 @@ def delete_note(note_id):
                 return redirect(url_for('views.notes_nutrition'))
             if note_category == "organization":
                 return redirect(url_for('views.notes_organization'))
+            if note_category == "health":
+                return redirect(url_for('views.notes_health'))
             
         except Exception as e:
             flash(f'Erreur lors de la suppression de la note : {str(e)}', category='error')
@@ -2325,11 +2330,10 @@ def delete_note(note_id):
     
     return redirect(url_for('views.notes'))
 
-
 @views.route('/notes_sleep', methods=['GET', 'POST'])
 @login_required
 def notes_sleep():
-    #Fonctions afin d'initialiser la route
+#Fonctions afin d'initialiser la route
     #-----------------------------------
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
@@ -2339,47 +2343,15 @@ def notes_sleep():
         return redirect(url_for('views.my_projects'))
     #-----------------------------------
     
+    specific_category = "sleep"
+    filtered_notes, selected_period, period_translation = get_notes(specific_category)
     
-#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
-
-#Initialisation des variables
-    selected_period = "All"
-    
-    # Mapping des valeurs en anglais aux valeurs en français
-    period_translation = {
-        'all': 'Tout',
-        'before_pregnancy': 'Avant la grossesse',
-        'childbirth': 'L\'accouchement',
-        '0_6_months': '0 à 6 mois',
-        '6_12_months': '6 à 12 mois',
-        '1_3_years': '1 à 3 ans',
-        '3_6_years': '3 à 6 ans',
-    }
-
-
-#--------------------------------------------------------------------------------------------------------------------------------------------
-#Début du code pour la route "photos"
-#--------------------------------------------------------------------------------------------------------------------------------------------  
-    
-    # Récupérer toutes les notes de la catégorie "Sommeil"
-    notes_sleep = Notes.objects(category="sleep").order_by('-date')
-
-    # Filtrage des notes par catégorie (période)
     if request.method == 'POST':
         selected_period = request.form.get('note_period')
-        
-        if selected_period and selected_period != 'all':
-            filtered_notes = notes_sleep.filter(period=selected_period)
-        else:
-            # Si "Tout" est sélectionné ou aucune catégorie spécifique n'est choisie, on affiche toutes les notes
-            filtered_notes = notes_sleep
-    else:
-        filtered_notes = notes_sleep
-
-
+        filtered_notes = filter_notes(filtered_notes, selected_period)
 
     return render_template('Notes/sleep.html', 
-                           notes=filtered_notes,
+                           filtered_notes=filtered_notes,
                            selected_period=selected_period,
                            period_translation=period_translation,
                            
@@ -2388,7 +2360,7 @@ def notes_sleep():
 @views.route('/notes_nutrition', methods=['GET', 'POST'])
 @login_required
 def notes_nutrition():
-    #Fonctions afin d'initialiser la route
+#Fonctions afin d'initialiser la route
     #-----------------------------------
     user_id = current_user.id
     elements_for_base = elements_for_navbar(user_id) #Eléments pour la navbar
@@ -2398,48 +2370,15 @@ def notes_nutrition():
         return redirect(url_for('views.my_projects'))
     #-----------------------------------
     
+    specific_category = "nutrition"
+    filtered_notes, selected_period, period_translation = get_notes(specific_category)
     
-#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
-
-#Initialisation des variables
-    selected_period = "All"
-    
-        # Mapping des valeurs en anglais aux valeurs en français
-    period_translation = {
-        'all': 'Tout',
-        'before_pregnancy': 'Avant la grossesse',
-        'childbirth': 'L\'accouchement',
-        '0_6_months': '0 à 6 mois',
-        '6_12_months': '6 à 12 mois',
-        '1_3_years': '1 à 3 ans',
-        '3_6_years': '3 à 6 ans',
-    }
-
-
-#--------------------------------------------------------------------------------------------------------------------------------------------
-#Début du code pour la route "notes_nutrition"
-#--------------------------------------------------------------------------------------------------------------------------------------------  
-    
-
-    # Récupérer toutes les notes de la catégorie "Sommeil"
-    notes_nutrition = Notes.objects(category="nutrition").order_by('-date')
-
-    # Filtrage des notes par catégorie (période)
     if request.method == 'POST':
         selected_period = request.form.get('note_period')
-        
-        if selected_period and selected_period != 'all':
-            filtered_notes = notes_nutrition.filter(period=selected_period)
-        else:
-            # Si "Tout" est sélectionné ou aucune catégorie spécifique n'est choisie, on affiche toutes les notes
-            filtered_notes = notes_nutrition
-    else:
-        filtered_notes = notes_nutrition
-
-
+        filtered_notes = filter_notes(filtered_notes, selected_period)
 
     return render_template('Notes/nutrition.html', 
-                           notes=filtered_notes,
+                           filtered_notes=filtered_notes,
                            selected_period=selected_period,
                            period_translation=period_translation,
                            
@@ -2458,48 +2397,15 @@ def notes_organization():
         return redirect(url_for('views.my_projects'))
     #-----------------------------------
     
+    specific_category = "organization"
+    filtered_notes, selected_period, period_translation = get_notes(specific_category)
     
-#Fonctions afin de récupérer les infos nécessaires + variables tirées de ces fonctions
-
-#Initialisation des variables
-    selected_period = "All"
-    
-        # Mapping des valeurs en anglais aux valeurs en français
-    period_translation = {
-        'all': 'Tout',
-        'before_pregnancy': 'Avant la grossesse',
-        'childbirth': 'L\'accouchement',
-        '0_6_months': '0 à 6 mois',
-        '6_12_months': '6 à 12 mois',
-        '1_3_years': '1 à 3 ans',
-        '3_6_years': '3 à 6 ans',
-    }
-
-
-#--------------------------------------------------------------------------------------------------------------------------------------------
-#Début du code pour la route "notes_organization"
-#--------------------------------------------------------------------------------------------------------------------------------------------  
-    
-
-    # Récupérer toutes les notes de la catégorie "Sommeil"
-    notes_organization = Notes.objects(category="organization").order_by('-date')
-
-    # Filtrage des notes par catégorie (période)
     if request.method == 'POST':
         selected_period = request.form.get('note_period')
-        
-        if selected_period and selected_period != 'all':
-            filtered_notes = notes_organization.filter(period=selected_period)
-        else:
-            # Si "Tout" est sélectionné ou aucune catégorie spécifique n'est choisie, on affiche toutes les notes
-            filtered_notes = notes_organization
-    else:
-        filtered_notes = notes_organization
-
-
+        filtered_notes = filter_notes(filtered_notes, selected_period)
 
     return render_template('Notes/organization.html', 
-                           notes=filtered_notes,
+                           filtered_notes=filtered_notes,
                            selected_period=selected_period,
                            period_translation=period_translation,
                            
@@ -2520,7 +2426,11 @@ def notes_health():
     
     specific_category = "health"
     filtered_notes, selected_period, period_translation = get_notes(specific_category)
-
+    
+    if request.method == 'POST':
+        selected_period = request.form.get('note_period')
+        filtered_notes = filter_notes(filtered_notes, selected_period)
+    
     return render_template('Notes/health.html', 
                            filtered_notes=filtered_notes,
                            selected_period=selected_period,

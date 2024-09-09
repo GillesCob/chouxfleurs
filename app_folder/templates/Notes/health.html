@@ -35,25 +35,29 @@
     </div>
 
     <div class="notes_container">
-        {% for note in notes %}
-            <div class="note_item">
-                <div class="note_image">
-                    <img src="{{ note.url_note }}" alt="Image de la note" class="note-thumbnail" onclick="openModal('{{ note.url_note }}')">
-                </div>
+        {% if filtered_notes %}
+            {% for note in filtered_notes %}
+                <div class="note_item">
+                    <div class="note_image">
+                        <img src="{{ note.url_note }}" alt="Image de la note" class="note-thumbnail" onclick="openModal('{{ note.url_note }}')">
+                    </div>
 
-                <div class="note_details">
-                    <h3>{{ note.title }}</h3>
-                    <p>{{ period_translation[note.period] if note.period in period_translation else note.period }}</p>
-                    <p>{{ note.description }}</p>
-                </div>
+                    <div class="note_details">
+                        <h3>{{ note.title }}</h3>
+                        <p>{{ period_translation[note.period] if note.period in period_translation else note.period }}</p>
+                        <p>{{ note.description }}</p>
+                    </div>
 
-                <div class="delete-form">
-                    <form action="{{ url_for('views.delete_note', note_id=note.id) }}" method="POST">
-                        <button type="submit" class="delete_btn" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette note ?');">Supprimer</button>
-                    </form>
+                    <div class="delete-form">
+                        <form action="{{ url_for('views.delete_note', note_id=note.id) }}" method="POST">
+                            <button type="submit" class="delete_btn" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette note ?');">Supprimer</button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <p>Aucune note pour le moment</p>
+        {% endif %}
 
     </div>
 
