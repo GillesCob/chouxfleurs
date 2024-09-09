@@ -7,15 +7,15 @@
 {% block content %}
 <body>
     <div class="my_container">
-        <h1>Notes</h1>
-
-        <div class="icon_container">
+        
             <div class="icon" id="add_note">
                 <a href="{{ url_for('views.add_note') }}" style="text-decoration: none;">
                     <img src="{{ url_for('static', filename='icons/add.png') }}" alt="add">
                     <p>Ajouter une note</p>
                 </a>
-            </div>         
+            </div> 
+
+        <div class="icon_container">        
             
             <div class="icon" id="organization">
                 <a href="{{ url_for('views.notes_organization') }}" style="text-decoration: none;">

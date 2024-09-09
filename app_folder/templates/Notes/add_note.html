@@ -11,21 +11,20 @@
     </a>
 
     <form action="{{ url_for('views.add_note') }}" method="POST" enctype="multipart/form-data">
-        <div class="my_container">
-            <input class="text-center note_title " id="file_name_hidden" name="note_title" placeholder="Titre de la note">
 
-            <select id="note_category" name="note_category" class="note_category">
-                <option value="" disabled selected>Catégorie</option>
+        <div class="my_container">
+            <input class="text-center note_title " id="file_name_hidden" name="note_title" placeholder="Titre de la note" required>
+
+            <select id="note_category" name="note_category" class="note_selector" required>
+                <option value="" disabled selected>Choisir une catégorie</option>
                 <option value="organization">Organisation</option>
                 <option value="sleep">Sommeil</option>
                 <option value="nutrition">Nutrition</option>
-
-
             </select>
             
 
-            <select id="note_period" name="note_period" class="note_period">
-                <option value="" disabled selected>Période</option>
+            <select id="note_period" name="note_period" class="note_selector" required>
+                <option value="" disabled selected>Choisir une période</option>
                 <option value="before_pregnancy">Avant la grossesse</option>
                 <option value="childbirth">L'accouchement</option>
                 <option value="0_6_months">0 à 6 mois</option>
@@ -40,10 +39,7 @@
             <input class="text-center note_title" id="file_name_hidden" name="write_note" placeholder="Plus d'informations">
 
 
-            <label for="note" class="my_btn white_btn">Sélectionner</label>
-
-            <!-- Ajout de la liste déroulante -->
-
+            <label for="note" class="my_btn white_btn">Image/Photo</label>
 
             <button type="submit" class="my_btn">Valider</button>         
 

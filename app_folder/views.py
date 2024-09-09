@@ -643,19 +643,6 @@ def project_name_in_session():
 @views.route('/')
 @views.route('/home_page',methods=['GET', 'POST'])
 def home_page():
-#Fonctions afin d'initialiser la route
-    #-----------------------------------
-    user_id = current_user.id
-    elements_for_base = elements_for_navbar(user_id)
-    add_project_in_session(user_id)
-    user_is_admin_current_project()
-    user_is_2nd_admin_current_project()
-    project_exist = add_project_in_session(user_id)
-    if project_exist == False:
-        return redirect(url_for('views.my_projects'))
-    
-    
-    
     user_identified_bool = False
     user_in_project_bool = False
     user_is_admin_project_bool = False
