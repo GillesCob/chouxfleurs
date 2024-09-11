@@ -23,7 +23,7 @@
             <label for="note_period">Trier par période :</label>
             <select id="note_period" name="note_period" class="note_period">
                 <option value="all" {% if selected_period == 'all' %}selected{% endif %}>Tout</option>
-                <option value="before_pregnancy" {% if selected_period == 'before_pregnancy' %}selected{% endif %}>Avant la grossesse</option>
+                <option value="during_pregnancy" {% if selected_period == 'during_pregnancy' %}selected{% endif %}>Pendant la grossesse</option>
                 <option value="childbirth" {% if selected_period == 'childbirth' %}selected{% endif %}>L'accouchement</option>
                 <option value="0_6_months" {% if selected_period == '0_6_months' %}selected{% endif %}>0 à 6 mois</option>
                 <option value="6_12_months" {% if selected_period == '6_12_months' %}selected{% endif %}>6 à 12 mois</option>
